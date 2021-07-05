@@ -5,7 +5,7 @@ import random
 pygame.init()
 
 # screen/surface setup:
-phone_w, phone_h = 1000, 1000
+phone_w, phone_h = 500, 500
 display_info_object = pygame.display.Info()
 screen_width, screen_height = display_info_object.current_w, display_info_object.current_h
 screen_scaler = phone_h / screen_height
@@ -26,95 +26,225 @@ lightgrey = (150, 150, 150)
 darkgrey = (100, 100, 100)
 red = (255, 0, 0)
 
+wall_thickness = 10
 
 
-class LeftDoor:
+class Doors:
     def __init__(self):
-        self.width = (surface_width // 2) - 1
-        self.height = surface_height // 16
-        self.x = 0
-        self.y = (surface_height // 2) - (surface_height // 16) // 2
-        self.speed = 70
-        self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
-        self.direction = 0
-        self.rest = True
-        self.rest_period = 0
+        self.width_TB = (surface_width // 2) - 1
+        self.height_TB = surface_height // wall_thickness
+        self.width_LR = surface_height // wall_thickness
+        self.height_LR = (surface_width // 2) - 1
 
-    def slide(self):
-        if self.rest:
-            self.rest_period += 1
-            if self.rest_period > 100:
-                self.rest = False
-        if not self.rest:
-            if self.direction == 0:
-                result = random.randint(1, 100)
-                if result == 1:
-                    self.direction = 1
+        # top doors
+        self.x_T_L = 0
+        self.y_T_L = 0
+        self.x_T_R = (surface_width // 2) + 1
+        self.y_T_R = 0
+        self.rect_T_L = pygame.Rect(self.x_T_L, self.y_T_L, self.width_TB, self.height_TB)
+        self.rect_T_R = pygame.Rect(self.x_T_R, self.y_T_R, self.width_TB, self.height_TB)
+        self.direction_T = 0
+        self.rest_period_T = 0
+        self.rest_T = True
 
-            if self.rect.right > 0 and self.direction == 1:
-                self.rect.x -= self.speed
+        # bottom doors
+        self.x_B_L = 0
+        self.y_B_L = surface_height - (surface_height // wall_thickness)
+        self.x_B_R = (surface_width // 2) + 1
+        self.y_B_R = surface_height - (surface_height // wall_thickness)
+        self.rect_B_L = pygame.Rect(self.x_B_L, self.y_B_L, self.width_TB, self.height_TB)
+        self.rect_B_R = pygame.Rect(self.x_B_R, self.y_B_R, self.width_TB, self.height_TB)
+        self.direction_B = 0
+        self.rest_period_B = 0
+        self.rest_B = True
 
-                if self.rect.right <= 0:
-                    self.direction = -1
+        # left doors
+        self.x_L_T = 0
+        self.y_L_T = 0
+        self.x_L_B = 0
+        self.y_L_B = (surface_height // 2) + 1
+        self.rect_L_T = pygame.Rect(self.x_L_T, self.y_L_T, self.width_LR, self.height_LR)
+        self.rect_L_B = pygame.Rect(self.x_L_B, self.y_L_B, self.width_LR, self.height_LR)
+        self.direction_L = 0
+        self.rest_period_L = 0
+        self.rest_L = True
 
-            if self.rect.left < 0 and self.direction == -1:
-                self.rect.x += self.speed
+        # right doors
+        self.x_R_T = surface_width - self.width_LR
+        self.y_R_T = 0
+        self.x_R_B = surface_width - self.width_LR
+        self.y_R_B = (surface_height // 2) + 1
+        self.rect_R_T = pygame.Rect(self.x_R_T, self.y_R_T, self.width_LR, self.height_LR)
+        self.rect_R_B = pygame.Rect(self.x_R_B, self.y_R_B, self.width_LR, self.height_LR)
+        self.direction_R = 0
+        self.rest_period_R = 0
+        self.rest_R = True
 
-                if self.rect.left == 0:
-                    self.direction = 0
-                    self.rest = True
-                    self.rest_period = 0
+        self.speed = 60
+        self.switcher = None
 
+    def slide_T(self):
+        if self.rest_T:
+            self.rest_period_T += 1
+            if self.rest_period_T > 50:
+                self.rest_T = False
+        if not self.rest_T:
+            if self.direction_T == 0:
+                result_t = random.randint(1, 100)
+                if result_t == 1:
+                    self.direction_T = 1
+                    if self.switcher is None:
+                        self.switcher = "top"
+                    else:
+                        self.rest_T = True
+                        self.rest_period_T = 0
+                        self.direction_T = 0
+            if self.switcher == "top":
+                if self.rect_T_L.right > 0 and self.direction_T == 1:
+                    self.rect_T_L.x -= self.speed
+                    self.rect_T_R.x += self.speed
+
+                    if self.rect_T_L.right <= 0:
+                        self.direction_T = -1
+
+                if self.rect_T_L.left < 0 and self.direction_T == -1:
+                    self.rect_T_L.x += self.speed
+                    self.rect_T_R.x -= self.speed
+
+                    if self.rect_T_L.left == 0:
+                        self.direction_T = 0
+                        self.rest_T = True
+                        self.rest_period_T = 0
+                        self.switcher = None
+
+    def slide_B(self):
+        if self.rest_B:
+            self.rest_period_B += 1
+            if self.rest_period_B > 50:
+                self.rest_B = False
+        if not self.rest_B:
+            if self.direction_B == 0:
+                result_b = random.randint(1, 100)
+                if result_b == 1:
+                    self.direction_B = 1
+                    if self.switcher is None:
+                        self.switcher = "bottom"
+                    else:
+                        self.rest_B = True
+                        self.rest_period_B = 0
+                        self.direction_B = 0
+            if self.switcher == "bottom":
+                if self.rect_T_L.right > 0 and self.direction_B == 1:
+                    self.rect_B_L.x -= self.speed
+                    self.rect_B_R.x += self.speed
+
+                    if self.rect_B_L.right <= 0:
+                        self.direction_B = -1
+
+                if self.rect_B_L.left < 0 and self.direction_B == -1:
+                    self.rect_B_L.x += self.speed
+                    self.rect_B_R.x -= self.speed
+
+                    if self.rect_B_L.left == 0:
+                        self.direction_B = 0
+                        self.rest_B = True
+                        self.rest_period_B = 0
+                        self.switcher = None
+
+    def slide_L(self):
+        if self.rest_L:
+            self.rest_period_L += 1
+            if self.rest_period_L > 50:
+                self.rest_L = False
+        if not self.rest_L:
+            if self.direction_L == 0:
+                result_l = random.randint(1, 100)
+                if result_l == 1:
+                    self.direction_L = 1
+                    if self.switcher is None:
+                        self.switcher = "left"
+                    else:
+                        self.rest_L = True
+                        self.rest_period_L = 0
+                        self.direction_L = 0
+            if self.switcher == "left":
+                if self.rect_L_T.bottom > 0 and self.direction_L == 1:
+                    self.rect_L_T.y -= self.speed
+                    self.rect_L_B.y += self.speed
+
+                    if self.rect_L_T.bottom <= 0:
+                        self.direction_L = -1
+
+                if self.rect_L_T.top < 0 and self.direction_L == -1:
+                    self.rect_L_T.y += self.speed
+                    self.rect_L_B.y -= self.speed
+
+                    if self.rect_L_T.top == 0:
+                        self.direction_L = 0
+                        self.rest_L = True
+                        self.rest_period_L = 0
+                        self.switcher = None
+
+    def slide_R(self):
+        if self.rest_R:
+            self.rest_period_R += 1
+            if self.rest_period_R > 50:
+                self.rest_R = False
+        if not self.rest_R:
+            if self.direction_R == 0:
+                result_r = random.randint(1, 100)
+                if result_r == 1:
+                    self.direction_R = 1
+                    if self.switcher is None:
+                        self.switcher = "right"
+                    else:
+                        self.rest_R = True
+                        self.rest_period_R = 0
+                        self.direction_R = 0
+            if self.switcher == "right":
+                if self.rect_R_T.bottom > 0 and self.direction_R == 1:
+                    self.rect_R_T.y -= self.speed
+                    self.rect_R_B.y += self.speed
+
+                    if self.rect_R_T.bottom <= 0:
+                        self.direction_R = -1
+
+                if self.rect_R_T.top < 0 and self.direction_R == -1:
+                    self.rect_R_T.y += self.speed
+                    self.rect_R_B.y -= self.speed
+
+                    if self.rect_R_T.top == 0:
+                        self.direction_R = 0
+                        self.rest_R = True
+                        self.rest_period_R = 0
+                        self.switcher = None
 
     def draw(self):
-        pygame.draw.rect(surface, darkgrey, self.rect)
+        pygame.draw.rect(surface, black, self.rect_T_L)
+        pygame.draw.rect(surface, black, self.rect_T_R)
+        pygame.draw.rect(surface, black, self.rect_B_L)
+        pygame.draw.rect(surface, black, self.rect_B_R)
+        pygame.draw.rect(surface, black, self.rect_L_T)
+        pygame.draw.rect(surface, black, self.rect_L_B)
+        pygame.draw.rect(surface, black, self.rect_R_T)
+        pygame.draw.rect(surface, black, self.rect_R_B)
 
 
-class RightDoor:
-    def __init__(self):
-        self.width = (surface_width // 2) + 1
-        self.height = surface_height // 16
-        self.x = surface_width // 2
-        self.y = (surface_height // 2) - (surface_height // 16) // 2
-        self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
-
-    def slide(self, d):
-        self.rect.x = self.x + (d.rect.x * -1)
-
-    def draw(self):
-        pygame.draw.rect(surface, darkgrey, self.rect)
-
-
-class Marker:
-    def __init__(self):
-        self.diag1 = (0, surface_height), (surface_width, 0)
-        self.diag2 = (0, 0), (surface_width, surface_height)
-
-    def flash(self, d):
-        if d.direction != 0:
-            pygame.draw.polygon(surface, red, self.diag1, 1)
-            pygame.draw.polygon(surface, red, self.diag2, 1)
-
-
-Ldoor = LeftDoor()
-Rdoor = RightDoor()
-marker = Marker()
+doors = Doors()
 
 
 while True:
     clock.tick(fps)
-    surface.fill((180, 180, 180))
+    surface.fill(lightgrey)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             quit()
 
-    Ldoor.slide()
-    Ldoor.draw()
-
-    Rdoor.draw()
-    Rdoor.slide(Ldoor)
-
-    marker.flash(Ldoor)
+    doors.slide_T()
+    doors.slide_B()
+    doors.slide_L()
+    doors.slide_R()
+    doors.draw()
 
     pygame.display.update()
