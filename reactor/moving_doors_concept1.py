@@ -35,6 +35,8 @@ class Doors:
         self.height_TB = surface_height // wall_thickness
         self.width_LR = surface_height // wall_thickness
         self.height_LR = (surface_width // 2) - 1
+        self.speed = 15
+        self.switcher = None
 
         # top doors
         self.x_T_L = 0
@@ -79,9 +81,6 @@ class Doors:
         self.direction_R = 0
         self.rest_period_R = 0
         self.rest_R = True
-
-        self.speed = 60
-        self.switcher = None
 
     def slide_T(self):
         if self.rest_T:
@@ -219,18 +218,82 @@ class Doors:
                         self.rest_period_R = 0
                         self.switcher = None
 
-    def draw(self):
-        pygame.draw.rect(surface, black, self.rect_T_L)
-        pygame.draw.rect(surface, black, self.rect_T_R)
-        pygame.draw.rect(surface, black, self.rect_B_L)
-        pygame.draw.rect(surface, black, self.rect_B_R)
-        pygame.draw.rect(surface, black, self.rect_L_T)
-        pygame.draw.rect(surface, black, self.rect_L_B)
-        pygame.draw.rect(surface, black, self.rect_R_T)
-        pygame.draw.rect(surface, black, self.rect_R_B)
+    def draw_doors(self):
+        all_doors = [self.rect_T_L, self.rect_T_R, self.rect_B_L, self.rect_B_R,
+                     self.rect_L_T, self.rect_L_B, self.rect_R_T, self.rect_R_B]
+        return [pygame.draw.rect(surface, black, door) for door in all_doors]
+
+
+class Ball:
+    def __init__(self):
+        self.radius = 50
+        self.x = (surface_width // 2) - self.radius
+        self.y = (surface_height // 2) - self.radius
+        self.ball = pygame.Rect((self.x, self.y), (self.radius * 2, self.radius * 2))
+        self.speed = 30
+        self.switch = 0
+        self.rest = 0
+
+    def launch(self):
+        if self.rest:
+            self.rest -= 1
+        else:
+            key = pygame.key.get_pressed()
+
+            if key[pygame.K_UP] and not self.rest and self.switch == 0:
+                self.switch = 1
+            if self.switch == 1:
+                self.ball.y -= self.speed
+                if self.ball.bottom <= 0:
+                    self.ball.x, self.ball.y = self.x, self.y
+                    self.switch = 0
+                    self.rest = 10
+
+            if key[pygame.K_DOWN] and not self.rest and self.switch == 0:
+                self.switch = 2
+            if self.switch == 2:
+                self.ball.y += self.speed
+                if self.ball.top >= surface_height:
+                    self.ball.x, self.ball.y = self.x, self.y
+                    self.switch = 0
+                    self.rest = 10
+
+            if key[pygame.K_LEFT] and not self.rest and self.switch == 0:
+                self.switch = 3
+            if self.switch == 3:
+                self.ball.x -= self.speed
+                if self.ball.right <= 0:
+                    self.ball.x, self.ball.y = self.x, self.y
+                    self.switch = 0
+                    self.rest = 10
+
+            if key[pygame.K_RIGHT] and not self.rest and self.switch == 0:
+                self.switch = 4
+            if self.switch == 4:
+                self.ball.x += self.speed
+                if self.ball.left >= surface_width:
+                    self.ball.x, self.ball.y = self.x, self.y
+                    self.switch = 0
+                    self.rest = 10
+
+        return self.ball.x, self.ball.y
+
+    def collision(self, x, y):
+        pass
+        # note: check youtube video for collisions
+
+    def draw_ball(self):
+        pygame.draw.circle(surface, white,
+            (self.ball.x + self.radius, self.ball.y + self.radius), self.radius)
+
+
+
+
+
 
 
 doors = Doors()
+ball = Ball()
 
 
 while True:
@@ -245,6 +308,10 @@ while True:
     doors.slide_B()
     doors.slide_L()
     doors.slide_R()
-    doors.draw()
+    doors.draw_doors()
+    ball_x, ball_y = ball.launch()
+    ball.collision(ball_x, ball_y)
+    ball.draw_ball()
 
-    pygame.display.update()
+    pygame.display.flip()
+    # pygame.display.update()
