@@ -9,7 +9,7 @@ phone_w, phone_h = 500, 500
 display_info_object = pygame.display.Info()
 screen_width, screen_height = display_info_object.current_w, display_info_object.current_h
 screen_scaler = phone_h / screen_height
-scaler = .90
+scaler = .5
 surface_width, surface_height = int((phone_w / screen_scaler) * scaler), int((phone_h / screen_scaler) * scaler)
 surface = pygame.display.set_mode((surface_width, surface_height))
 
@@ -35,7 +35,7 @@ class Doors:
         self.height_TB = surface_height // wall_thickness
         self.width_LR = surface_height // wall_thickness
         self.height_LR = (surface_width // 2) - 1
-        self.speed = 15
+        self.speed = int(25 * scaler)
         self.switcher = None
 
         # top doors
@@ -103,18 +103,20 @@ class Doors:
                     self.rect_T_L.x -= self.speed
                     self.rect_T_R.x += self.speed
 
-                    if self.rect_T_L.right <= 0:
-                        self.direction_T = -1
+                elif self.rect_T_L.right <= 0:
+                    self.direction_T = -1
 
                 if self.rect_T_L.left < 0 and self.direction_T == -1:
                     self.rect_T_L.x += self.speed
                     self.rect_T_R.x -= self.speed
 
-                    if self.rect_T_L.left == 0:
-                        self.direction_T = 0
-                        self.rest_T = True
-                        self.rest_period_T = 0
-                        self.switcher = None
+                elif self.rect_T_L.left == 0:
+                    self.direction_T = 0
+                    self.rest_T = True
+                    self.rest_period_T = 0
+                    self.switcher = None
+
+        return self.rect_T_L.right, self.rect_T_L.centery
 
     def slide_B(self):
         if self.rest_B:
@@ -133,22 +135,24 @@ class Doors:
                         self.rest_period_B = 0
                         self.direction_B = 0
             if self.switcher == "bottom":
-                if self.rect_T_L.right > 0 and self.direction_B == 1:
+                if self.rect_B_L.right > 0 and self.direction_B == 1:
                     self.rect_B_L.x -= self.speed
                     self.rect_B_R.x += self.speed
 
-                    if self.rect_B_L.right <= 0:
-                        self.direction_B = -1
+                elif self.rect_B_L.right <= 0:
+                    self.direction_B = -1
 
                 if self.rect_B_L.left < 0 and self.direction_B == -1:
                     self.rect_B_L.x += self.speed
                     self.rect_B_R.x -= self.speed
 
-                    if self.rect_B_L.left == 0:
-                        self.direction_B = 0
-                        self.rest_B = True
-                        self.rest_period_B = 0
-                        self.switcher = None
+                elif self.rect_B_L.left == 0:
+                    self.direction_B = 0
+                    self.rest_B = True
+                    self.rest_period_B = 0
+                    self.switcher = None
+
+        return self.rect_B_L.right, self.rect_B_L.centery
 
     def slide_L(self):
         if self.rest_L:
@@ -171,18 +175,20 @@ class Doors:
                     self.rect_L_T.y -= self.speed
                     self.rect_L_B.y += self.speed
 
-                    if self.rect_L_T.bottom <= 0:
-                        self.direction_L = -1
+                elif self.rect_L_T.bottom <= 0:
+                    self.direction_L = -1
 
                 if self.rect_L_T.top < 0 and self.direction_L == -1:
                     self.rect_L_T.y += self.speed
                     self.rect_L_B.y -= self.speed
 
-                    if self.rect_L_T.top == 0:
-                        self.direction_L = 0
-                        self.rest_L = True
-                        self.rest_period_L = 0
-                        self.switcher = None
+                elif self.rect_L_T.top == 0:
+                    self.direction_L = 0
+                    self.rest_L = True
+                    self.rest_period_L = 0
+                    self.switcher = None
+
+        return self.rect_L_T.centerx, self.rect_L_T.bottom
 
     def slide_R(self):
         if self.rest_R:
@@ -205,18 +211,20 @@ class Doors:
                     self.rect_R_T.y -= self.speed
                     self.rect_R_B.y += self.speed
 
-                    if self.rect_R_T.bottom <= 0:
-                        self.direction_R = -1
+                elif self.rect_R_T.bottom <= 0:
+                    self.direction_R = -1
 
                 if self.rect_R_T.top < 0 and self.direction_R == -1:
                     self.rect_R_T.y += self.speed
                     self.rect_R_B.y -= self.speed
 
-                    if self.rect_R_T.top == 0:
-                        self.direction_R = 0
-                        self.rest_R = True
-                        self.rest_period_R = 0
-                        self.switcher = None
+                elif self.rect_R_T.top == 0:
+                    self.direction_R = 0
+                    self.rest_R = True
+                    self.rest_period_R = 0
+                    self.switcher = None
+
+        return self.rect_R_T.centerx, self.rect_R_T.bottom
 
     def draw_doors(self):
         all_doors = [self.rect_T_L, self.rect_T_R, self.rect_B_L, self.rect_B_R,
@@ -226,13 +234,14 @@ class Doors:
 
 class Ball:
     def __init__(self):
-        self.radius = 50
+        self.radius = 100 * scaler
         self.x = (surface_width // 2) - self.radius
         self.y = (surface_height // 2) - self.radius
         self.ball = pygame.Rect((self.x, self.y), (self.radius * 2, self.radius * 2))
-        self.speed = 30
+        self.speed = int(50 * scaler)
         self.switch = 0
         self.rest = 0
+        self.score = 0
 
     def launch(self):
         if self.rest:
@@ -244,7 +253,9 @@ class Ball:
                 self.switch = 1
             if self.switch == 1:
                 self.ball.y -= self.speed
-                if self.ball.bottom <= 0:
+                if self.ball.bottom < 0:
+                    self.score += 100
+                    print(self.score)
                     self.ball.x, self.ball.y = self.x, self.y
                     self.switch = 0
                     self.rest = 10
@@ -253,7 +264,9 @@ class Ball:
                 self.switch = 2
             if self.switch == 2:
                 self.ball.y += self.speed
-                if self.ball.top >= surface_height:
+                if self.ball.top > surface_height:
+                    self.score += 100
+                    print(self.score)
                     self.ball.x, self.ball.y = self.x, self.y
                     self.switch = 0
                     self.rest = 10
@@ -262,7 +275,9 @@ class Ball:
                 self.switch = 3
             if self.switch == 3:
                 self.ball.x -= self.speed
-                if self.ball.right <= 0:
+                if self.ball.right < 0:
+                    self.score += 100
+                    print(self.score)
                     self.ball.x, self.ball.y = self.x, self.y
                     self.switch = 0
                     self.rest = 10
@@ -271,32 +286,51 @@ class Ball:
                 self.switch = 4
             if self.switch == 4:
                 self.ball.x += self.speed
-                if self.ball.left >= surface_width:
+                if self.ball.left > surface_width:
+                    self.score += 100
+                    print(self.score)
                     self.ball.x, self.ball.y = self.x, self.y
                     self.switch = 0
                     self.rest = 10
 
-        return self.ball.x, self.ball.y
+    def ball_coord_getter(self):
+        return self.ball.center, self.switch
 
-    def collision(self, x, y):
-        pass
-        # note: check youtube video for collisions
+    def collision(self, bx, by, dx, dy):
+        distance = (((dx - bx) ** 2) + ((dy - by) ** 2)) ** .5
+        if distance <= self.radius + ((surface_height // wall_thickness) // 2):
+            return True
+        else:
+            return False
 
     def draw_ball(self):
-        pygame.draw.circle(surface, white,
-            (self.ball.x + self.radius, self.ball.y + self.radius), self.radius)
+        pygame.draw.circle(
+            surface, white, (self.ball.x + self.radius, self.ball.y + self.radius), self.radius, 1)
 
 
+# text rendered using blit
+def render_text(total_points, lives_left):
 
+    font = pygame.font.Font("./darkforest.ttf", int(100 * scaler))
 
-
+    text_surface = font.render(f"{total_points}", True, (135, 135, 135))
+    text_surface1 = font.render(f"{lives_left}", True, (135, 135, 135))
+    text_rect = text_surface.get_rect()
+    text_rect1 = text_surface1.get_rect()
+    text_rect.left, text_rect.centery = surface_width // 7, surface_height // 5
+    text_rect1.left, text_rect1.centery = surface_width - surface_width // 5, surface_height - surface_height // 5.5
+    surface.blit(text_surface, text_rect)
+    surface.blit(text_surface1, text_rect1)
 
 
 doors = Doors()
 ball = Ball()
 
+lives = 5
+score = 0
+game_over = False
 
-while True:
+while not game_over:
     clock.tick(fps)
     surface.fill(lightgrey)
 
@@ -304,14 +338,32 @@ while True:
         if event.type == pygame.QUIT:
             quit()
 
-    doors.slide_T()
-    doors.slide_B()
-    doors.slide_L()
-    doors.slide_R()
-    doors.draw_doors()
-    ball_x, ball_y = ball.launch()
-    ball.collision(ball_x, ball_y)
-    ball.draw_ball()
+    door_T_x, door_T_y = doors.slide_T()
+    door_B_x, door_B_y = doors.slide_B()
+    door_L_x, door_L_y = doors.slide_L()
+    door_R_x, door_R_y = doors.slide_R()
+    all_doors_coords = [(door_T_x, door_T_y), (door_B_x, door_B_y), (door_L_x, door_L_y), (door_R_x, door_R_y)]
 
-    pygame.display.flip()
-    # pygame.display.update()
+    ball.launch()
+    ball_coord, switch = ball.ball_coord_getter()
+
+    result = ball.collision(ball_coord[0], ball_coord[-1], all_doors_coords[switch - 1][0], all_doors_coords[switch - 1][-1])
+    if result:
+        lives -= 1
+        if lives == 0:
+            game_over = True
+        else:
+            ball = Ball()
+            ball.rest = 10
+            ball.score = score
+    else:
+        score = ball.score
+
+    doors.draw_doors()
+    ball.draw_ball()
+    render_text(ball.score, lives)
+
+    pygame.display.update()
+
+print("game over!")
+print("final score: {}".format(score))
