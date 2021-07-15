@@ -1,7 +1,7 @@
 # REACTOR
 a game of quick reflexes
 
-![reactor_screenshot_v1](https://user-images.githubusercontent.com/86641253/125457080-21d6878d-22bd-4f0c-b604-0ca0b48f0dd8.png)
+![Untitled](https://user-images.githubusercontent.com/86641253/125760546-28d8760e-19cd-45e1-aa7b-2ff39ac5813c.png)
 
 
 WIP
