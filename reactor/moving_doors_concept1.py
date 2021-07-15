@@ -30,7 +30,7 @@ orange = (255, 118, 0)
 purple = (82, 0, 106)
 
 
-wall_thinness = 20
+wall_thinness = 5 * (scaler * 2)
 
 
 class Doors:
@@ -41,6 +41,9 @@ class Doors:
         self.height_LR = (surface_height // 2) - 1
         self.speed = int(20 * scaler)
         self.switcher = None
+        self.openings = 0
+        self.rest_period = 100
+        self.current_rest_period = -100
 
         # top doors
         self.x_T_L = 0
@@ -88,19 +91,21 @@ class Doors:
 
     def slide_T(self):
         if self.rest_T:
-            self.rest_period_T += 1
-            if self.rest_period_T > 50:
+            self.current_rest_period += 1
+            if self.current_rest_period > self.rest_period:
                 self.rest_T = False
         if not self.rest_T:
             if self.direction_T == 0:
                 result_t = random.randint(1, 100)
                 if result_t == 1:
                     self.direction_T = 1
+                    self.current_rest_period = 0
+                    self.rest_R, self.rest_B, self.rest_L = True, True, True
                     if self.switcher is None:
                         self.switcher = "top"
                     else:
                         self.rest_T = True
-                        self.rest_period_T = 0
+                        self.current_rest_period = 0
                         self.direction_T = 0
             if self.switcher == "top":
                 if self.rect_T_L.right > 0 and self.direction_T == 1:
@@ -117,26 +122,29 @@ class Doors:
                 elif self.rect_T_L.left == 0:
                     self.direction_T = 0
                     self.rest_T = True
-                    self.rest_period_T = 0
+                    self.current_rest_period = 0
                     self.switcher = None
+                    self.openings += 1
 
         return self.rect_T_L.right, self.rect_T_L.topright[-1], self.rect_T_L.bottomright[-1]
 
     def slide_B(self):
         if self.rest_B:
-            self.rest_period_B += 1
-            if self.rest_period_B > 50:
+            self.current_rest_period += 1
+            if self.current_rest_period > self.rest_period:
                 self.rest_B = False
         if not self.rest_B:
             if self.direction_B == 0:
                 result_b = random.randint(1, 100)
                 if result_b == 1:
                     self.direction_B = 1
+                    self.current_rest_period = 0
+                    self.rest_R, self.rest_L, self.rest_T = True, True, True
                     if self.switcher is None:
                         self.switcher = "bottom"
                     else:
                         self.rest_B = True
-                        self.rest_period_B = 0
+                        self.current_rest_period = 0
                         self.direction_B = 0
             if self.switcher == "bottom":
                 if self.rect_B_L.right > 0 and self.direction_B == 1:
@@ -153,26 +161,29 @@ class Doors:
                 elif self.rect_B_L.left == 0:
                     self.direction_B = 0
                     self.rest_B = True
-                    self.rest_period_B = 0
+                    self.current_rest_period = 0
                     self.switcher = None
+                    self.openings += 1
 
         return self.rect_B_L.right, self.rect_B_L.bottomright[-1], self.rect_B_L.topright[-1]
 
     def slide_L(self):
         if self.rest_L:
-            self.rest_period_L += 1
-            if self.rest_period_L > 50:
+            self.current_rest_period += 1
+            if self.current_rest_period > self.rest_period:
                 self.rest_L = False
         if not self.rest_L:
             if self.direction_L == 0:
                 result_l = random.randint(1, 100)
                 if result_l == 1:
+                    self.current_rest_period = 0
+                    self.rest_R, self.rest_B, self.rest_T = True, True, True
                     self.direction_L = 1
                     if self.switcher is None:
                         self.switcher = "left"
                     else:
                         self.rest_L = True
-                        self.rest_period_L = 0
+                        self.current_rest_period = 0
                         self.direction_L = 0
             if self.switcher == "left":
                 if self.rect_L_T.bottom > 0 and self.direction_L == 1:
@@ -189,26 +200,29 @@ class Doors:
                 elif self.rect_L_T.top == 0:
                     self.direction_L = 0
                     self.rest_L = True
-                    self.rest_period_L = 0
+                    self.current_rest_period = 0
                     self.switcher = None
+                    self.openings += 1
 
         return self.rect_L_T.bottomleft[0], self.rect_L_T.bottom, self.rect_L_T.bottomright[0]
 
     def slide_R(self):
         if self.rest_R:
-            self.rest_period_R += 1
-            if self.rest_period_R > 50:
+            self.current_rest_period += 1
+            if self.current_rest_period > self.rest_period:
                 self.rest_R = False
         if not self.rest_R:
             if self.direction_R == 0:
                 result_r = random.randint(1, 100)
                 if result_r == 1:
+                    self.current_rest_period = 0
                     self.direction_R = 1
+                    self.rest_L, self.rest_B, self.rest_T = True, True, True
                     if self.switcher is None:
                         self.switcher = "right"
                     else:
                         self.rest_R = True
-                        self.rest_period_R = 0
+                        self.current_rest_period = 0
                         self.direction_R = 0
             if self.switcher == "right":
                 if self.rect_R_T.bottom > 0 and self.direction_R == 1:
@@ -225,8 +239,9 @@ class Doors:
                 elif self.rect_R_T.top == 0:
                     self.direction_R = 0
                     self.rest_R = True
-                    self.rest_period_R = 0
+                    self.current_rest_period = 0
                     self.switcher = None
+                    self.openings += 1
 
         return self.rect_R_T.bottomright[0], self.rect_R_T.bottom, self.rect_R_T.bottomleft[0]
 
@@ -234,6 +249,9 @@ class Doors:
         all_doors = [self.rect_T_L, self.rect_T_R, self.rect_B_L, self.rect_B_R,
                      self.rect_L_T, self.rect_L_B, self.rect_R_T, self.rect_R_B]
         return [pygame.draw.rect(surface, darkgrey, door) for door in all_doors]
+
+    def get_openings(self):
+        return self.openings
 
 
 class Ball:
@@ -259,7 +277,7 @@ class Ball:
             if self.switch == 1:
                 self.ball.y -= self.speed
                 if self.ball.bottom < 0:
-                    self.score += 100
+                    self.score += 1
                     self.ball.x, self.ball.y = self.x, self.y
                     self.switch = 0
                     self.rest = 10
@@ -269,7 +287,7 @@ class Ball:
             if self.switch == 2:
                 self.ball.y += self.speed
                 if self.ball.top > surface_height:
-                    self.score += 100
+                    self.score += 1
                     self.ball.x, self.ball.y = self.x, self.y
                     self.switch = 0
                     self.rest = 10
@@ -279,7 +297,7 @@ class Ball:
             if self.switch == 3:
                 self.ball.x -= self.speed
                 if self.ball.right < 0:
-                    self.score += 100
+                    self.score += 1
                     self.ball.x, self.ball.y = self.x, self.y
                     self.switch = 0
                     self.rest = 10
@@ -289,7 +307,7 @@ class Ball:
             if self.switch == 4:
                 self.ball.x += self.speed
                 if self.ball.left > surface_width:
-                    self.score += 100
+                    self.score += 1
                     self.ball.x, self.ball.y = self.x, self.y
                     self.switch = 0
                     self.rest = 10
@@ -330,26 +348,54 @@ class Ball:
 # text rendered using blit
 def stats(total_points, lives_left, timer):
 
-    font = pygame.font.Font("./darkforest.ttf", int(20 * scaler))
+    font_style = "darkforest.ttf"
+    font = pygame.font.Font(f"./{font_style}", int(20 * scaler))
 
-    timer_color = yellow
+    text_color = black
+    timer_color = black
     if 10 < timer <= time_limit // 2:
         timer_color = orange
     elif timer <= 10:
         timer_color = red
 
-    text_surface = font.render(f"{total_points}", True, yellow)
-    text_surface1 = font.render(f"{lives_left}", True, yellow)
-    text_surface2 = font.render(f"{timer}", True, timer_color)
+    shot_accuracy = total_points[0]
+    total_openings = total_points[-1]
+
+    text_surface = font.render(f"shots made/total: {shot_accuracy}", True, text_color)
+    text_surface1 = font.render(f"lives: {lives_left}", True, text_color)
+    text_surface2 = font.render(f"timer: {timer}", True, timer_color)
+    text_surface3 = font.render(f"tries/openings: {total_openings}", True, text_color)
+
     text_rect = text_surface.get_rect()
     text_rect1 = text_surface1.get_rect()
     text_rect2 = text_surface2.get_rect()
-    text_rect.centerx, text_rect.top = surface_width // 2, surface_height // 2 + 10
-    text_rect1.centerx, text_rect1.bottom = surface_width // 2, surface_height // 2 - 10
-    text_rect2.centerx, text_rect2.centery = surface_width // 2, surface_height // 2
+    text_rect3 = text_surface3.get_rect()
+
+    text_rect.centerx, text_rect.centery = surface_width // 2, surface_height // 2 + (130 * scaler)
+    text_rect1.centerx, text_rect1.centery = surface_width // 2, surface_height // 2 + (10 * scaler)
+    text_rect2.centerx, text_rect2.centery = surface_width // 2, surface_height // 2 - (10 * scaler)
+    text_rect3.centerx, text_rect3.centery = surface_width // 2, surface_height // 2 - (130 * scaler)
+
     surface.blit(text_surface, text_rect)
     surface.blit(text_surface1, text_rect1)
     surface.blit(text_surface2, text_rect2)
+    surface.blit(text_surface3, text_rect3)
+
+
+def accuracy(pass_throughs, fails, door_slides):
+    total_tries = pass_throughs + fails
+
+    if not total_tries:
+        percentage_1 = 0.0
+    else:
+        percentage_1 = round((pass_throughs / total_tries) * 100, 1)
+
+    if not door_slides:
+        percentage_2 = 0.0
+    else:
+        percentage_2 = round((total_tries / door_slides) * 100, 1)
+
+    return f"{pass_throughs}/{total_tries} {percentage_1}", f"{total_tries}/{door_slides} {percentage_2}"
 
 
 doors = Doors()
@@ -358,10 +404,13 @@ ball = Ball()
 rise = True
 ball_color = 0
 
-lives = 5
+lives = 10
 score = 0
-time_limit = 30
-time_remaining = 99
+collisions = 0
+successes = 0
+
+time_limit = 5000
+time_remaining = 0
 game_over = False
 
 start_ticks = pygame.time.get_ticks()  # starter tick
@@ -388,11 +437,14 @@ while not game_over:
                         (door_L_x, door_L_y, door_L_x_front_side),
                         (door_R_x, door_R_y, door_R_x_front_side)]
 
+    if (switch - 1) < 2: x, y = 0, -1
+    else: x, y = -1, 1
+
     result_front = ball.collision(
         ball_coord[0],
         ball_coord[-1],
-        all_doors_coords[switch - 1][-1],
-        all_doors_coords[switch - 1][1])
+        all_doors_coords[switch - 1][x],
+        all_doors_coords[switch - 1][y])
 
     result_back = ball.collision(
         ball_coord[0],
@@ -402,6 +454,7 @@ while not game_over:
 
     if result_front or result_back:
         lives -= 1
+        collisions += 1
         if lives == 0:
             game_over = True
         else:
@@ -414,14 +467,18 @@ while not game_over:
     doors.draw_doors()
     rise, ball_color = ball.ball_pulse(rise, ball_color)
     ball.draw_ball(ball_color)
-    stats(ball.score, lives, time_remaining)
 
-    pygame.display.update()
+    accuracy_result = accuracy(score, collisions, doors.get_openings())
+    stats(accuracy_result, lives, time_remaining)
+
+    pygame.display.flip()
 
     elapsed_seconds = int((pygame.time.get_ticks() - start_ticks) / 1000)  # calculate how many seconds
     time_remaining = time_limit - elapsed_seconds
     if time_remaining < 0:  # if equal/less than 0 seconds close the game
         game_over = True
+
+    # print(doors.current_rest_period)
 
 print("game over!")
 print("final score: {}".format(score))
