@@ -28,12 +28,12 @@ yellow = (255, 169, 0)
 orange = (255, 118, 0)
 purple = (82, 0, 106)
 
-margin = 25
+margin = int(30 * scaler)
 margin_color = purple
 
 # music
-pygame.mixer.music.load("tron_sample.mp3")
-pygame.mixer.music.play(-1)
+# pygame.mixer.music.load("tron_sample.mp3")
+# pygame.mixer.music.play(-1)
 
 accuracy, time = 0, 0
 title_pos = 0
@@ -43,48 +43,51 @@ title_open_count = 0
 blinker = True
 blinker_count = 0
 blinker_speed = 20
+disc_pulse = 140
+disc_pulse_up = True
 
 
-def stats(accuracy, timer, title_position, on_off):
+def stats(accuracy, timer, title_position, title_anime, on_off):
 
-    font_style = "darkforest.ttf"
-    font = pygame.font.Font(f"./{font_style}", int(40 * scaler))
-    instructions_font = pygame.font.Font(f"./{font_style}", int(30 * scaler))
-    title = pygame.font.Font(f"./{font_style}", int(250 * scaler))
+    font_style_title = "SF Square Head Bold.ttf"
+    font_style_text = "darkforest.ttf"
+    font = pygame.font.Font(f"./{font_style_text}", int(40 * scaler))
+    instructions_font = pygame.font.Font(f"./{font_style_text}", int(30 * scaler))
+    title = pygame.font.Font(f"./{font_style_title}", int(150 * scaler))
     text_color = black
 
     title_surface = title.render("REACTOR", True, text_color)
     title_rect = title_surface.get_rect()
-    title_rect.centerx, title_rect.centery = title_position, surface_height // 4
+    title_rect.centerx, title_rect.centery = title_position, surface_height // 4 + (100 * scaler)
     surface.blit(title_surface, title_rect)
 
-    if on_off:
-        start_surface = font.render("press [s]tart to begin", True, red)
-        start_rect = start_surface.get_rect()
-        start_rect.centerx, start_rect.centery = surface_width // 2, surface_height // 2
-        surface.blit(start_surface, start_rect)
+    if not title_anime:
+        if on_off:
+            start_surface = font.render("press [s]tart to activate", True, red)
+            start_rect = start_surface.get_rect()
+            start_rect.centerx, start_rect.centery = surface_width // 2, surface_height // 2
+            surface.blit(start_surface, start_rect)
 
-    if accuracy or timer != 0:
-        shot_accuracy = accuracy[0]
-        total_openings = accuracy[-1]
+        if accuracy or timer != 0:
+            shot_accuracy = accuracy[0]
+            total_openings = accuracy[-1]
 
-        text_surface1 = instructions_font.render(f"shots made/total: {shot_accuracy} pct.", True, text_color)
-        # text_surface2 = font.render(str(timer), True, text_color)
-        text_surface3 = instructions_font.render(f"tries/openings: {total_openings} pct.", True, text_color)
+            text_surface1 = instructions_font.render(f"shots made/total: {shot_accuracy} pct.", True, text_color)
+            # text_surface2 = font.render(str(timer), True, text_color)
+            text_surface3 = instructions_font.render(f"tries/openings: {total_openings} pct.", True, text_color)
 
-        text_rect1 = text_surface1.get_rect()
-        # text_rect2 = text_surface2.get_rect()
-        text_rect3 = text_surface3.get_rect()
+            text_rect1 = text_surface1.get_rect()
+            # text_rect2 = text_surface2.get_rect()
+            text_rect3 = text_surface3.get_rect()
 
-        text_rect1.centerx, text_rect1.centery = surface_width // 2, surface_height - surface_height // 2 + (80 * scaler)
-        # text_rect2.centerx, text_rect2.centery = surface_width // 2, surface_height - surface_height // 4 + 40 * scaler
-        text_rect3.centerx, text_rect3.centery = surface_width // 2, surface_height - surface_height // 2 + (110 * scaler)
+            text_rect1.centerx, text_rect1.centery = surface_width // 2, surface_height - surface_height // 2 + (80 * scaler)
+            # text_rect2.centerx, text_rect2.centery = surface_width // 2, surface_height - surface_height // 4 + 40 * scaler
+            text_rect3.centerx, text_rect3.centery = surface_width // 2, surface_height - surface_height // 2 + (110 * scaler)
 
-        surface.blit(text_surface1, text_rect1)
-        # surface.blit(text_surface2, text_rect2)
-        surface.blit(text_surface3, text_rect3)
+            surface.blit(text_surface1, text_rect1)
+            # surface.blit(text_surface2, text_rect2)
+            surface.blit(text_surface3, text_rect3)
 
-    else:
         instructions_surface = instructions_font.render(
             "using arrow keys, launch the disc through the open doors", True, text_color)
         instructions_rect = instructions_surface.get_rect()
@@ -92,12 +95,14 @@ def stats(accuracy, timer, title_position, on_off):
         surface.blit(instructions_surface, instructions_rect)
 
 
-def draw_ball():
+def draw_ball(disolve):
+
+    dissolve = int(disolve)
     pygame.draw.circle(
         surface,
-        darkgrey,
+        (disolve, disolve, disolve),
         (surface_width // 2, surface_height // 2),
-        surface_width // 2 * scaler,
+        (surface_width // 2) - margin,
         int(75 * scaler))
 
 
@@ -112,7 +117,7 @@ while True:
 
         elif event.type == pygame.KEYDOWN:
             if pygame.key.name(event.key) == "s":
-                accuracy, time = reactor_main_game.run_reactor(surface, surface_width, surface_height, scaler, clock, fps)
+                accuracy, time = reactor_main_game.run_reactor(surface, surface_width, surface_height, margin, scaler, clock, fps)
                 title_open_count = 0
                 title_open = True
 
@@ -121,6 +126,7 @@ while True:
 
             elif pygame.key.name(event.key) == "r":
                 title_open_count = 0
+                accuracy, time = 0, 0
                 title_open = True
 
     pygame.display.set_caption("REACTOR MENU")
@@ -147,9 +153,18 @@ while True:
             blinker_count = 0
             blinker = True
 
-    draw_ball()
+    if disc_pulse <= 140:
+        disc_pulse_up = True
+    if disc_pulse_up:
+        disc_pulse += .5
+    if disc_pulse >= 150:
+        disc_pulse_up = False
+    if not disc_pulse_up:
+        disc_pulse -= .5
 
-    stats(accuracy, time, current_title_pos, blinker)
+    draw_ball(disc_pulse)
+
+    stats(accuracy, time, current_title_pos, title_open, blinker)
     rendered_margin = pygame.draw.rect(surface, margin_color, (0, 0, surface_width, surface_height), margin)
 
 
