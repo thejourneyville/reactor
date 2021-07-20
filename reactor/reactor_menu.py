@@ -5,12 +5,12 @@ import reactor_main_game
 pygame.init()
 
 # screen/surface setup:
-phone_w, phone_h = 1, 1  # screen aspect ratio
+width, height = 1, 1  # screen aspect ratio
 display_info_object = pygame.display.Info()
 screen_width, screen_height = display_info_object.current_w, display_info_object.current_h
-screen_scaler = phone_h / screen_height
+screen_scaler = height / screen_height
 scaler = .75
-surface_width, surface_height = int((phone_w / screen_scaler) * scaler), int((phone_h / screen_scaler) * scaler)
+surface_width, surface_height = int((width / screen_scaler) * scaler), int((height / screen_scaler) * scaler)
 surface = pygame.display.set_mode((surface_width, surface_height))
 
 # window caption, clock speed
@@ -22,151 +22,176 @@ fps = 60
 white = (255, 255, 255)
 black = (0, 0, 0)
 lightgrey = (150, 150, 150)
-darkgrey = (140, 140, 140)
+darkgrey = (50, 50, 50)
 red = (200, 17, 59)
 yellow = (255, 169, 0)
 orange = (255, 118, 0)
 purple = (82, 0, 106)
 
+# margin thickness, color
 margin = int(30 * scaler)
-margin_color = purple
+margin_color = darkgrey
 
 # music
 # pygame.mixer.music.load("tron_sample.mp3")
 # pygame.mixer.music.play(-1)
 
-accuracy, time = 0, 0
-title_pos = 0
-speed = 500
-title_open = True
-title_open_count = 0
-blinker = True
-blinker_count = 0
-blinker_speed = 20
-disc_pulse = 140
-disc_pulse_up = True
 
+def start_menu():
 
-def stats(accuracy, timer, title_position, title_anime, on_off):
+    # variables
+    accuracy, timer = 0, 0
+    title_position = 0
+    title_speed = 500
+    title_animating = True
+    title_open_count = 0
+    blinker_on = True
+    blinker_count = 0
+    blinker_speed = 10
+    disc_pulse_value = 140
+    disc_pulse_direction = True
 
-    font_style_title = "SF Square Head Bold.ttf"
-    font_style_text = "darkforest.ttf"
-    font = pygame.font.Font(f"./{font_style_text}", int(40 * scaler))
-    instructions_font = pygame.font.Font(f"./{font_style_text}", int(30 * scaler))
-    title = pygame.font.Font(f"./{font_style_title}", int(150 * scaler))
-    text_color = black
+    def render_text():
 
-    title_surface = title.render("REACTOR", True, text_color)
-    title_rect = title_surface.get_rect()
-    title_rect.centerx, title_rect.centery = title_position, surface_height // 4 + (100 * scaler)
-    surface.blit(title_surface, title_rect)
+        # note: 'timer' is not currently being rendered but it is being passed from the game, so it could added
 
-    if not title_anime:
-        if on_off:
-            start_surface = font.render("press [s]tart to activate", True, red)
-            start_rect = start_surface.get_rect()
-            start_rect.centerx, start_rect.centery = surface_width // 2, surface_height // 2
-            surface.blit(start_surface, start_rect)
-
-        if accuracy or timer != 0:
+        if accuracy or timer:  # initially set to 0, these variables returned after game is played as tuples
             shot_accuracy = accuracy[0]
             total_openings = accuracy[-1]
+        else:
+            shot_accuracy = 0
+            total_openings = 0
 
-            text_surface1 = instructions_font.render(f"shots made/total: {shot_accuracy} pct.", True, text_color)
-            # text_surface2 = font.render(str(timer), True, text_color)
-            text_surface3 = instructions_font.render(f"tries/openings: {total_openings} pct.", True, text_color)
+        font_style_title = "SF Square Head Bold.ttf"
+        font_style_text = "darkforest.ttf"
 
-            text_rect1 = text_surface1.get_rect()
-            # text_rect2 = text_surface2.get_rect()
-            text_rect3 = text_surface3.get_rect()
+        title = pygame.font.Font(f"./{font_style_title}", int(150 * scaler))
+        start_font = pygame.font.Font(f"./{font_style_text}", int(60 * scaler))
+        instructions_font = pygame.font.Font(f"./{font_style_text}", int(30 * scaler))
+        stats_font = pygame.font.Font(f"./{font_style_text}", int(40 * scaler))
 
-            text_rect1.centerx, text_rect1.centery = surface_width // 2, surface_height - surface_height // 2 + (80 * scaler)
-            # text_rect2.centerx, text_rect2.centery = surface_width // 2, surface_height - surface_height // 4 + 40 * scaler
-            text_rect3.centerx, text_rect3.centery = surface_width // 2, surface_height - surface_height // 2 + (110 * scaler)
+        title_color = black
+        start_color = red
+        instructions_color = black
+        stats_color = black
 
-            surface.blit(text_surface1, text_rect1)
-            # surface.blit(text_surface2, text_rect2)
-            surface.blit(text_surface3, text_rect3)
-
+        title_surface = title.render("REACT0R", False, title_color)
+        start_surface = start_font.render("press [s]tart to activate", False, start_color)
         instructions_surface = instructions_font.render(
-            "using arrow keys, launch the disc through the open doors", True, text_color)
+            "using arrow keys, launch the disc through the open doors", True, instructions_color)
+        shot_accuracy_surface = stats_font.render(f"shots made/total: {shot_accuracy} pct.", True, stats_color)
+        total_openings_surface = stats_font.render(f"tries/openings: {total_openings} pct.", True, stats_color)
+
+        title_rect = title_surface.get_rect()
+        start_rect = start_surface.get_rect()
         instructions_rect = instructions_surface.get_rect()
+        shot_accuracy_rect = shot_accuracy_surface.get_rect()
+        total_openings_rect = total_openings_surface.get_rect()
+
+        title_rect.centerx, title_rect.centery = title_position, surface_height // 4 + (100 * scaler)
+        start_rect.centerx, start_rect.centery = surface_width // 2, (surface_height // 2) + (35 * scaler)
         instructions_rect.centerx, instructions_rect.centery = surface_width // 2, surface_height // 2 - (50 * scaler)
-        surface.blit(instructions_surface, instructions_rect)
+        shot_accuracy_rect.centerx, shot_accuracy_rect.centery = \
+            surface_width // 2, surface_height - surface_height // 2 + (130 * scaler)
+        total_openings_rect.centerx, total_openings_rect.centery = \
+            surface_width // 2, surface_height - surface_height // 2 + (160 * scaler)
 
+        surface.blit(title_surface, title_rect)
 
-def draw_ball(disolve):
+        if not title_animating:
 
-    dissolve = int(disolve)
-    pygame.draw.circle(
-        surface,
-        (disolve, disolve, disolve),
-        (surface_width // 2, surface_height // 2),
-        (surface_width // 2) - margin,
-        int(75 * scaler))
+            surface.blit(instructions_surface, instructions_rect)
 
+            if blinker_on:
+                surface.blit(start_surface, start_rect)
 
-while True:
+            if accuracy or timer:
+                surface.blit(shot_accuracy_surface, shot_accuracy_rect)
+                surface.blit(total_openings_surface, total_openings_rect)
 
-    clock.tick(fps)
-    surface.fill(lightgrey)
+    def draw_background_disc(dissolve, disc_pulse_up):
 
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            quit()
+        if disc_pulse_up:
+            dissolve += .5
+        else:
+            dissolve -= .1
 
-        elif event.type == pygame.KEYDOWN:
-            if pygame.key.name(event.key) == "s":
-                accuracy, time = reactor_main_game.run_reactor(surface, surface_width, surface_height, margin, scaler, clock, fps)
-                title_open_count = 0
-                title_open = True
+        if dissolve <= 140:
+            disc_pulse_up = True
+        elif dissolve >= 150:
+            disc_pulse_up = False
 
-            elif pygame.key.name(event.key) == "q":
+        pygame.draw.circle(
+            surface,
+            (int(dissolve), int(dissolve), int(dissolve)),
+            (surface_width // 2, surface_height // 2),
+            (surface_width // 2) - margin,
+            int(100 * scaler))
+
+        return dissolve, disc_pulse_up
+
+    def start_text_blinker(count, status):
+
+        count += 1
+        if count == blinker_speed:
+            count = 0
+            if status:
+                status = False
+            else:
+                status = True
+
+        return count, status
+
+    def title_animation(title_start, count, position):
+
+        if title_start:
+            position += title_speed
+            position = position % (surface_width * 2)
+            count += 1
+            if count == 25:
+                title_start = False
+                position = (surface_width // 2) % (surface_width * 2)  # for title_rect.centerx
+
+        return title_start, count, position
+
+    def draw_margin():
+
+        pygame.draw.rect(surface, margin_color, (0, 0, surface_width, surface_height), margin)
+
+    while True:
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
                 quit()
 
-            elif pygame.key.name(event.key) == "r":
-                title_open_count = 0
-                accuracy, time = 0, 0
-                title_open = True
+            elif event.type == pygame.KEYDOWN:
+                if pygame.key.name(event.key) == "s":
+                    accuracy, timer = reactor_main_game.run_reactor(
+                        surface, surface_width, surface_height, margin, margin_color, scaler, clock, fps)
+                    pygame.display.set_caption("REACTOR MENU")
+                    title_open_count = 0
+                    title_animating = True
 
-    pygame.display.set_caption("REACTOR MENU")
+                elif pygame.key.name(event.key) == "q":
+                    quit()
 
-    if title_open:
-        title_pos += speed
-        current_title_pos = title_pos % (surface_width * 2)
-        title_open_count += 1
-        if title_open_count == 25:
-            title_open = False
-            title_pos = surface_width // 2
-    else:
-        current_title_pos = title_pos % (surface_width * 2)
+                elif pygame.key.name(event.key) == "r":
+                    title_open_count = 0
+                    accuracy, timer = 0, 0
+                    title_animating = True
 
-    if blinker:
-        blinker_count += 1
-        if blinker_count == blinker_speed:
-            blinker_count = 0
-            blinker = False
+        clock.tick(fps)
+        surface.fill(lightgrey)
 
-    else:
-        blinker_count += 1
-        if blinker_count == blinker_speed:
-            blinker_count = 0
-            blinker = True
+        draw_margin()
+        disc_pulse_value, disc_pulse_direction = draw_background_disc(disc_pulse_value, disc_pulse_direction)
+        title_animating, title_open_count, title_position = title_animation(
+            title_animating, title_open_count, title_position)
+        blinker_count, blinker_on = start_text_blinker(blinker_count, blinker_on)
+        render_text()
 
-    if disc_pulse <= 140:
-        disc_pulse_up = True
-    if disc_pulse_up:
-        disc_pulse += .5
-    if disc_pulse >= 150:
-        disc_pulse_up = False
-    if not disc_pulse_up:
-        disc_pulse -= .5
-
-    draw_ball(disc_pulse)
-
-    stats(accuracy, time, current_title_pos, title_open, blinker)
-    rendered_margin = pygame.draw.rect(surface, margin_color, (0, 0, surface_width, surface_height), margin)
+        pygame.display.update()
 
 
-    pygame.display.update()
-
+if __name__ == "__main__":
+    start_menu()

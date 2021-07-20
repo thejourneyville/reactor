@@ -2,7 +2,7 @@ import pygame
 import random
 
 
-def run_reactor(surface, surface_width, surface_height, margin, scaler, clock, fps):
+def run_reactor(surface, surface_width, surface_height, margin, margin_color, scaler, clock, fps):
 
     pygame.display.set_caption("REACTOR")
 
@@ -10,7 +10,7 @@ def run_reactor(surface, surface_width, surface_height, margin, scaler, clock, f
     white = (255, 255, 255)
     black = (0, 0, 0)
     lightgrey = (150, 150, 150)
-    darkgrey = (100, 100, 100)
+    darkgrey = (50, 50, 50)
     red = (240, 17, 59)
     blue = (59, 17, 240)
     yellow = (255, 169, 0)
@@ -19,7 +19,6 @@ def run_reactor(surface, surface_width, surface_height, margin, scaler, clock, f
 
     wall_thinness = 10
 
-    margin_color = purple
     margin_switch = "purple"
     rehabilitate = 0
     rehab_duration = 100
@@ -374,25 +373,25 @@ def run_reactor(surface, surface_width, surface_height, margin, scaler, clock, f
         # blue = (59, 17, 240)
         # purple = (82, 0, 106)
 
-        red_purple_shift = abs(red[0] - purple[0]) / rehab_duration, \
-                           abs(red[1] - purple[1]) / rehab_duration, \
-                           abs(red[2] - purple[2]) / rehab_duration
-        blue_purple_shift = abs(blue[0] - purple[0]) / rehab_duration, \
-                            abs(blue[1] - purple[1]) / rehab_duration, \
-                            abs(blue[2] - purple[2]) / rehab_duration
+        red_purple_shift = abs(red[0] - darkgrey[0]) / rehab_duration, \
+                           abs(red[1] - darkgrey[1]) / rehab_duration, \
+                           abs(red[2] - darkgrey[2]) / rehab_duration
+        blue_purple_shift = abs(blue[0] - darkgrey[0]) / rehab_duration, \
+                            abs(blue[1] - darkgrey[1]) / rehab_duration, \
+                            abs(blue[2] - darkgrey[2]) / rehab_duration
 
         if rehab < rehab_duration:
             if color == red:
-
+                #darkgrey = (140, 140, 140)
                 shift = red_purple_shift
                 color = (color[0] - shift[0] * rehab,
-                         color[1] - shift[1] * rehab,
+                         color[1] + shift[1] * rehab,
                          color[2] + shift[2] * rehab)
             elif color == blue:
 
                 shift = blue_purple_shift
                 color = (color[0] + shift[0] * rehab,
-                         color[1] - shift[1] * rehab,
+                         color[1] + shift[1] * rehab,
                          color[2] - shift[2] * rehab)
 
         color = int(color[0]), int(color[1]), int(color[2])
@@ -587,7 +586,7 @@ def run_reactor(surface, surface_width, surface_height, margin, scaler, clock, f
                 margin_switch = "red"
                 rehabilitate += 1
             if rehabilitate == rehab_duration:
-                margin_color = purple
+                margin_color = darkgrey
                 margin_switch = "purple"
                 rehabilitate = 1
         elif margin_color == blue:
@@ -597,7 +596,7 @@ def run_reactor(surface, surface_width, surface_height, margin, scaler, clock, f
                 margin_switch = "blue"
                 rehabilitate += 1
             if rehabilitate == rehab_duration:
-                margin_color = purple
+                margin_color = darkgrey
                 margin_switch = "purple"
                 rehabilitate = 1
 
