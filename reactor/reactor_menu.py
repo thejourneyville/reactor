@@ -1,5 +1,6 @@
 import pygame
 import reactor_main_game
+import reactor_colors as color
 
 # initializing pygame
 pygame.init()
@@ -9,7 +10,7 @@ width, height = 1, 1  # screen aspect ratio
 display_info_object = pygame.display.Info()
 screen_width, screen_height = display_info_object.current_w, display_info_object.current_h
 screen_scaler = height / screen_height
-scaler = .75
+scaler = 1
 surface_width, surface_height = int((width / screen_scaler) * scaler), int((height / screen_scaler) * scaler)
 surface = pygame.display.set_mode((surface_width, surface_height))
 
@@ -18,19 +19,9 @@ pygame.display.set_caption("REACTOR MENU")
 clock = pygame.time.Clock()
 fps = 60
 
-# colors
-white = (255, 255, 255)
-black = (0, 0, 0)
-lightgrey = (150, 150, 150)
-darkgrey = (50, 50, 50)
-red = (200, 17, 59)
-yellow = (255, 169, 0)
-orange = (255, 118, 0)
-purple = (82, 0, 106)
-
 # margin thickness, color
 margin = int(30 * scaler)
-margin_color = darkgrey
+margin_color = color.margin_color
 
 # music
 # pygame.mixer.music.load("tron_sample.mp3")
@@ -48,12 +39,12 @@ def start_menu():
     blinker_on = True
     blinker_count = 0
     blinker_speed = 10
-    disc_pulse_value = 140
+    disc_pulse_value = 0
     disc_pulse_direction = True
 
     def render_text():
 
-        # note: 'timer' is not currently being rendered but it is being passed from the game, so it could added
+        # note: 'timer' is not currently being rendered but it is being passed from the game, so it could be added
 
         if accuracy or timer:  # initially set to 0, these variables returned after game is played as tuples
             shot_accuracy = accuracy[0]
@@ -70,17 +61,12 @@ def start_menu():
         instructions_font = pygame.font.Font(f"./{font_style_text}", int(30 * scaler))
         stats_font = pygame.font.Font(f"./{font_style_text}", int(40 * scaler))
 
-        title_color = black
-        start_color = red
-        instructions_color = black
-        stats_color = black
-
-        title_surface = title.render("REACT0R", False, title_color)
-        start_surface = start_font.render("press [s]tart to activate", False, start_color)
+        title_surface = title.render("REACT0R", False, color.title_color)
+        start_surface = start_font.render("press [s]tart to activate", False, color.start_color)
         instructions_surface = instructions_font.render(
-            "using arrow keys, launch the disc through the open doors", True, instructions_color)
-        shot_accuracy_surface = stats_font.render(f"shots made/total: {shot_accuracy} pct.", True, stats_color)
-        total_openings_surface = stats_font.render(f"tries/openings: {total_openings} pct.", True, stats_color)
+            "using arrow keys, launch the disc through the open doors", True, color.instructions_color)
+        shot_accuracy_surface = stats_font.render(f"shots made/total: {shot_accuracy} pct.", True, color.stats_color)
+        total_openings_surface = stats_font.render(f"tries/openings: {total_openings} pct.", True, color.stats_color)
 
         title_rect = title_surface.get_rect()
         start_rect = start_surface.get_rect()
@@ -112,18 +98,18 @@ def start_menu():
     def draw_background_disc(dissolve, disc_pulse_up):
 
         if disc_pulse_up:
-            dissolve += .5
+            dissolve += 1
         else:
-            dissolve -= .1
+            dissolve -= 2
 
-        if dissolve <= 140:
+        if dissolve <= 0:
             disc_pulse_up = True
-        elif dissolve >= 150:
+        elif dissolve >= 50:
             disc_pulse_up = False
 
         pygame.draw.circle(
             surface,
-            (int(dissolve), int(dissolve), int(dissolve)),
+            (color.background[0] - int(dissolve), color.background[1] - int(dissolve), color.background[2] - int(dissolve)),
             (surface_width // 2, surface_height // 2),
             (surface_width // 2) - margin,
             int(100 * scaler))
@@ -181,7 +167,7 @@ def start_menu():
                     title_animating = True
 
         clock.tick(fps)
-        surface.fill(lightgrey)
+        surface.fill(color.background)
 
         draw_margin()
         disc_pulse_value, disc_pulse_direction = draw_background_disc(disc_pulse_value, disc_pulse_direction)

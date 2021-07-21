@@ -1,28 +1,34 @@
 import pygame
 import random
+import reactor_colors as color
 
 
 def run_reactor(surface, surface_width, surface_height, margin, margin_color, scaler, clock, fps):
 
     pygame.display.set_caption("REACTOR")
 
-    # colors
-    white = (255, 255, 255)
-    black = (0, 0, 0)
-    lightgrey = (150, 150, 150)
-    darkgrey = (50, 50, 50)
-    red = (240, 17, 59)
-    blue = (59, 17, 240)
-    yellow = (255, 169, 0)
-    orange = (255, 118, 0)
-    purple = (82, 0, 106)
-
     wall_thinness = 10
 
-    margin_switch = "purple"
+    margin_switch = "nominal"
     rehabilitate = 0
-    rehab_duration = 100
+    rehab_duration = 25
 
+    rise = True
+    ball_color = 200
+
+    lives = 10
+    score = 0
+    collisions = 0
+    particle, all_particles, modded_particles = [], [], []
+    current_ball_color = color.blue
+    ball_color_explosion = (0, 0, 0)
+
+    time_limit = 999
+    time_remaining = 0
+    game_over = False
+
+
+    start_ticks = pygame.time.get_ticks()  # starter tick
 
     class Doors:
         def __init__(self):
@@ -240,7 +246,7 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
         def draw_doors(self):
             all_doors = [self.rect_T_L, self.rect_T_R, self.rect_B_L, self.rect_B_R,
                          self.rect_L_T, self.rect_L_B, self.rect_R_T, self.rect_R_B]
-            rendered_doors = [pygame.draw.rect(surface, black, door) for door in all_doors]
+            rendered_doors = [pygame.draw.rect(surface, color.doors_color, door) for door in all_doors]
 
             return rendered_doors
 
@@ -262,59 +268,46 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
         def launch(self):
 
             success_shot = False
+
             if self.rest:
                 self.rest -= 1
-            else:
-                key = pygame.key.get_pressed()
 
-                if key[pygame.K_UP] and not self.rest and self.switch == 0:
-                    self.switch = 1
+            else:
+
+                if self.switch == 0:
+                    if pressed_key[pygame.K_UP]:
+                        self.switch = 1
+                    elif pressed_key[pygame.K_DOWN]:
+                        self.switch = 2
+                    elif pressed_key[pygame.K_LEFT]:
+                        self.switch = 3
+                    elif pressed_key[pygame.K_RIGHT]:
+                        self.switch = 4
+
                 if self.switch == 1:
                     self.ball.y -= self.speed
-                    if self.ball.bottom < 0:
-                        success_shot = True
-                        self.score += 1
-                        self.ball.x, self.ball.y = self.x, self.y
-                        self.switch = 0
-                        self.rest = 10
-
-                if key[pygame.K_DOWN] and not self.rest and self.switch == 0:
-                    self.switch = 2
-                if self.switch == 2:
+                elif self.switch == 2:
                     self.ball.y += self.speed
-                    if self.ball.top > surface_height:
-                        success_shot = True
-                        self.score += 1
-                        self.ball.x, self.ball.y = self.x, self.y
-                        self.switch = 0
-                        self.rest = 10
-
-                if key[pygame.K_LEFT] and not self.rest and self.switch == 0:
-                    self.switch = 3
-                if self.switch == 3:
+                elif self.switch == 3:
                     self.ball.x -= self.speed
-                    if self.ball.right < 0:
-                        success_shot = True
-                        self.score += 1
-                        self.ball.x, self.ball.y = self.x, self.y
-                        self.switch = 0
-                        self.rest = 10
-
-                if key[pygame.K_RIGHT] and not self.rest and self.switch == 0:
-                    self.switch = 4
-                if self.switch == 4:
+                elif self.switch == 4:
                     self.ball.x += self.speed
-                    if self.ball.left > surface_width:
-                        success_shot = True
-                        self.score += 1
-                        self.ball.x, self.ball.y = self.x, self.y
-                        self.switch = 0
-                        self.rest = 10
 
-            return success_shot
+                if any([self.ball.bottom < 0,
+                       self.ball.top > surface_height,
+                       self.ball.right < 0,
+                       self.ball.left > surface_width]):
+
+                    success_shot = True
+                    self.score += 1
+                    self.ball.x, self.ball.y = self.x, self.y
+                    self.switch = 0
+                    self.rest = 10
+
+            return success_shot, self.switch
 
         def ball_coord_getter(self):
-            return self.ball.center, self.switch
+            return self.ball.center
 
         def collision(self, bx, by, dx, dy):
             distance = (((dx - bx) ** 2) + ((dy - by) ** 2)) ** .5
@@ -368,35 +361,44 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
         def get_ball_color(current):
             return current
 
-    def draw_margin(color, rehab):
+    def draw_margin(m_color, rehab):
         # red = (240, 17, 59)
         # blue = (59, 17, 240)
         # purple = (82, 0, 106)
-
-        red_purple_shift = abs(red[0] - darkgrey[0]) / rehab_duration, \
-                           abs(red[1] - darkgrey[1]) / rehab_duration, \
-                           abs(red[2] - darkgrey[2]) / rehab_duration
-        blue_purple_shift = abs(blue[0] - darkgrey[0]) / rehab_duration, \
-                            abs(blue[1] - darkgrey[1]) / rehab_duration, \
-                            abs(blue[2] - darkgrey[2]) / rehab_duration
-
+        r, g, b = m_color[0], m_color[1], m_color[2]
         if rehab < rehab_duration:
-            if color == red:
-                #darkgrey = (140, 140, 140)
-                shift = red_purple_shift
-                color = (color[0] - shift[0] * rehab,
-                         color[1] + shift[1] * rehab,
-                         color[2] + shift[2] * rehab)
-            elif color == blue:
 
-                shift = blue_purple_shift
-                color = (color[0] + shift[0] * rehab,
-                         color[1] + shift[1] * rehab,
-                         color[2] - shift[2] * rehab)
+            fail_nominal_shift = abs(color.fail_color[0] - color.margin_color[0]) / rehab_duration, \
+                               abs(color.fail_color[1] - color.margin_color[1]) / rehab_duration, \
+                               abs(color.fail_color[2] - color.margin_color[2]) / rehab_duration
+            success_nominal_shift = abs(color.success_color[0] - color.margin_color[0]) / rehab_duration, \
+                                abs(color.success_color[1] - color.margin_color[1]) / rehab_duration, \
+                                abs(color.success_color[2] - color.margin_color[2]) / rehab_duration
 
-        color = int(color[0]), int(color[1]), int(color[2])
+            shift = (0, 0, 0)
+            if m_color == color.fail_color:
+                shift = fail_nominal_shift
+            elif m_color == color.success_color:
+                shift = success_nominal_shift
 
-        return pygame.draw.rect(surface, color, (0, 0, surface_width, surface_height), margin)
+            if m_color[0] > color.margin_color[0]:
+                r = m_color[0] - shift[0] * rehab
+            else:
+                r = m_color[0] + shift[0] * rehab
+
+            if m_color[1] > color.margin_color[1]:
+                g = m_color[1] - shift[1] * rehab
+            else:
+                g = m_color[1] + shift[1] * rehab
+
+            if m_color[2] > color.margin_color[2]:
+                b = m_color[2] - shift[2] * rehab
+            else:
+                b = m_color[2] + shift[2] * rehab
+
+        m_color = int(r), int(g), int(b)
+
+        return pygame.draw.rect(surface, m_color, (0, 0, surface_width, surface_height), margin)
 
     # text rendered using blit
     def stats(total_points, lives_left, timer):
@@ -406,14 +408,14 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
         font = pygame.font.Font(f"./{font_style}", int(20 * scaler))
         lives_font = pygame.font.Font(f"./{lives_stlye}", int(75 * scaler))
 
-        text_color = black
-        timer_color = black
-        lives_color = black
+        text_color = color.doors_color
+        timer_color = color.doors_color
+        lives_color = color.doors_color
         if timer <= 10:
-            timer_color = red
+            timer_color = color.fail_color
 
         if lives_left <= 3:
-            lives_color = red
+            lives_color = color.fail_color
 
         shot_accuracy = total_points[0]
         total_openings = total_points[-1]
@@ -492,31 +494,10 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
 
         return particles
 
-
     doors = Doors()
     ball = Ball()
 
-    rise = True
-    ball_color = 200
-
-    lives = 10
-    score = 0
-    collisions = 0
-    particle, all_particles, modded_particles = [], [], []
-    go_explosion = False
-    current_ball_color = blue
-    ball_color_explosion = (0, 0, 0)
-
-    time_limit = 999
-    time_remaining = 0
-    game_over = False
-
-    start_ticks = pygame.time.get_ticks()  # starter tick
-
     while True:
-
-        clock.tick(fps)
-        surface.fill(lightgrey)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -526,8 +507,13 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
                 if pygame.key.name(event.key) == "q":
                     game_over = True
 
-        success = ball.launch()
-        ball_coord, switch = ball.ball_coord_getter()
+        clock.tick(fps)
+        surface.fill(color.background)
+
+        pressed_key = pygame.key.get_pressed()
+
+        success, switch = ball.launch()
+        ball_coord = ball.ball_coord_getter()
 
         door_T_x, door_T_y, door_T_y_front_side = doors.slide_T()
         door_B_x, door_B_y, door_B_y_front_side = doors.slide_B()
@@ -559,7 +545,7 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
         if not game_over and any([result_front, result_back]):
             lives -= 1
             collisions += 1
-            margin_color = red
+            margin_color = color.fail_color
             rehabilitate = 1
 
             all_particles = explosion(collide_location, all_particles)
@@ -574,30 +560,30 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
                 ball.score = score
 
         if success:
-            margin_color = blue
+            margin_color = color.success_color
             rehabilitate = 1
             score = ball.score
             success = False
 
-        if margin_color == red:
-            if margin_switch == "blue":
-                margin_switch = "red"
+        if margin_color == color.fail_color:
+            if margin_switch == "success":
+                margin_switch = "fail"
             else:
-                margin_switch = "red"
+                margin_switch = "fail"
                 rehabilitate += 1
             if rehabilitate == rehab_duration:
-                margin_color = darkgrey
-                margin_switch = "purple"
+                margin_color = color.margin_color
+                margin_switch = "nominal"
                 rehabilitate = 1
-        elif margin_color == blue:
-            if margin_switch == "red":
-                margin_switch = "blue"
+        elif margin_color == color.success_color:
+            if margin_switch == "fail":
+                margin_switch = "success"
             else:
-                margin_switch = "blue"
+                margin_switch = "success"
                 rehabilitate += 1
             if rehabilitate == rehab_duration:
-                margin_color = darkgrey
-                margin_switch = "purple"
+                margin_color = color.margin_color
+                margin_switch = "nominal"
                 rehabilitate = 1
 
         if not game_over:
