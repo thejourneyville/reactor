@@ -396,17 +396,17 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
         return pygame.draw.rect(surface, m_color, (0, 0, surface_width, surface_height), margin)
 
     # text rendered using blit
-    def stats(total_points, lives_left, timer):
+    def stats(total_points, lives_left, time_left):
 
         font_style = "darkforest.ttf"
-        lives_stlye = "SF Square Head Bold.ttf"
+        lives_style = "SF Square Head Bold.ttf"
         font = pygame.font.Font(f"./{font_style}", int(20 * scaler))
-        lives_font = pygame.font.Font(f"./{lives_stlye}", int(75 * scaler))
+        lives_font = pygame.font.Font(f"./{lives_style}", int(75 * scaler))
 
         text_color = color.doors_color
         timer_color = color.doors_color
         lives_color = color.doors_color
-        if timer <= 10:
+        if time_left <= 10:
             timer_color = color.fail_color
 
         if lives_left <= 3:
@@ -417,7 +417,7 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
 
         text_surface = font.render(f"shots made/total: {shot_accuracy}", True, text_color)
         text_surface1 = lives_font.render(str(lives_left), True, lives_color)
-        text_surface2 = font.render(str(timer), True, timer_color)
+        text_surface2 = font.render(str(time_left), True, timer_color)
         text_surface3 = font.render(f"tries/openings: {total_openings}", True, text_color)
 
         text_rect = text_surface.get_rect()
@@ -474,7 +474,7 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
 
         return particles
 
-    def anim_explosion(particles, shrapnal_color):
+    def anim_explosion(particles, shrapnel_color):
 
         # [0][0] [0][1] [explode_x, explode_y],
         # [1][0] [1][1] [explode_speed_x, explode_speed_y],
@@ -487,7 +487,7 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
             current[2] -= random.choice([.1, .3, .5, .7, 1])
             current[1][1] += 2
 
-            pygame.draw.rect(surface, shrapnal_color,
+            pygame.draw.rect(surface, shrapnel_color,
                              (int(current[0][0]), int(current[0][1]), int(current[2]), int(current[2])))
 
             if current[2] <= 0:

@@ -10,7 +10,7 @@ width, height = 1, 1  # screen aspect ratio
 display_info_object = pygame.display.Info()
 screen_width, screen_height = display_info_object.current_w, display_info_object.current_h
 screen_scaler = height / screen_height
-scaler = 1
+scaler = .75
 surface_width, surface_height = int((width / screen_scaler) * scaler), int((height / screen_scaler) * scaler)
 surface = pygame.display.set_mode((surface_width, surface_height))
 
@@ -109,7 +109,9 @@ def start_menu():
 
         pygame.draw.circle(
             surface,
-            (color.background[0] - int(dissolve), color.background[1] - int(dissolve), color.background[2] - int(dissolve)),
+            (color.background[0] - int(dissolve),
+             color.background[1] - int(dissolve),
+             color.background[2] - int(dissolve)),
             (surface_width // 2, surface_height // 2),
             (surface_width // 2) - margin,
             int(100 * scaler))
