@@ -4,25 +4,22 @@ import reactor_colors as color
 
 
 def run_reactor(surface, surface_width, surface_height, margin, margin_color, scaler, clock, fps):
+
+    # variables
     pygame.display.set_caption("REACTOR")
-
-    wall_thinness = 10
-
-    rehabilitate = 0
-    rehab_duration = 25
-
-    rise = True
-    ball_color = 200
-
+    wall_thinness = 15
+    margin_return_nominal_state = 0
+    margin_return_nominal_state_duration = 25
+    disc_color_rising = True
+    disc_color = 200
     lives = 10
     score = 0
     collisions = 0
-    result_front, result_back = False, False
+    collision_result_front, collision_result_back = False, False
     particle, all_particles, modded_particles = [], [], []
-    current_ball_color = color.blue
-    ball_color_explosion = (0, 0, 0)
-
-    start_ticks = pygame.time.get_ticks()  # starter tick
+    current_disc_color = color.blue
+    disc_explosion_color = (0, 0, 0)
+    timer_marker = pygame.time.get_ticks()  # starter tick
     time_limit = 999
     game_over = False
 
@@ -32,12 +29,12 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
             self.height_TB = surface_height // wall_thinness
             self.width_LR = surface_height // wall_thinness
             self.height_LR = (surface_height // 2) - 1
-            self.speed = int(15 * scaler)
+            self.speed = int(22 * scaler)
             self.switcher = None
             self.openings = 0
             self.rest_period = 0
             self.current_rest_period = -100
-            self.random_range = random.randint(50, 200)
+            self.random_range = random.randint(10, 100)
             self.locked = False
 
             # top doors
@@ -95,7 +92,7 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
                         self.rest_T = False
 
                 if not self.rest_T:
-                    result_t = random.randint(1, self.random_range)
+                    result_t = random.randint(1, random.randint(10, 500))
                     if result_t == 1:
                         self.rest_R, self.rest_L, self.rest_B = True, True, True
                         self.switcher = "top"
@@ -117,7 +114,7 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
                     if self.rect_T_L.left == 0:
                         self.direction_T = 0
                         self.rest_T = True
-                        self.current_rest_period = -200
+                        self.current_rest_period = 0
                         self.openings += 1
                         self.switcher = None
 
@@ -134,7 +131,7 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
                         self.rest_B = False
 
                 if not self.rest_B:
-                    result_b = random.randint(1, self.random_range)
+                    result_b = random.randint(1, random.randint(10, 500))
                     if result_b == 1:
                         self.rest_R, self.rest_L, self.rest_T = True, True, True
                         self.switcher = "bottom"
@@ -156,7 +153,7 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
                     if self.rect_B_L.left == 0:
                         self.direction_B = 0
                         self.rest_B = True
-                        self.current_rest_period = -200
+                        self.current_rest_period = 0
                         self.openings += 1
                         self.switcher = None
 
@@ -173,7 +170,7 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
                         self.rest_L = False
 
                 if not self.rest_L:
-                    result_l = random.randint(1, self.random_range)
+                    result_l = random.randint(1, random.randint(10, 500))
                     if result_l == 1:
                         self.rest_R, self.rest_B, self.rest_T = True, True, True
                         self.switcher = "left"
@@ -195,7 +192,7 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
                     if self.rect_L_T.top == 0:
                         self.direction_L = 0
                         self.rest_L = True
-                        self.current_rest_period = -200
+                        self.current_rest_period = 0
                         self.openings += 1
                         self.switcher = None
 
@@ -212,7 +209,7 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
                         self.rest_R = False
 
                 if not self.rest_R:
-                    result_r = random.randint(1, self.random_range)
+                    result_r = random.randint(1, random.randint(10, 500))
                     if result_r == 1:
                         self.rest_L, self.rest_B, self.rest_T = True, True, True
                         self.switcher = "right"
@@ -234,7 +231,7 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
                     if self.rect_R_T.top == 0:
                         self.direction_R = 0
                         self.rest_R = True
-                        self.current_rest_period = -200
+                        self.current_rest_period = 0
                         self.openings += 1
                         self.switcher = None
 
@@ -243,9 +240,7 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
         def draw_doors(self):
             all_doors = [self.rect_T_L, self.rect_T_R, self.rect_B_L, self.rect_B_R,
                          self.rect_L_T, self.rect_L_B, self.rect_R_T, self.rect_R_B]
-            rendered_doors = [pygame.draw.rect(surface, color.doors_color, door) for door in all_doors]
-
-            return rendered_doors
+            return [pygame.draw.rect(surface, color.doors_color, door) for door in all_doors]
 
         def get_openings(self):
             return self.openings
@@ -361,14 +356,16 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
         # blue = (59, 17, 240)
         # purple = (82, 0, 106)
         r, g, b = m_color[0], m_color[1], m_color[2]
-        if rehab < rehab_duration:
+        if rehab < margin_return_nominal_state_duration:
 
-            fail_nominal_shift = (abs(color.fail_color[0] - color.margin_color[0]) / rehab_duration,
-                                  abs(color.fail_color[1] - color.margin_color[1]) / rehab_duration,
-                                  abs(color.fail_color[2] - color.margin_color[2]) / rehab_duration)
-            success_nominal_shift = (abs(color.success_color[0] - color.margin_color[0]) / rehab_duration,
-                                     abs(color.success_color[1] - color.margin_color[1]) / rehab_duration,
-                                     abs(color.success_color[2] - color.margin_color[2]) / rehab_duration)
+            fail_nominal_shift = \
+                (abs(color.fail_color[0] - color.margin_color[0]) / margin_return_nominal_state_duration,
+                 abs(color.fail_color[1] - color.margin_color[1]) / margin_return_nominal_state_duration,
+                 abs(color.fail_color[2] - color.margin_color[2]) / margin_return_nominal_state_duration)
+            success_nominal_shift = \
+                (abs(color.success_color[0] - color.margin_color[0]) / margin_return_nominal_state_duration,
+                 abs(color.success_color[1] - color.margin_color[1]) / margin_return_nominal_state_duration,
+                 abs(color.success_color[2] - color.margin_color[2]) / margin_return_nominal_state_duration)
 
             shift = (0, 0, 0)
             if m_color == color.fail_color:
@@ -397,7 +394,6 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
 
     # text rendered using blit
     def stats(total_points, lives_left, time_left):
-
         font_style = "darkforest.ttf"
         lives_style = "SF Square Head Bold.ttf"
         font = pygame.font.Font(f"./{font_style}", int(20 * scaler))
@@ -436,7 +432,6 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
         surface.blit(text_surface3, text_rect3)
 
     def accuracy(pass_throughs, fails, door_slides):
-
         total_tries = pass_throughs + fails
 
         if not total_tries:
@@ -452,7 +447,6 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
         return f"{pass_throughs}/{total_tries} {percentage_1}", f"{total_tries}/{door_slides} {percentage_2}"
 
     def explosion(coords, particles):
-
         explode_x = coords[0]
         explode_y = coords[-1]
         shrapnel_exists = True
@@ -460,7 +454,6 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
         shrapnel_speed_y = list(range(-35, 35))
 
         for i in range(100):
-
             explode_speed_x = random.choice(shrapnel_speed_x)
             explode_speed_y = random.choice(shrapnel_speed_y)
             shrapnel_size = random.randint(5, 20)
@@ -475,27 +468,30 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
         return particles
 
     def anim_explosion(particles, shrapnel_color):
-
+        # index explanation
         # [0][0] [0][1] [explode_x, explode_y],
         # [1][0] [1][1] [explode_speed_x, explode_speed_y],
         # [2] 2 shrapnel_size,
         # [3] 3 shrapnel_exists
 
-        for current in particles:
-            current[0][0] += current[1][0]
-            current[0][1] += current[1][1]
-            current[2] -= random.choice([.1, .3, .5, .7, 1])
-            current[1][1] += 2
+        for current_particle in particles:
+            current_particle[0][0] += current_particle[1][0]
+            current_particle[0][1] += current_particle[1][1]
+            current_particle[2] -= random.choice([.1, .3, .5, .7, 1])
+            current_particle[1][1] += 2
 
             pygame.draw.rect(surface, shrapnel_color,
-                             (int(current[0][0]), int(current[0][1]), int(current[2]), int(current[2])))
+                             (int(current_particle[0][0]),
+                              int(current_particle[0][1]),
+                              int(current_particle[2]),
+                              int(current_particle[2])))
 
-            if current[2] <= 0:
-                current[3] = False
+            if current_particle[2] <= 0:
+                current_particle[3] = False
 
-        for current in all_particles:
-            if not current[3]:
-                all_particles.remove(current)
+        for current_particle in all_particles:
+            if not current_particle[3]:
+                all_particles.remove(current_particle)
         return particles
 
     def timer(elapsed_seconds):
@@ -519,9 +515,9 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
 
         doors.draw_doors()
         ball_scored, ball_direction, ball_coord = ball.launch()
-        all_particles = anim_explosion(all_particles, ball_color_explosion)
-        draw_margin(margin_color, rehabilitate)
-        time_remaining = timer(int((pygame.time.get_ticks() - start_ticks) / 1000))
+        all_particles = anim_explosion(all_particles, disc_explosion_color)
+        draw_margin(margin_color, margin_return_nominal_state)
+        time_remaining = timer(int((pygame.time.get_ticks() - timer_marker) / 1000))
 
         #  *note: doors.slide_N returns the following: door_N_x, door_N_y, door_N_y_front_side
         #         [ball_direction - 1]: 0 - un-launched, 1 - top, 2 - bottom, 3 - left, 4 - right
@@ -534,7 +530,7 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
 
             if ball_scored:
                 margin_color = color.success_color
-                rehabilitate = 1
+                margin_return_nominal_state = 1
                 score = ball.score
 
             else:
@@ -544,48 +540,48 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
                 else:
                     x, y = -1, 1
 
-                result_front, collide_location = ball.collision(
+                collision_result_front, collide_location = ball.collision(
                     ball_coord[0],
                     ball_coord[-1],
                     chosen_door_coords[x],
                     chosen_door_coords[y])
 
-                if not result_front:
-                    result_back, collide_location = ball.collision(
+                if not collision_result_front:
+                    collision_result_back, collide_location = ball.collision(
                         ball_coord[0],
                         ball_coord[-1],
                         chosen_door_coords[0],
                         chosen_door_coords[1])
 
-                if any([result_front, result_back]):
+                if any([collision_result_front, collision_result_back]):
                     lives -= 1
                     collisions += 1
                     margin_color = color.fail_color
                     all_particles = explosion(collide_location, all_particles)
-                    ball_color_explosion = ball.get_ball_color(current_ball_color)
+                    disc_explosion_color = ball.get_ball_color(current_disc_color)
 
                     if lives == 0:
-                        rehabilitate = 0
+                        margin_return_nominal_state = 0
                         doors.locked = True
                         game_over = True
 
                     else:
-                        rehabilitate = 0
+                        margin_return_nominal_state = 0
                         ball = Ball()
                         ball.rest = 10
                         ball.score = score
 
         if any([margin_color == color.fail_color, margin_color == color.success_color]):
-            rehabilitate += 1
-            if rehabilitate == rehab_duration:
+            margin_return_nominal_state += 1
+            if margin_return_nominal_state == margin_return_nominal_state_duration:
                 margin_color = color.margin_color
-                rehabilitate = 0
+                margin_return_nominal_state = 0
 
         accuracy_result = accuracy(score, collisions, doors.get_openings())
 
         if not game_over:
-            rise, ball_color = ball.ball_pulse(rise, ball_color)
-            current_ball_color = ball.draw_ball(ball_color)
+            disc_color_rising, disc_color = ball.ball_pulse(disc_color_rising, disc_color)
+            current_disc_color = ball.draw_ball(disc_color)
             stats(accuracy_result, lives, time_remaining)
 
         else:
