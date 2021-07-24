@@ -36,6 +36,8 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
             self.current_rest_period = -100
             self.random_range = random.randint(10, 100)
             self.locked = False
+            self.start_mark_open = 0
+            self.start_timer = True
 
             # top doors
             self.x_T_L = 0
@@ -101,6 +103,9 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
             elif self.switcher == "top":
 
                 if self.rect_T_L.right > 0 and self.direction_T == 1 and not self.locked:
+                    if self.start_timer:
+                        self.start_mark_open = pygame.time.get_ticks()
+                        self.start_timer = False
                     self.rect_T_L.x -= self.speed
                     self.rect_T_R.x += self.speed
 
@@ -117,6 +122,7 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
                         self.current_rest_period = 0
                         self.openings += 1
                         self.switcher = None
+                        self.start_timer = True
 
             return self.rect_T_L.right, self.rect_T_L.topright[-1] - margin, self.rect_T_L.bottomright[-1]
 
@@ -256,6 +262,8 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
             self.rest = 0
             self.score = 0
             self.pulse_speed = 10
+            self.start_mark_close = 0
+            self.start_timer = True
 
         def launch(self):
 
@@ -270,6 +278,12 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
 
                 if self.switch == 0:
                     if pressed_key[pygame.K_UP]:
+                        if doors.start_mark_open:
+                            if self.start_timer:
+                                self.start_mark_close = pygame.time.get_ticks() - doors.start_mark_open
+                                doors.start_mark_open = 0
+                                print(self.start_mark_close)
+                                self.start_timer = False
                         self.switch = 1
                     elif pressed_key[pygame.K_DOWN]:
                         self.switch = 2
@@ -296,6 +310,7 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
                     self.ball.x, self.ball.y = self.x, self.y
                     self.switch = 0
                     self.rest = 10
+                    self.start_timer = True
 
             return success_shot, self.switch, self.ball.center
 
