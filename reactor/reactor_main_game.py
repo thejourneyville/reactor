@@ -21,8 +21,6 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
     timer_marker = pygame.time.get_ticks()  # starter tick
     time_limit = 999
     current_react_data = {}
-    react_success = True
-    last_reaction_time = (0, 0)
     game_over = False
 
     class Doors:
@@ -461,20 +459,15 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
         return pygame.draw.rect(surface, m_color, (0, 0, surface_width, surface_height), margin)
 
     # text rendered using blit
-    def stats(total_points, lives_left, time_left, reaction_stats, last_time):
+    def stats(total_points, lives_left, time_left):
         font_style = "darkforest.ttf"
         lives_style = "SF Square Head Bold.ttf"
         font = pygame.font.Font(f"./{font_style}", int(20 * scaler))
         lives_font = pygame.font.Font(f"./{lives_style}", int(75 * scaler))
-        react_success_font = pygame.font.Font(f"./{font_style}", int(35 * scaler))
-        react_fail_font = pygame.font.Font(f"./{font_style}", int(35 * scaler))
 
         text_color = color.doors_color
         timer_color = color.doors_color
         lives_color = color.doors_color
-        react_success_color = color.success_color
-        react_fail_color = color.fail_color
-
         if time_left <= 10:
             timer_color = color.fail_color
 
@@ -484,22 +477,15 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
         shot_accuracy = total_points[0]
         total_openings = total_points[-1]
 
-
-
-        text_surface = font.render(f"shots made/total: {shot_accuracy}", True, text_color)
-        text_surface1 = lives_font.render(str(lives_left), True, lives_color)
-        text_surface2 = font.render(str(time_left), True, timer_color)
-        text_surface3 = font.render(f"tries/openings: {total_openings}", True, text_color)
+        text_surface = font.render(f"shots made/total: {shot_accuracy}", True, text_color, color.background)
+        text_surface1 = lives_font.render(str(lives_left), True, lives_color, color.background)
+        text_surface2 = font.render(str(time_left), True, timer_color, color.background)
+        text_surface3 = font.render(f"tries/openings: {total_openings}", True, text_color, color.background)
 
         text_rect = text_surface.get_rect()
         text_rect1 = text_surface1.get_rect()
         text_rect2 = text_surface2.get_rect()
         text_rect3 = text_surface3.get_rect()
-
-        reaction_locations = [(surface_width // 8, surface_height // 8),
-                              (surface_width - (surface_width // 8), surface_height - (surface_height // 8)),
-                              (surface_width // 8, surface_height - (surface_height // 8)),
-                              (surface_width - (surface_width // 8), surface_height // 8)]
 
         text_rect.centerx, text_rect.centery = surface_width // 2, surface_height // 2 + (130 * scaler)
         text_rect1.centerx, text_rect1.centery = surface_width // 2, surface_height // 2
@@ -510,27 +496,6 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
         surface.blit(text_surface1, text_rect1)
         surface.blit(text_surface2, text_rect2)
         surface.blit(text_surface3, text_rect3)
-
-        # react_success, ball.start_mark_close, ball_direction
-        if reaction_stats[1] == 0:
-            reaction_speed = last_time[0]
-            location = last_time[-1]
-        else:
-            reaction_speed = reaction_stats[1]
-            location = reaction_stats[-1]
-
-        if reaction_stats[0]:
-            text_surface4 = react_success_font.render(f"{reaction_speed}ms", True, react_success_color)
-            text_rect4 = text_surface4.get_rect()
-            text_rect4.center = reaction_locations[location - 1]
-            surface.blit(text_surface4, text_rect4)
-        else:
-            text_surface5 = react_fail_font.render(f"{reaction_speed})ms", True, react_fail_color)
-            text_rect5 = text_surface5.get_rect()
-            text_rect5.center = reaction_locations[location - 1]
-            surface.blit(text_surface5, text_rect5)
-
-        return reaction_speed, location
 
     def accuracy(pass_throughs, fails, door_slides):
         total_tries = pass_throughs + fails
@@ -547,20 +512,67 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
         # print(pass_throughs, fails, total_tries, door_slides)
         return f"{pass_throughs}/{total_tries} {percentage_1}", f"{total_tries}/{door_slides} {percentage_2}"
 
-    def reaction_data(total, success_fail, reaction_time, disc_direction, door):
+    def build_reaction_data(total, success_fail, reaction_time, disc_direction, door):
 
         total.setdefault("door_speed", doors.true_door_speed)
         total.setdefault("disc_speed", ball.true_disc_speed)
         total.setdefault("disc_size", ball.true_disc_radius_size)
         total.setdefault("success", [])
         total.setdefault("fail", [])
+        total.setdefault("last_shot_made", success_fail)
 
         if success_fail:
-            total["success"].append((disc_direction, door, reaction_time))
+            total["success"].append([disc_direction, door, reaction_time, 0])
+            total["last_shot_made"] = True
         else:
-            total["fail"].append((disc_direction, door, reaction_time))
+            total["fail"].append([disc_direction, door, reaction_time, 0])
+            total["last_shot_made"] = False
 
         return total
+
+    def reaction_text(reaction_data):
+
+        door_speed = reaction_data['door_speed']
+        disc_speed = reaction_data['disc_speed']
+        disc_size = reaction_data['disc_size']
+        success_data = reaction_data['success']
+        fail_data = reaction_data['fail']
+        shot_made = reaction_data['last_shot_made']
+
+        if shot_made:
+            y_adjustment = success_data[-1][-1]
+        else:
+            y_adjustment = fail_data[-1][-1]
+
+        font_style = "darkforest.ttf"
+        font = pygame.font.Font(f"./{font_style}", int(20 * scaler))
+
+        directions = [(surface_width // 2, surface_height // 4 + y_adjustment),
+                      (surface_width // 2, surface_height - (surface_height // 6) + y_adjustment),
+                      (surface_width // 4, surface_height // 2 + y_adjustment),
+                      (surface_width - (surface_width // 4), surface_height // 2 + y_adjustment)]
+
+        if not shot_made:
+            text_color_fail = color.fail_color
+            text_surface = font.render(f"{fail_data[-1][-2]}ms", True, text_color_fail, color.background)
+            text_rect = text_surface.get_rect()
+
+            text_rect.center = directions[fail_data[-1][0] - 1]
+            surface.blit(text_surface, text_rect)
+            if reaction_data["fail"][-1][-1] >= -50:
+                reaction_data["fail"][-1][-1] -= 1
+
+        else:
+            text_color_success = color.success_color
+            text_surface = font.render(f"{success_data[-1][-2]}ms", True, text_color_success, color.background)
+            text_rect = text_surface.get_rect()
+
+            text_rect.center = directions[success_data[-1][0] - 1]
+            surface.blit(text_surface, text_rect)
+            if reaction_data["success"][-1][-1] >= -50:
+                reaction_data["success"][-1][-1] -= 1
+
+        return reaction_data
 
     def explosion(coords, particles):
         explode_x = coords[0]
@@ -629,8 +641,6 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
         clock.tick(fps)
         surface.fill(color.background)
 
-        react_success = None
-
         doors.draw_doors()
         ball_scored, ball_direction, ball_coord = ball.launch()
         all_particles = anim_explosion(all_particles, disc_explosion_color)
@@ -651,13 +661,13 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
                 margin_return_nominal_state = 1
                 score = ball.score
                 react_success = True
-                print(f"1: {ball.start_mark_close, ball_direction} current/last active door: {doors.last_open}")
-                current_react_data = reaction_data(current_react_data,
-                                                   react_success,
-                                                   ball.start_mark_close,
-                                                   ball_direction,
-                                                   doors.last_open)
-                print(current_react_data)
+                # print(f"1: {ball.start_mark_close, ball_direction} current/last active door: {doors.last_open}")
+                current_react_data = build_reaction_data(
+                    current_react_data,
+                    react_success,
+                    ball.start_mark_close,
+                    ball_direction,
+                    doors.last_open)
 
             else:
                 # created to change index when searching chosen_door_coords for either front side or back side
@@ -682,14 +692,13 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
                 if any([collision_result_front, collision_result_back]):
 
                     react_success = False
-                    print(f"0: {ball.start_mark_close, ball_direction} current/last active door: {doors.last_open}")
-                    current_react_data = reaction_data(
+                    # print(f"0: {ball.start_mark_close, ball_direction} current/last active door: {doors.last_open}")
+                    current_react_data = build_reaction_data(
                         current_react_data,
                         react_success,
                         ball.start_mark_close,
                         ball_direction,
                         doors.last_open)
-                    print(current_react_data)
 
                     lives -= 1
                     collisions += 1
@@ -717,15 +726,14 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
         accuracy_result = accuracy(score, collisions, doors.get_openings())
 
         if not game_over:
+
+            stats(accuracy_result, lives, time_remaining)
+
+            if current_react_data:
+                current_react_data = reaction_text(current_react_data)
+
             disc_color_rising, disc_color = ball.ball_pulse(disc_color_rising, disc_color)
             current_disc_color = ball.draw_ball(disc_color)
-
-            if any([react_success is True, react_success is False]):
-                reaction_stat_data = (react_success, ball.start_mark_close, ball_direction)
-            else:
-                reaction_stat_data = (True, 0, last_reaction_time[-1])
-
-            last_reaction_time = stats(accuracy_result, lives, time_remaining, reaction_stat_data, last_reaction_time)
 
         else:
             if len(all_particles) <= 1:
