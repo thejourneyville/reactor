@@ -4,6 +4,7 @@ import reactor_colors as color
 
 
 def run_reactor(surface, surface_width, surface_height, margin, margin_color, scaler, clock, fps):
+
     # variables
     pygame.display.set_caption("REACTOR")
     wall_thinness = 15
@@ -20,9 +21,6 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
     disc_explosion_color = (0, 0, 0)
     timer_marker = pygame.time.get_ticks()  # starter tick
     time_limit = 999
-    current_react_data = {}
-    react_success = True
-    last_reaction_time = (0, 0)
     game_over = False
 
     class Doors:
@@ -31,9 +29,8 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
             self.height_TB = surface_height // wall_thinness
             self.width_LR = surface_height // wall_thinness
             self.height_LR = (surface_height // 2) - 1
-            self.true_door_speed = 22
-            self.door_speed = int(self.true_door_speed * scaler)
-            self.switcher = 0
+            self.speed = int(22 * scaler)
+            self.switcher = None
             self.openings = 0
             self.rest_period = 0
             self.current_rest_period = -100
@@ -41,7 +38,6 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
             self.locked = False
             self.start_mark_open = 0
             self.start_timer = True
-            self.last_open = 0
 
             # top doors
             self.x_T_L = 0
@@ -89,7 +85,7 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
 
         def slide_T(self):
 
-            if self.switcher == 0:
+            if self.switcher is None:
                 if self.rest_T:
                     self.current_rest_period += 1
 
@@ -101,41 +97,38 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
                     result_t = random.randint(1, random.randint(10, 500))
                     if result_t == 1:
                         self.rest_R, self.rest_L, self.rest_B = True, True, True
-                        self.switcher = 1
+                        self.switcher = "top"
                         self.direction_T = 1
 
-            elif self.switcher == 1:
+            elif self.switcher == "top":
 
                 if self.rect_T_L.right > 0 and self.direction_T == 1 and not self.locked:
-
                     if self.start_timer:
                         self.start_mark_open = pygame.time.get_ticks()
                         self.start_timer = False
-                    self.last_open = self.switcher
-
-                    self.rect_T_L.x -= self.door_speed
-                    self.rect_T_R.x += self.door_speed
+                    self.rect_T_L.x -= self.speed
+                    self.rect_T_R.x += self.speed
 
                 elif self.rect_T_L.right <= 0:
                     self.direction_T = -1
 
                 if self.direction_T == -1:
-                    self.rect_T_L.x += self.door_speed
-                    self.rect_T_R.x -= self.door_speed
+                    self.rect_T_L.x += self.speed
+                    self.rect_T_R.x -= self.speed
 
                     if self.rect_T_L.left == 0:
                         self.direction_T = 0
                         self.rest_T = True
                         self.current_rest_period = 0
                         self.openings += 1
-                        self.switcher = 0
+                        self.switcher = None
                         self.start_timer = True
 
             return self.rect_T_L.right, self.rect_T_L.topright[-1] - margin, self.rect_T_L.bottomright[-1]
 
         def slide_B(self):
 
-            if self.switcher == 0:
+            if self.switcher is None:
                 if self.rest_B:
                     self.current_rest_period += 1
 
@@ -147,41 +140,34 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
                     result_b = random.randint(1, random.randint(10, 500))
                     if result_b == 1:
                         self.rest_R, self.rest_L, self.rest_T = True, True, True
-                        self.switcher = 2
+                        self.switcher = "bottom"
                         self.direction_B = 1
 
-            elif self.switcher == 2:
+            elif self.switcher == "bottom":
 
                 if self.rect_B_L.right > 0 and self.direction_B == 1 and not self.locked:
-
-                    if self.start_timer:
-                        self.start_mark_open = pygame.time.get_ticks()
-                        self.start_timer = False
-                    self.last_open = self.switcher
-
-                    self.rect_B_L.x -= self.door_speed
-                    self.rect_B_R.x += self.door_speed
+                    self.rect_B_L.x -= self.speed
+                    self.rect_B_R.x += self.speed
 
                 elif self.rect_B_L.right <= 0:
                     self.direction_B = -1
 
                 if self.direction_B == -1:
-                    self.rect_B_L.x += self.door_speed
-                    self.rect_B_R.x -= self.door_speed
+                    self.rect_B_L.x += self.speed
+                    self.rect_B_R.x -= self.speed
 
                     if self.rect_B_L.left == 0:
                         self.direction_B = 0
                         self.rest_B = True
                         self.current_rest_period = 0
                         self.openings += 1
-                        self.switcher = 0
-                        self.start_timer = True
+                        self.switcher = None
 
             return self.rect_B_L.right, self.rect_B_L.bottomright[-1] - margin, self.rect_B_L.topright[-1]
 
         def slide_L(self):
 
-            if self.switcher == 0:
+            if self.switcher is None:
                 if self.rest_L:
                     self.current_rest_period += 1
 
@@ -193,41 +179,34 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
                     result_l = random.randint(1, random.randint(10, 500))
                     if result_l == 1:
                         self.rest_R, self.rest_B, self.rest_T = True, True, True
-                        self.switcher = 3
+                        self.switcher = "left"
                         self.direction_L = 1
 
-            elif self.switcher == 3:
+            elif self.switcher == "left":
 
                 if self.rect_L_T.bottom > 0 and self.direction_L == 1 and not self.locked:
-
-                    if self.start_timer:
-                        self.start_mark_open = pygame.time.get_ticks()
-                        self.start_timer = False
-                    self.last_open = self.switcher
-
-                    self.rect_L_T.y -= self.door_speed
-                    self.rect_L_B.y += self.door_speed
+                    self.rect_L_T.y -= self.speed
+                    self.rect_L_B.y += self.speed
 
                 elif self.rect_L_T.bottom <= 0:
                     self.direction_L = -1
 
                 if self.direction_L == -1:
-                    self.rect_L_T.y += self.door_speed
-                    self.rect_L_B.y -= self.door_speed
+                    self.rect_L_T.y += self.speed
+                    self.rect_L_B.y -= self.speed
 
                     if self.rect_L_T.top == 0:
                         self.direction_L = 0
                         self.rest_L = True
                         self.current_rest_period = 0
                         self.openings += 1
-                        self.switcher = 0
-                        self.start_timer = True
+                        self.switcher = None
 
             return self.rect_L_T.bottomleft[0] + margin, self.rect_L_T.bottom, self.rect_L_T.bottomright[0]
 
         def slide_R(self):
 
-            if self.switcher == 0:
+            if self.switcher is None:
                 if self.rest_R:
                     self.current_rest_period += 1
 
@@ -239,35 +218,28 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
                     result_r = random.randint(1, random.randint(10, 500))
                     if result_r == 1:
                         self.rest_L, self.rest_B, self.rest_T = True, True, True
-                        self.switcher = 4
+                        self.switcher = "right"
                         self.direction_R = 1
 
-            elif self.switcher == 4:
+            elif self.switcher == "right":
 
                 if self.rect_R_T.bottom > 0 and self.direction_R == 1 and not self.locked:
-
-                    if self.start_timer:
-                        self.start_mark_open = pygame.time.get_ticks()
-                        self.start_timer = False
-                    self.last_open = self.switcher
-
-                    self.rect_R_T.y -= self.door_speed
-                    self.rect_R_B.y += self.door_speed
+                    self.rect_R_T.y -= self.speed
+                    self.rect_R_B.y += self.speed
 
                 elif self.rect_R_T.bottom <= 0:
                     self.direction_R = -1
 
                 if self.direction_R == -1:
-                    self.rect_R_T.y += self.door_speed
-                    self.rect_R_B.y -= self.door_speed
+                    self.rect_R_T.y += self.speed
+                    self.rect_R_B.y -= self.speed
 
                     if self.rect_R_T.top == 0:
                         self.direction_R = 0
                         self.rest_R = True
                         self.current_rest_period = 0
                         self.openings += 1
-                        self.switcher = 0
-                        self.start_timer = True
+                        self.switcher = None
 
             return self.rect_R_T.bottomright[0] - margin, self.rect_R_T.bottom, self.rect_R_T.bottomleft[0]
 
@@ -281,13 +253,11 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
 
     class Ball:
         def __init__(self):
-            self.true_disc_radius_size = 100
-            self.disc_radius_size = self.true_disc_radius_size * scaler
-            self.x = (surface_width // 2) - self.disc_radius_size
-            self.y = (surface_height // 2) - self.disc_radius_size
-            self.ball = pygame.Rect((self.x, self.y), (self.disc_radius_size * 2, self.disc_radius_size * 2))
-            self.true_disc_speed = 50
-            self.disc_speed = int(self.true_disc_speed * scaler)
+            self.radius = 100 * scaler
+            self.x = (surface_width // 2) - self.radius
+            self.y = (surface_height // 2) - self.radius
+            self.ball = pygame.Rect((self.x, self.y), (self.radius * 2, self.radius * 2))
+            self.speed = int(50 * scaler)
             self.switch = 0
             self.rest = 0
             self.score = 0
@@ -298,7 +268,6 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
         def launch(self):
 
             success_shot = False
-            last_direction = 0
 
             if self.rest:
                 self.rest -= 1
@@ -309,49 +278,28 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
 
                 if self.switch == 0:
                     if pressed_key[pygame.K_UP]:
-
                         if doors.start_mark_open:
                             if self.start_timer:
                                 self.start_mark_close = pygame.time.get_ticks() - doors.start_mark_open
                                 doors.start_mark_open = 0
+                                print(self.start_mark_close)
                                 self.start_timer = False
                         self.switch = 1
-
                     elif pressed_key[pygame.K_DOWN]:
-
-                        if doors.start_mark_open:
-                            if self.start_timer:
-                                self.start_mark_close = pygame.time.get_ticks() - doors.start_mark_open
-                                doors.start_mark_open = 0
-                                self.start_timer = False
                         self.switch = 2
-
                     elif pressed_key[pygame.K_LEFT]:
-
-                        if doors.start_mark_open:
-                            if self.start_timer:
-                                self.start_mark_close = pygame.time.get_ticks() - doors.start_mark_open
-                                doors.start_mark_open = 0
-                                self.start_timer = False
                         self.switch = 3
-
                     elif pressed_key[pygame.K_RIGHT]:
-
-                        if doors.start_mark_open:
-                            if self.start_timer:
-                                self.start_mark_close = pygame.time.get_ticks() - doors.start_mark_open
-                                doors.start_mark_open = 0
-                                self.start_timer = False
                         self.switch = 4
 
                 if self.switch == 1:
-                    self.ball.y -= self.disc_speed
+                    self.ball.y -= self.speed
                 elif self.switch == 2:
-                    self.ball.y += self.disc_speed
+                    self.ball.y += self.speed
                 elif self.switch == 3:
-                    self.ball.x -= self.disc_speed
+                    self.ball.x -= self.speed
                 elif self.switch == 4:
-                    self.ball.x += self.disc_speed
+                    self.ball.x += self.speed
 
                 if any([self.ball.top > surface_height,
                         self.ball.bottom < 0,
@@ -360,17 +308,16 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
                     success_shot = True
                     self.score += 1
                     self.ball.x, self.ball.y = self.x, self.y
-                    last_direction = self.switch
                     self.switch = 0
                     self.rest = 10
                     self.start_timer = True
 
-            return success_shot, max(self.switch, last_direction), self.ball.center
+            return success_shot, self.switch, self.ball.center
 
         def collision(self, bx, by, dx, dy):
             distance = (((dx - bx) ** 2) + ((dy - by) ** 2)) ** .5
 
-            if distance <= self.disc_radius_size:
+            if distance <= self.radius:
                 return True, (dx, dy)
             else:
                 return False, (dx, dy)
@@ -409,8 +356,8 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
             pygame.draw.circle(
                 surface,
                 (red_shift, 0, blue_shift),
-                (self.ball.x + self.disc_radius_size, self.ball.y + self.disc_radius_size),
-                self.disc_radius_size,
+                (self.ball.x + self.radius, self.ball.y + self.radius),
+                self.radius,
                 int(25 * scaler))
 
             return red_shift, 0, blue_shift
@@ -461,20 +408,15 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
         return pygame.draw.rect(surface, m_color, (0, 0, surface_width, surface_height), margin)
 
     # text rendered using blit
-    def stats(total_points, lives_left, time_left, reaction_stats, last_time):
+    def stats(total_points, lives_left, time_left):
         font_style = "darkforest.ttf"
         lives_style = "SF Square Head Bold.ttf"
         font = pygame.font.Font(f"./{font_style}", int(20 * scaler))
         lives_font = pygame.font.Font(f"./{lives_style}", int(75 * scaler))
-        react_success_font = pygame.font.Font(f"./{font_style}", int(35 * scaler))
-        react_fail_font = pygame.font.Font(f"./{font_style}", int(35 * scaler))
 
         text_color = color.doors_color
         timer_color = color.doors_color
         lives_color = color.doors_color
-        react_success_color = color.success_color
-        react_fail_color = color.fail_color
-
         if time_left <= 10:
             timer_color = color.fail_color
 
@@ -483,8 +425,6 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
 
         shot_accuracy = total_points[0]
         total_openings = total_points[-1]
-
-
 
         text_surface = font.render(f"shots made/total: {shot_accuracy}", True, text_color)
         text_surface1 = lives_font.render(str(lives_left), True, lives_color)
@@ -496,11 +436,6 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
         text_rect2 = text_surface2.get_rect()
         text_rect3 = text_surface3.get_rect()
 
-        reaction_locations = [(surface_width // 8, surface_height // 8),
-                              (surface_width - (surface_width // 8), surface_height - (surface_height // 8)),
-                              (surface_width // 8, surface_height - (surface_height // 8)),
-                              (surface_width - (surface_width // 8), surface_height // 8)]
-
         text_rect.centerx, text_rect.centery = surface_width // 2, surface_height // 2 + (130 * scaler)
         text_rect1.centerx, text_rect1.centery = surface_width // 2, surface_height // 2
         text_rect2.centerx, text_rect2.centery = surface_width // 2, surface_height // 2 + (40 * scaler)
@@ -510,27 +445,6 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
         surface.blit(text_surface1, text_rect1)
         surface.blit(text_surface2, text_rect2)
         surface.blit(text_surface3, text_rect3)
-
-        # react_success, ball.start_mark_close, ball_direction
-        if reaction_stats[1] == 0:
-            reaction_speed = last_time[0]
-            location = last_time[-1]
-        else:
-            reaction_speed = reaction_stats[1]
-            location = reaction_stats[-1]
-
-        if reaction_stats[0]:
-            text_surface4 = react_success_font.render(f"{reaction_speed}ms", True, react_success_color)
-            text_rect4 = text_surface4.get_rect()
-            text_rect4.center = reaction_locations[location - 1]
-            surface.blit(text_surface4, text_rect4)
-        else:
-            text_surface5 = react_fail_font.render(f"{reaction_speed})ms", True, react_fail_color)
-            text_rect5 = text_surface5.get_rect()
-            text_rect5.center = reaction_locations[location - 1]
-            surface.blit(text_surface5, text_rect5)
-
-        return reaction_speed, location
 
     def accuracy(pass_throughs, fails, door_slides):
         total_tries = pass_throughs + fails
@@ -546,21 +460,6 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
             percentage_2 = round((total_tries / door_slides) * 100, 1)
         # print(pass_throughs, fails, total_tries, door_slides)
         return f"{pass_throughs}/{total_tries} {percentage_1}", f"{total_tries}/{door_slides} {percentage_2}"
-
-    def reaction_data(total, success_fail, reaction_time, disc_direction, door):
-
-        total.setdefault("door_speed", doors.true_door_speed)
-        total.setdefault("disc_speed", ball.true_disc_speed)
-        total.setdefault("disc_size", ball.true_disc_radius_size)
-        total.setdefault("success", [])
-        total.setdefault("fail", [])
-
-        if success_fail:
-            total["success"].append((disc_direction, door, reaction_time))
-        else:
-            total["fail"].append((disc_direction, door, reaction_time))
-
-        return total
 
     def explosion(coords, particles):
         explode_x = coords[0]
@@ -629,8 +528,6 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
         clock.tick(fps)
         surface.fill(color.background)
 
-        react_success = None
-
         doors.draw_doors()
         ball_scored, ball_direction, ball_coord = ball.launch()
         all_particles = anim_explosion(all_particles, disc_explosion_color)
@@ -650,14 +547,6 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
                 margin_color = color.success_color
                 margin_return_nominal_state = 1
                 score = ball.score
-                react_success = True
-                print(f"1: {ball.start_mark_close, ball_direction} current/last active door: {doors.last_open}")
-                current_react_data = reaction_data(current_react_data,
-                                                   react_success,
-                                                   ball.start_mark_close,
-                                                   ball_direction,
-                                                   doors.last_open)
-                print(current_react_data)
 
             else:
                 # created to change index when searching chosen_door_coords for either front side or back side
@@ -680,17 +569,6 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
                         chosen_door_coords[1])
 
                 if any([collision_result_front, collision_result_back]):
-
-                    react_success = False
-                    print(f"0: {ball.start_mark_close, ball_direction} current/last active door: {doors.last_open}")
-                    current_react_data = reaction_data(
-                        current_react_data,
-                        react_success,
-                        ball.start_mark_close,
-                        ball_direction,
-                        doors.last_open)
-                    print(current_react_data)
-
                     lives -= 1
                     collisions += 1
                     margin_color = color.fail_color
@@ -719,13 +597,7 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
         if not game_over:
             disc_color_rising, disc_color = ball.ball_pulse(disc_color_rising, disc_color)
             current_disc_color = ball.draw_ball(disc_color)
-
-            if any([react_success is True, react_success is False]):
-                reaction_stat_data = (react_success, ball.start_mark_close, ball_direction)
-            else:
-                reaction_stat_data = (True, 0, last_reaction_time[-1])
-
-            last_reaction_time = stats(accuracy_result, lives, time_remaining, reaction_stat_data, last_reaction_time)
+            stats(accuracy_result, lives, time_remaining)
 
         else:
             if len(all_particles) <= 1:
