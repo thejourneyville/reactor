@@ -1,5 +1,6 @@
 import pygame
 import random
+from collections import deque
 import reactor_colors as color
 
 
@@ -21,6 +22,14 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
     timer_marker = pygame.time.get_ticks()  # starter tick
     time_limit = 999
     current_react_data = {}
+    react_fade_speed = .25
+    react_movement_speed = .5
+    delay = 1
+    shadow_coord_1 = deque([], maxlen=delay)
+    shadow_coord_2 = deque([], maxlen=delay * 2)
+    shadow_coord_3 = deque([], maxlen=delay * 3)
+    shadow_coord_4 = deque([], maxlen=delay * 4)
+    shadow_coord_5 = deque([], maxlen=delay * 5)
     game_over = False
 
     class Doors:
@@ -417,6 +426,46 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
         def get_ball_color(current):
             return current
 
+        def shadow(self, shadow_color):
+
+            all_shadows = [shadow_coord_5, shadow_coord_4, shadow_coord_3, shadow_coord_2, shadow_coord_1]
+
+            diff_r = shadow_color[0] - color.background[0]
+            diff_g = shadow_color[1] - color.background[1]
+            diff_b = shadow_color[2] - color.background[2]
+            divisor = len(all_shadows)
+            incrementor = [abs(diff_r / divisor), abs(diff_g / divisor), abs(diff_b / divisor)]
+
+            r, g, b = shadow_color[0], shadow_color[1], shadow_color[2]
+            all_colors = []
+            for _ in range(len(all_shadows)):
+                if diff_r < 0:
+                    r += (incrementor[0])
+                else:
+                    r -= (incrementor[0])
+
+                if diff_g < 0:
+                    g += (incrementor[1])
+                else:
+                    g -= (incrementor[1])
+
+                if diff_b < 0:
+                    b += (incrementor[2])
+                else:
+                    b -= (incrementor[2])
+
+                output_color = (int(r), int(g), int(b))
+                all_colors.append(output_color)
+
+            for idx, shadow in enumerate(all_shadows):
+                shadow.append((self.ball.x, self.ball.y))
+                pygame.draw.circle(
+                    surface,
+                    all_colors[(len(all_shadows) - 1) - idx],
+                    (shadow[0][0] + self.disc_radius_size, shadow[0][-1] + self.disc_radius_size),
+                    self.disc_radius_size,
+                    int((idx + 1) ** 2))
+
     def draw_margin(m_color, rehab):
         # red = (240, 17, 59)
         # blue = (59, 17, 240)
@@ -477,10 +526,10 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
         shot_accuracy = total_points[0]
         total_openings = total_points[-1]
 
-        text_surface = font.render(f"shots made/total: {shot_accuracy}", True, text_color, color.background)
-        text_surface1 = lives_font.render(str(lives_left), True, lives_color, color.background)
-        text_surface2 = font.render(str(time_left), True, timer_color, color.background)
-        text_surface3 = font.render(f"tries/openings: {total_openings}", True, text_color, color.background)
+        text_surface = font.render(f"shots made/total: {shot_accuracy}", True, text_color)
+        text_surface1 = lives_font.render(str(lives_left), True, lives_color)
+        text_surface2 = font.render(str(time_left), True, timer_color)
+        text_surface3 = font.render(f"tries/openings: {total_openings}", True, text_color)
 
         text_rect = text_surface.get_rect()
         text_rect1 = text_surface1.get_rect()
@@ -521,11 +570,15 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
         total.setdefault("fail", [])
         total.setdefault("last_shot_made", success_fail)
 
+        y_axis_movement = 0
+        starting_color_success = color.success_color
+        starting_color_fail = color.fail_color
+
         if success_fail:
-            total["success"].append([disc_direction, door, reaction_time, 0])
+            total["success"].append([disc_direction, door, reaction_time, y_axis_movement, starting_color_success])
             total["last_shot_made"] = True
         else:
-            total["fail"].append([disc_direction, door, reaction_time, 0])
+            total["fail"].append([disc_direction, door, reaction_time, y_axis_movement, starting_color_fail])
             total["last_shot_made"] = False
 
         return total
@@ -540,12 +593,57 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
         shot_made = reaction_data['last_shot_made']
 
         if shot_made:
-            y_adjustment = success_data[-1][-1]
+            y_adjustment = int(success_data[-1][-2])
+            current_color = list(success_data[-1][-1])
+
+            diff = [abs(color.background[0] - color.success_color[0]),
+                    abs(color.background[1] - color.success_color[1]),
+                    abs(color.background[2] - color.success_color[2])]
+
+            smallest = min(diff)
+
+            increments = ((diff[0] / smallest),
+                          (diff[1] / smallest),
+                          (diff[2] / smallest))
         else:
-            y_adjustment = fail_data[-1][-1]
+            y_adjustment = int(fail_data[-1][-2])
+            current_color = list(fail_data[-1][-1])
+
+            diff = [abs(color.background[0] - color.fail_color[0]),
+                    abs(color.background[1] - color.fail_color[1]),
+                    abs(color.background[2] - color.fail_color[2])]
+
+            smallest = min(diff)
+
+            increments = ((diff[0] / smallest),
+                          (diff[1] / smallest),
+                          (diff[2] / smallest))
+
+        if color.background[0] - current_color[0] < 0:
+            current_color[0] -= increments[0] * react_fade_speed
+        else:
+            current_color[0] += increments[0] * react_fade_speed
+        if color.background[1] - current_color[1] < 0:
+            current_color[1] -= increments[1] * react_fade_speed
+        else:
+            current_color[1] += increments[1] * react_fade_speed
+        if color.background[2] - current_color[2] < 0:
+            current_color[2] -= increments[2] * react_fade_speed
+        else:
+            current_color[2] += increments[2] * react_fade_speed
+
+        current_color = (int(current_color[0]), int(current_color[1]), int(current_color[2]))
 
         font_style = "darkforest.ttf"
-        font = pygame.font.Font(f"./{font_style}", int(20 * scaler))
+        if success_data:
+            success_font_size = 60 - (success_data[-1][-3] // 10)
+            if success_font_size < 20:
+                success_font_size = 20
+        else:
+            success_font_size = 20
+
+        success_font = pygame.font.Font(f"./{font_style}", int(success_font_size * scaler))
+        fail_font = pygame.font.Font(f"./{font_style}", int(20 * scaler))
 
         directions = [(surface_width // 2, surface_height // 4 + y_adjustment),
                       (surface_width // 2, surface_height - (surface_height // 6) + y_adjustment),
@@ -553,24 +651,26 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
                       (surface_width - (surface_width // 4), surface_height // 2 + y_adjustment)]
 
         if not shot_made:
-            text_color_fail = color.fail_color
-            text_surface = font.render(f"{fail_data[-1][-2]}ms", True, text_color_fail, color.background)
+            text_surface = fail_font.render(f"{fail_data[-1][-3]}ms", True, current_color)
             text_rect = text_surface.get_rect()
 
-            text_rect.center = directions[fail_data[-1][0] - 1]
-            surface.blit(text_surface, text_rect)
-            if reaction_data["fail"][-1][-1] >= -50:
-                reaction_data["fail"][-1][-1] -= 1
+            text_rect.center = directions[fail_data[-1][1] - 1]
+            if reaction_data["fail"][-1][-1] != color.background:
+                surface.blit(text_surface, text_rect)
+                reaction_data["fail"][-1][-1] = current_color
+            if reaction_data["fail"][-1][-2] >= -50:
+                reaction_data["fail"][-1][-2] -= react_movement_speed
 
         else:
-            text_color_success = color.success_color
-            text_surface = font.render(f"{success_data[-1][-2]}ms", True, text_color_success, color.background)
+            text_surface = success_font.render(f"{success_data[-1][-3]}ms", True, current_color)
             text_rect = text_surface.get_rect()
 
             text_rect.center = directions[success_data[-1][0] - 1]
-            surface.blit(text_surface, text_rect)
-            if reaction_data["success"][-1][-1] >= -50:
-                reaction_data["success"][-1][-1] -= 1
+            if reaction_data["success"][-1][-1] != color.background:
+                surface.blit(text_surface, text_rect)
+                reaction_data["success"][-1][-1] = current_color
+            if reaction_data["success"][-1][-2] >= -50:
+                reaction_data["success"][-1][-2] -= react_movement_speed
 
         return reaction_data
 
@@ -641,11 +741,12 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
         clock.tick(fps)
         surface.fill(color.background)
 
-        doors.draw_doors()
         ball_scored, ball_direction, ball_coord = ball.launch()
-        all_particles = anim_explosion(all_particles, disc_explosion_color)
-        draw_margin(margin_color, margin_return_nominal_state)
         time_remaining = timer(int((pygame.time.get_ticks() - timer_marker) / 1000))
+        all_particles = anim_explosion(all_particles, disc_explosion_color)
+        disc_color_rising, disc_color = ball.ball_pulse(disc_color_rising, disc_color)
+        doors.draw_doors()
+        draw_margin(margin_color, margin_return_nominal_state)
 
         #  *note: doors.slide_N returns the following: door_N_x, door_N_y, door_N_y_front_side
         #         [ball_direction - 1]: 0 - un-launched, 1 - top, 2 - bottom, 3 - left, 4 - right
@@ -726,14 +827,14 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
         accuracy_result = accuracy(score, collisions, doors.get_openings())
 
         if not game_over:
-
+            ball.shadow(current_disc_color)
             stats(accuracy_result, lives, time_remaining)
+            current_disc_color = ball.draw_ball(disc_color)
+            doors.draw_doors()
+            draw_margin(margin_color, margin_return_nominal_state)
 
             if current_react_data:
                 current_react_data = reaction_text(current_react_data)
-
-            disc_color_rising, disc_color = ball.ball_pulse(disc_color_rising, disc_color)
-            current_disc_color = ball.draw_ball(disc_color)
 
         else:
             if len(all_particles) <= 1:
