@@ -10,7 +10,7 @@ width, height = 1, 1  # screen aspect ratio
 display_info_object = pygame.display.Info()
 screen_width, screen_height = display_info_object.current_w, display_info_object.current_h
 screen_scaler = height / screen_height
-scaler = .75
+scaler = 1
 surface_width, surface_height = int((width / screen_scaler) * scaler), int((height / screen_scaler) * scaler)
 surface = pygame.display.set_mode((surface_width, surface_height))
 
@@ -20,7 +20,7 @@ clock = pygame.time.Clock()
 fps = 60
 
 # margin thickness, color
-margin = int(30 * scaler)
+margin = int(60 * scaler)
 margin_color = color.margin_color
 
 # music
@@ -155,7 +155,7 @@ def start_menu():
             elif event.type == pygame.KEYDOWN:
                 if pygame.key.name(event.key) == "s":
                     accuracy, timer = reactor_main_game.run_reactor(
-                        surface, surface_width, surface_height, margin, margin_color, scaler, clock, fps)
+                        surface, surface_width, surface_height, margin, margin_color, disc_pulse_value, disc_pulse_direction, scaler, clock, fps)
                     pygame.display.set_caption("REACTOR MENU")
                     title_open_count = 0
                     title_animating = True

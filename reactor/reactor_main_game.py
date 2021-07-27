@@ -1,13 +1,16 @@
 import pygame
 import random
 from collections import deque
+import reactor_round
 import reactor_colors as color
 
 
-def run_reactor(surface, surface_width, surface_height, margin, margin_color, scaler, clock, fps):
+def run_reactor(surface, surface_width, surface_height, margin, margin_color, disc_pulse_value, disc_pulse_direction, scaler, clock, fps):
+
     # variables
     pygame.display.set_caption("REACTOR")
-    wall_thinness = 15
+    door_thinness = 10
+    door_speed = 15
     margin_return_nominal_state = 0
     margin_return_nominal_state_duration = 25
     disc_color_rising = True
@@ -20,7 +23,7 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
     current_disc_color = color.blue
     disc_explosion_color = (0, 0, 0)
     timer_marker = pygame.time.get_ticks()  # starter tick
-    time_limit = 999
+    time_limit = 60
     current_react_data = {}
     react_fade_speed = .25
     react_movement_speed = .5
@@ -30,19 +33,24 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
     shadow_coord_3 = deque([], maxlen=delay * 3)
     shadow_coord_4 = deque([], maxlen=delay * 4)
     shadow_coord_5 = deque([], maxlen=delay * 5)
-    game_over = False
+    shadow_coord_6 = deque([], maxlen=delay * 6)
+    shadow_coord_7 = deque([], maxlen=delay * 7)
+    shadow_coord_8 = deque([], maxlen=delay * 8)
+    shadow_coord_9 = deque([], maxlen=delay * 9)
+    shadow_coord_10 = deque([], maxlen=delay * 10)
+    all_shadows = [shadow_coord_10, shadow_coord_9, shadow_coord_8, shadow_coord_7, shadow_coord_6, shadow_coord_5, shadow_coord_4, shadow_coord_3, shadow_coord_2, shadow_coord_1]
 
     class Doors:
         def __init__(self):
             self.width_TB = (surface_width // 2) - 1
-            self.height_TB = surface_height // wall_thinness
-            self.width_LR = surface_height // wall_thinness
+            self.height_TB = surface_height // door_thinness
+            self.width_LR = surface_height // door_thinness
             self.height_LR = (surface_height // 2) - 1
-            self.true_door_speed = 22
+            self.true_door_speed = door_speed
             self.door_speed = int(self.true_door_speed * scaler)
             self.switcher = 0
             self.openings = 0
-            self.rest_period = 0
+            self.rest_period = 25
             self.current_rest_period = -100
             self.random_range = random.randint(10, 100)
             self.locked = False
@@ -63,9 +71,9 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
 
             # bottom doors
             self.x_B_L = 0
-            self.y_B_L = surface_height - (surface_height // wall_thinness)
+            self.y_B_L = surface_height - (surface_height // door_thinness)
             self.x_B_R = (surface_width // 2) + 2
-            self.y_B_R = surface_height - (surface_height // wall_thinness)
+            self.y_B_R = surface_height - (surface_height // door_thinness)
             self.rect_B_L = pygame.Rect(self.x_B_L, self.y_B_L, self.width_TB, self.height_TB)
             self.rect_B_R = pygame.Rect(self.x_B_R, self.y_B_R, self.width_TB, self.height_TB)
             self.direction_B = 0
@@ -428,8 +436,6 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
 
         def shadow(self, shadow_color):
 
-            all_shadows = [shadow_coord_5, shadow_coord_4, shadow_coord_3, shadow_coord_2, shadow_coord_1]
-
             diff_r = shadow_color[0] - color.background[0]
             diff_g = shadow_color[1] - color.background[1]
             diff_b = shadow_color[2] - color.background[2]
@@ -464,7 +470,7 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
                     all_colors[(len(all_shadows) - 1) - idx],
                     (shadow[0][0] + self.disc_radius_size, shadow[0][-1] + self.disc_radius_size),
                     self.disc_radius_size,
-                    int((idx + 1) ** 2))
+                    int((idx + 1) ** 1.4))
 
     def draw_margin(m_color, rehab):
         # red = (240, 17, 59)
@@ -543,7 +549,10 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
 
         surface.blit(text_surface, text_rect)
         surface.blit(text_surface1, text_rect1)
-        surface.blit(text_surface2, text_rect2)
+
+        if time_remaining >= 0:
+            surface.blit(text_surface2, text_rect2)
+
         surface.blit(text_surface3, text_rect3)
 
     def accuracy(pass_throughs, fails, door_slides):
@@ -678,10 +687,10 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
         explode_x = coords[0]
         explode_y = coords[-1]
         shrapnel_exists = True
-        shrapnel_speed_x = list(range(-35, 35))
-        shrapnel_speed_y = list(range(-35, 35))
+        shrapnel_speed_x = list(range(-50, 50))
+        shrapnel_speed_y = list(range(-50, 50))
 
-        for i in range(100):
+        for i in range(200):
             explode_speed_x = random.choice(shrapnel_speed_x)
             explode_speed_y = random.choice(shrapnel_speed_y)
             shrapnel_size = random.randint(5, 20)
@@ -724,6 +733,9 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
 
     def timer(elapsed_seconds):
         return time_limit - elapsed_seconds
+
+    game_over = reactor_round.round_screen(surface, surface_width, surface_height, margin, margin_color,
+                                           disc_pulse_value, disc_pulse_direction, scaler, clock, fps)
 
     doors = Doors()
     ball = Ball()
@@ -826,18 +838,21 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, sc
 
         accuracy_result = accuracy(score, collisions, doors.get_openings())
 
+        if time_remaining < 0:
+            return accuracy_result, time_remaining
+
         if not game_over:
-            ball.shadow(current_disc_color)
-            stats(accuracy_result, lives, time_remaining)
-            current_disc_color = ball.draw_ball(disc_color)
             doors.draw_doors()
             draw_margin(margin_color, margin_return_nominal_state)
-
-            if current_react_data:
-                current_react_data = reaction_text(current_react_data)
+            ball.shadow(current_disc_color)
+            current_disc_color = ball.draw_ball(disc_color)
+            stats(accuracy_result, lives, time_remaining)
 
         else:
             if len(all_particles) <= 1:
                 return accuracy_result, time_remaining
+
+        if current_react_data:
+            current_react_data = reaction_text(current_react_data)
 
         pygame.display.update()
