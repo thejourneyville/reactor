@@ -1,9 +1,11 @@
 import pygame
 import reactor_colors as color
+import reactor_main_game as main
 
 
-def round_screen(surface, surface_width, surface_height, margin, margin_color, disc_pulse_value, disc_pulse_direction, scaler, clock, fps):
-
+def round_screen(surface, surface_width, surface_height, margin, margin_color,
+                 disc_pulse_value, disc_pulse_direction,
+                 scaler, clock, fps):
     round_font_position = 0
     round_font_speed = 500
     round_font_animating = True
@@ -12,32 +14,38 @@ def round_screen(surface, surface_width, surface_height, margin, margin_color, d
     score_goal = 15
     timer = 60
     pygame.display.set_caption(f"ROUND {round_number}")
-    reactor_start = False
-    game_over = False
+    door_speed = 15
+    round_screen_loop = True
+    accuracy_result, time_remaining = 0, 0
 
     def render_text():
 
         font_style_title = "SF Square Head Bold.ttf"
         font_style_text = "darkforest.ttf"
+        font_style_speed = "darkforest.ttf"
 
         round_font = pygame.font.Font(f"./{font_style_title}", int(75 * scaler))
         instructions_font = pygame.font.Font(f"./{font_style_text}", int(30 * scaler))
+        speed_font = pygame.font.Font(f"./{font_style_speed}", int(30 * scaler))
 
-        round_font_surface = round_font.render(f"ROUND {round_number}", False, color.alert_red)
+        round_font_surface = round_font.render(f"ROUND {round_number}", True, color.instructions_color)
         instructions_surface = instructions_font.render(
             f"must score {score_goal} points in {timer} seconds", True, color.instructions_color)
+        speed_font_surface = speed_font.render(f"reactor speed {door_speed}", True, color.alert_red)
 
         round_font_rect = round_font_surface.get_rect()
         instructions_rect = instructions_surface.get_rect()
+        speed_font_rect = speed_font_surface.get_rect()
 
-        round_font_rect.centerx, round_font_rect.centery = round_font_position, surface_height // 2 - (15 * scaler)
-        instructions_rect.centerx, instructions_rect.centery = surface_width // 2, surface_height // 2 + (50 * scaler)
+        round_font_rect.centerx, round_font_rect.centery = round_font_position, surface_height // 2 - (30 * scaler)
+        instructions_rect.centerx, instructions_rect.centery = surface_width // 2, surface_height // 2 + (60 * scaler)
+        speed_font_rect.center = (surface_width // 2, surface_height // 2 + (20 * scaler))
 
         surface.blit(round_font_surface, round_font_rect)
 
         if not round_font_animating:
-
             surface.blit(instructions_surface, instructions_rect)
+            surface.blit(speed_font_surface, speed_font_rect)
 
     def draw_background_disc(dissolve, disc_pulse_up):
 
@@ -78,7 +86,7 @@ def round_screen(surface, surface_width, surface_height, margin, margin_color, d
 
         pygame.draw.rect(surface, margin_color, (0, 0, surface_width, surface_height), margin)
 
-    while not reactor_start:
+    while round_screen_loop:
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -86,16 +94,21 @@ def round_screen(surface, surface_width, surface_height, margin, margin_color, d
 
             elif event.type == pygame.KEYDOWN:
                 if pygame.key.name(event.key) == "s":
-                    return game_over
-
-                    round_font_open_count = 0
-                    round_font_animating = True
+                    game_over, accuracy_result, time_remaining, current_react_data = main.run_reactor(surface,
+                                                                                                      surface_width,
+                                                                                                      surface_height,
+                                                                                                      margin,
+                                                                                                      margin_color,
+                                                                                                      scaler, clock,
+                                                                                                      fps, door_speed,
+                                                                                                      score_goal)
+                    if game_over:
+                        return accuracy_result, time_remaining
+                    print(accuracy_result)
+                    print(current_react_data)
 
                 elif pygame.key.name(event.key) == "q":
-                    game_over = True
-                    return game_over
-
-
+                    return accuracy_result, time_remaining
 
         clock.tick(fps)
         surface.fill(color.background)
@@ -107,5 +120,3 @@ def round_screen(surface, surface_width, surface_height, margin, margin_color, d
         render_text()
 
         pygame.display.update()
-
-

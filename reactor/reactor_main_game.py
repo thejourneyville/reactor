@@ -1,16 +1,16 @@
 import pygame
 import random
 from collections import deque
-import reactor_round
 import reactor_colors as color
 
 
-def run_reactor(surface, surface_width, surface_height, margin, margin_color, disc_pulse_value, disc_pulse_direction, scaler, clock, fps):
+def run_reactor(surface, surface_width, surface_height, margin, margin_color,
+                scaler, clock, fps,
+                door_speed, score_goal):
 
     # variables
     pygame.display.set_caption("REACTOR")
     door_thinness = 10
-    door_speed = 15
     margin_return_nominal_state = 0
     margin_return_nominal_state_duration = 25
     disc_color_rising = True
@@ -26,19 +26,29 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, di
     time_limit = 60
     current_react_data = {}
     react_fade_speed = .25
-    react_movement_speed = .5
-    delay = 1
-    shadow_coord_1 = deque([], maxlen=delay)
-    shadow_coord_2 = deque([], maxlen=delay * 2)
-    shadow_coord_3 = deque([], maxlen=delay * 3)
-    shadow_coord_4 = deque([], maxlen=delay * 4)
-    shadow_coord_5 = deque([], maxlen=delay * 5)
-    shadow_coord_6 = deque([], maxlen=delay * 6)
-    shadow_coord_7 = deque([], maxlen=delay * 7)
-    shadow_coord_8 = deque([], maxlen=delay * 8)
-    shadow_coord_9 = deque([], maxlen=delay * 9)
-    shadow_coord_10 = deque([], maxlen=delay * 10)
-    all_shadows = [shadow_coord_10, shadow_coord_9, shadow_coord_8, shadow_coord_7, shadow_coord_6, shadow_coord_5, shadow_coord_4, shadow_coord_3, shadow_coord_2, shadow_coord_1]
+    react_movement_speed = 2
+    shadow_delay = 1
+    shadow_coord_1 = deque([], maxlen=shadow_delay)
+    shadow_coord_2 = deque([], maxlen=shadow_delay * 2)
+    shadow_coord_3 = deque([], maxlen=shadow_delay * 3)
+    shadow_coord_4 = deque([], maxlen=shadow_delay * 4)
+    shadow_coord_5 = deque([], maxlen=shadow_delay * 5)
+    shadow_coord_6 = deque([], maxlen=shadow_delay * 6)
+    shadow_coord_7 = deque([], maxlen=shadow_delay * 7)
+    shadow_coord_8 = deque([], maxlen=shadow_delay * 8)
+    shadow_coord_9 = deque([], maxlen=shadow_delay * 9)
+    shadow_coord_10 = deque([], maxlen=shadow_delay * 10)
+    all_shadows = [shadow_coord_10,
+                   shadow_coord_9,
+                   shadow_coord_8,
+                   shadow_coord_7,
+                   shadow_coord_6,
+                   shadow_coord_5,
+                   shadow_coord_4,
+                   shadow_coord_3,
+                   shadow_coord_2,
+                   shadow_coord_1]
+    game_over = False
 
     class Doors:
         def __init__(self):
@@ -426,7 +436,7 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, di
                 (red_shift, 0, blue_shift),
                 (self.ball.x + self.disc_radius_size, self.ball.y + self.disc_radius_size),
                 self.disc_radius_size,
-                int(25 * scaler))
+                int(35 * scaler))
 
             return red_shift, 0, blue_shift
 
@@ -470,7 +480,7 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, di
                     all_colors[(len(all_shadows) - 1) - idx],
                     (shadow[0][0] + self.disc_radius_size, shadow[0][-1] + self.disc_radius_size),
                     self.disc_radius_size,
-                    int((idx + 1) ** 1.4))
+                    int((idx + 1) ** 1.3))
 
     def draw_margin(m_color, rehab):
         # red = (240, 17, 59)
@@ -594,9 +604,9 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, di
 
     def reaction_text(reaction_data):
 
-        door_speed = reaction_data['door_speed']
-        disc_speed = reaction_data['disc_speed']
-        disc_size = reaction_data['disc_size']
+        door_speed_data = reaction_data['door_speed']
+        disc_speed_data = reaction_data['disc_speed']
+        disc_size_data = reaction_data['disc_size']
         success_data = reaction_data['success']
         fail_data = reaction_data['fail']
         shot_made = reaction_data['last_shot_made']
@@ -734,9 +744,6 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, di
     def timer(elapsed_seconds):
         return time_limit - elapsed_seconds
 
-    game_over = reactor_round.round_screen(surface, surface_width, surface_height, margin, margin_color,
-                                           disc_pulse_value, disc_pulse_direction, scaler, clock, fps)
-
     doors = Doors()
     ball = Ball()
 
@@ -781,7 +788,6 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, di
                     ball.start_mark_close,
                     ball_direction,
                     doors.last_open)
-
             else:
                 # created to change index when searching chosen_door_coords for either front side or back side
                 if (ball_direction - 1) < 2:
@@ -839,20 +845,24 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color, di
         accuracy_result = accuracy(score, collisions, doors.get_openings())
 
         if time_remaining < 0:
-            return accuracy_result, time_remaining
+            return game_over, accuracy_result, time_remaining, current_react_data
 
         if not game_over:
+
+            current_disc_color = ball.draw_ball(disc_color)
+            ball.shadow(current_disc_color)
             doors.draw_doors()
             draw_margin(margin_color, margin_return_nominal_state)
-            ball.shadow(current_disc_color)
-            current_disc_color = ball.draw_ball(disc_color)
             stats(accuracy_result, lives, time_remaining)
 
         else:
             if len(all_particles) <= 1:
-                return accuracy_result, time_remaining
+                return game_over, accuracy_result, time_remaining, current_react_data
 
         if current_react_data:
             current_react_data = reaction_text(current_react_data)
+
+        if score == 3:
+            return game_over, accuracy_result, time_remaining, current_react_data
 
         pygame.display.update()
