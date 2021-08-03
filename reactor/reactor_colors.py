@@ -1,6 +1,7 @@
 white = (255, 255, 255)
 black = (0, 0, 0)
 lightgrey = (150, 150, 150)
+lighter_grey = (158, 158, 158)
 darkgrey = (50, 50, 50)
 red = (200, 17, 59)
 yellow = (255, 169, 0)
@@ -32,3 +33,5 @@ success_color = sky_blue
 fail_color = alert_red
 doors_color = charcoal
 background = cream
+
+grid_lines = lighter_grey

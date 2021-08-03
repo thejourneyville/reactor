@@ -156,7 +156,7 @@ def start_menu():
             elif event.type == pygame.KEYDOWN:
                 if pygame.key.name(event.key) == "s":
 
-                    accuracy, timer = round_screen.round_screen(surface, surface_width, surface_height,
+                    accuracy, timer = round_screen.level_screen(surface, surface_width, surface_height,
                                                                 margin, margin_color,
                                                                 disc_pulse_value, disc_pulse_direction,
                                                                 scaler, clock, fps)

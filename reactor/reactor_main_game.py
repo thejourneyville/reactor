@@ -6,7 +6,7 @@ import reactor_colors as color
 
 def run_reactor(surface, surface_width, surface_height, margin, margin_color,
                 scaler, clock, fps,
-                door_speed, score_goal):
+                door_speed, score_goal, time_limit):
 
     # variables
     pygame.display.set_caption("REACTOR")
@@ -15,7 +15,7 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color,
     margin_return_nominal_state_duration = 25
     disc_color_rising = True
     disc_color = 200
-    lives = 10
+    lives = 2
     score = 0
     collisions = 0
     collision_result_front, collision_result_back = False, False
@@ -23,10 +23,9 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color,
     current_disc_color = color.blue
     disc_explosion_color = (0, 0, 0)
     timer_marker = pygame.time.get_ticks()  # starter tick
-    time_limit = 60
     current_react_data = {}
     react_fade_speed = .25
-    react_movement_speed = 2
+    react_movement_speed = .25
     shadow_delay = 1
     shadow_coord_1 = deque([], maxlen=shadow_delay)
     shadow_coord_2 = deque([], maxlen=shadow_delay * 2)
@@ -314,7 +313,7 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color,
             self.true_disc_speed = 50
             self.disc_speed = int(self.true_disc_speed * scaler)
             self.switch = 0
-            self.rest = 0
+            self.rest = 100
             self.score = 0
             self.pulse_speed = 10
             self.start_mark_close = 0
@@ -338,7 +337,6 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color,
                         if doors.start_mark_open:
                             if self.start_timer:
                                 self.start_mark_close = pygame.time.get_ticks() - doors.start_mark_open
-                                doors.start_mark_open = 0
                                 self.start_timer = False
                         self.switch = 1
 
@@ -347,7 +345,6 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color,
                         if doors.start_mark_open:
                             if self.start_timer:
                                 self.start_mark_close = pygame.time.get_ticks() - doors.start_mark_open
-                                doors.start_mark_open = 0
                                 self.start_timer = False
                         self.switch = 2
 
@@ -356,7 +353,6 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color,
                         if doors.start_mark_open:
                             if self.start_timer:
                                 self.start_mark_close = pygame.time.get_ticks() - doors.start_mark_open
-                                doors.start_mark_open = 0
                                 self.start_timer = False
                         self.switch = 3
 
@@ -365,7 +361,6 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color,
                         if doors.start_mark_open:
                             if self.start_timer:
                                 self.start_mark_close = pygame.time.get_ticks() - doors.start_mark_open
-                                doors.start_mark_open = 0
                                 self.start_timer = False
                         self.switch = 4
 
@@ -592,12 +587,22 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color,
         y_axis_movement = 0
         starting_color_success = color.success_color
         starting_color_fail = color.fail_color
+        current_timer = round(time_remaining_decimal, 2)  # pulled from timer function
 
         if success_fail:
-            total["success"].append([disc_direction, door, reaction_time, y_axis_movement, starting_color_success])
+            total["success"].append([disc_direction,
+                                     door,
+                                     reaction_time,
+                                     y_axis_movement,
+                                     starting_color_success,
+                                     round(time_limit - current_timer, 2)])
             total["last_shot_made"] = True
         else:
-            total["fail"].append([disc_direction, door, reaction_time, y_axis_movement, starting_color_fail])
+            total["fail"].append([disc_direction,
+                                  door, reaction_time,
+                                  y_axis_movement,
+                                  starting_color_fail,
+                                  round(time_limit - current_timer, 2)])
             total["last_shot_made"] = False
 
         return total
@@ -612,8 +617,8 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color,
         shot_made = reaction_data['last_shot_made']
 
         if shot_made:
-            y_adjustment = int(success_data[-1][-2])
-            current_color = list(success_data[-1][-1])
+            y_adjustment = int(success_data[-1][-3])
+            current_color = list(success_data[-1][-2])
 
             diff = [abs(color.background[0] - color.success_color[0]),
                     abs(color.background[1] - color.success_color[1]),
@@ -625,8 +630,8 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color,
                           (diff[1] / smallest),
                           (diff[2] / smallest))
         else:
-            y_adjustment = int(fail_data[-1][-2])
-            current_color = list(fail_data[-1][-1])
+            y_adjustment = int(fail_data[-1][-3])
+            current_color = list(fail_data[-1][-2])
 
             diff = [abs(color.background[0] - color.fail_color[0]),
                     abs(color.background[1] - color.fail_color[1]),
@@ -655,7 +660,7 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color,
 
         font_style = "darkforest.ttf"
         if success_data:
-            success_font_size = 60 - (success_data[-1][-3] // 10)
+            success_font_size = 60 - (success_data[-1][2] // 10)
             if success_font_size < 20:
                 success_font_size = 20
         else:
@@ -670,26 +675,26 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color,
                       (surface_width - (surface_width // 4), surface_height // 2 + y_adjustment)]
 
         if not shot_made:
-            text_surface = fail_font.render(f"{fail_data[-1][-3]}ms", True, current_color)
+            text_surface = fail_font.render(f"{fail_data[-1][2]}ms", True, current_color)
             text_rect = text_surface.get_rect()
 
             text_rect.center = directions[fail_data[-1][1] - 1]
-            if reaction_data["fail"][-1][-1] != color.background:
+            if current_color != color.background:
                 surface.blit(text_surface, text_rect)
-                reaction_data["fail"][-1][-1] = current_color
-            if reaction_data["fail"][-1][-2] >= -50:
-                reaction_data["fail"][-1][-2] -= react_movement_speed
+                reaction_data["fail"][-1][-2] = current_color
+            if y_adjustment >= -100:
+                reaction_data["fail"][-1][3] -= react_movement_speed
 
         else:
-            text_surface = success_font.render(f"{success_data[-1][-3]}ms", True, current_color)
+            text_surface = success_font.render(f"{success_data[-1][2]}ms", True, current_color)
             text_rect = text_surface.get_rect()
 
             text_rect.center = directions[success_data[-1][0] - 1]
-            if reaction_data["success"][-1][-1] != color.background:
+            if current_color != color.background:
                 surface.blit(text_surface, text_rect)
-                reaction_data["success"][-1][-1] = current_color
-            if reaction_data["success"][-1][-2] >= -50:
-                reaction_data["success"][-1][-2] -= react_movement_speed
+                reaction_data["success"][-1][-2] = current_color
+            if y_adjustment >= -50:
+                reaction_data["success"][-1][3] -= react_movement_speed
 
         return reaction_data
 
@@ -761,7 +766,8 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color,
         surface.fill(color.background)
 
         ball_scored, ball_direction, ball_coord = ball.launch()
-        time_remaining = timer(int((pygame.time.get_ticks() - timer_marker) / 1000))
+        time_remaining_decimal = round(timer((pygame.time.get_ticks() - timer_marker) / 1000), 2)  # precise timer
+        time_remaining = int(time_remaining_decimal)  # main game timer
         all_particles = anim_explosion(all_particles, disc_explosion_color)
         disc_color_rising, disc_color = ball.ball_pulse(disc_color_rising, disc_color)
         doors.draw_doors()
@@ -836,6 +842,11 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color,
                         ball.rest = 10
                         ball.score = score
 
+        if time_remaining_decimal < 0:
+            margin_return_nominal_state = 0
+            doors.locked = True
+            game_over = True
+
         if any([margin_color == color.fail_color, margin_color == color.success_color]):
             margin_return_nominal_state += 1
             if margin_return_nominal_state == margin_return_nominal_state_duration:
@@ -843,9 +854,6 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color,
                 margin_return_nominal_state = 0
 
         accuracy_result = accuracy(score, collisions, doors.get_openings())
-
-        if time_remaining < 0:
-            return game_over, accuracy_result, time_remaining, current_react_data
 
         if not game_over:
 
@@ -862,7 +870,7 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color,
         if current_react_data:
             current_react_data = reaction_text(current_react_data)
 
-        if score == 3:
+        if score == score_goal:
             return game_over, accuracy_result, time_remaining, current_react_data
 
         pygame.display.update()
