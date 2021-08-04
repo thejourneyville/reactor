@@ -15,7 +15,7 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color,
     margin_return_nominal_state_duration = 25
     disc_color_rising = True
     disc_color = 200
-    lives = 2
+    lives = 10
     score = 0
     collisions = 0
     collision_result_front, collision_result_back = False, False
