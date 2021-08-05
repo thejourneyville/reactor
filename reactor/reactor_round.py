@@ -15,7 +15,7 @@ def level_screen(surface, surface_width, surface_height, margin, margin_color,
     score_goal = 60
     time_limit = 150
     pygame.display.set_caption(f"LEVEL {level}")
-    door_speed = 20
+    door_speed = 23
     level_screen_loop = True
     accuracy_result, time_remaining = 0, 0
 

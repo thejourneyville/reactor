@@ -15,7 +15,7 @@ def stats(surface, surface_width, surface_height, margin_color,
     success = data['success']
     fail = data['fail']
     entries, successes, fails = (len(success) + len(fail)), len(success), len(fail)
-    all_entries = success + fail
+    all_entries = (success + fail)
     success_directions = [entry[0] for entry in success]
     fail_directions = [entry[1] for entry in fail]
     success_times = [entry[2] for entry in success]
@@ -34,8 +34,8 @@ def stats(surface, surface_width, surface_height, margin_color,
         slowest_fail = max(success_times)
     time_stamp_success = [entry[-1] for entry in success]
     time_stamp_fail = [entry[-1] for entry in fail]
-    time_stamp_total = time_stamp_success + time_stamp_fail
-
+    time_stamp_total = (time_stamp_success + time_stamp_fail)
+    time_stamp_total = sorted(time_stamp_total)
 
     # print(f"stats screen: {level}")
     # print("stats screen: current_react_data:")
@@ -53,7 +53,7 @@ def stats(surface, surface_width, surface_height, margin_color,
             self.height = int(surface_height) - (margin // 2)
             self.x_adjust = int(margin)
             self.y_adjust = int(margin)
-            self.row_amount = (abs(fastest_success - slowest_fail) * .05)
+            self.row_amount = (abs(fastest_success - slowest_fail) * .01)
             self.rows = self.height / self.row_amount
             self.cols_amount = time_elapsed
             self.cols = self.width / self.cols_amount
@@ -106,19 +106,23 @@ def stats(surface, surface_width, surface_height, margin_color,
                     self.radius,
                     2)
 
+    def draw_line(directions):
+
+        for idx_direction, direction in enumerate(directions):
+            line_color = [color.white, color.yellow, color.sky_blue, color.alert_red][idx_direction]
+            for idx_coords, coords in enumerate(direction):
+                if idx_coords < len(direction) - 1:
+                    x_start, y_start = coords[0], coords[-1]
+                    x_end, y_end = direction[idx_coords + 1][0], direction[idx_coords + 1][-1]
+
+                    pygame.draw.line(surface,
+                                     line_color,
+                                     (x_start * graph.cols, ((surface_height - margin * 2) / slowest_time) * y_start),
+                                     (x_end * graph.cols, ((surface_height - margin * 2) / slowest_time) * y_end),
+                                     1)
+
     def draw_margin():
         pygame.draw.rect(surface, color.charcoal, (0, 0, surface_width, surface_height), margin)
-
-    graph = Graph()
-
-    all_points = []
-    for point in range(entries):
-        if time_stamp_total[point] in time_stamp_success:
-            point_data = (all_entries[point][-1], all_entries[point][2], all_entries[point][0], True)
-        else:
-            point_data = (all_entries[point][-1], all_entries[point][2], all_entries[point][0], False)
-        print(point_data)
-        all_points.append(Point(point_data))
 
     def render_text():
 
@@ -150,11 +154,16 @@ def stats(surface, surface_width, surface_height, margin_color,
             coord_pos.append((coord.x, coord.y))
 
         surfaces = []
-        for direction in coord_pos:
-            surfaces.append((key_font.render(f"{direction[-1]}", True, color.white), coord_pos[direction[-1]]))
+        for idx, direction in enumerate(coord_pos):
+            surfaces.append(((key_font.render(f"{all_entries[idx][2]}", True, color.white)), direction))
 
         rects = []
-        # cont here
+        for surf in surfaces:
+            rects.append(surf[0].get_rect())
+
+        for idx, placement in enumerate(rects):
+            placement.bottomleft = (surfaces[idx][-1][0], surfaces[idx][-1][-1] + (30 * scaler))
+            surface.blit(surfaces[idx][0], placement)
 
         # for reference
         # level_font_surface = level_font.render(f"LEVEL {level}", True, color.instructions_color)
@@ -171,6 +180,35 @@ def stats(surface, surface_width, surface_height, margin_color,
         # speed_font_rect.center = (surface_width // 2, surface_height // 2 + (20 * scaler))
         #
         # surface.blit(level_font_surface, level_font_rect)
+
+    graph = Graph()
+
+    all_points = []
+    point_data_view = []
+    up_data, down_data, left_data, right_data = [], [], [], []
+    for point in range(entries):
+
+        if time_stamp_total[point] in time_stamp_success:
+            point_data = (all_entries[point][-1], all_entries[point][2], all_entries[point][0], True)
+            point_data_view.append((all_entries[point][-1], all_entries[point][2], all_entries[point][0], True))
+        else:
+            point_data = (all_entries[point][-1], all_entries[point][2], all_entries[point][0], False)
+            point_data_view.append((all_entries[point][-1], all_entries[point][2], all_entries[point][0], False))
+
+        if all_entries[point][0] == "1":
+            up_data.append((all_entries[point][-1], all_entries[point][2]))
+        elif all_entries[point][0] == "2":
+            down_data.append((all_entries[point][-1], all_entries[point][2]))
+        elif all_entries[point][0] == "3":
+            left_data.append((all_entries[point][-1], all_entries[point][2]))
+        else:
+            right_data.append((all_entries[point][-1], all_entries[point][2]))
+
+        all_points.append(Point(point_data))
+
+    print(f"point data:\n")
+    for entry in point_data_view:
+        print(entry)
 
     while True:
 
@@ -189,8 +227,12 @@ def stats(surface, surface_width, surface_height, margin_color,
         draw_margin()
         render_text()
 
+
+
         for point in all_points:
             point.draw_point()
+
+        draw_line([up_data, down_data, left_data, right_data])
 
         pygame.display.update()
 
