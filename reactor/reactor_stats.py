@@ -108,24 +108,68 @@ def stats(surface, surface_width, surface_height, margin_color,
             self.x = self.time_marker * graph.cols
             self.y_adjust = margin * 1.5
             self.y = self.y_adjust + (self.reaction_time - fastest_time) * ((surface_height - (margin * 3)) / (slowest_time - fastest_time))
+            self.reaction_time = self.y
             self.color = [color.white, color.yellow, color.sky_blue, color.alert_red][p[2] - 1]
             self.radius = 5
             self.ball = pygame.Rect((int(self.x), int(self.y)), (self.radius, self.radius))
 
         def draw_point(self):
 
-            pygame.draw.circle(
-                surface,
-                self.color,
-                (self.x, self.y),
-                self.radius,
-                self.result)
+            if not (slowest_time - fastest_time):
+                self.reaction_time = self.y_adjust + (self.reaction_time - fastest_time) * (
+                            (surface_height - (margin * 3)) / 1)
+
+            if box.press_up:
+                if self.color == color.white:
+                    pygame.draw.circle(
+                        surface,
+                        self.color,
+                        (self.x, self.reaction_time),
+                        self.radius,
+                        self.result)
+
+            if box.press_down:
+                if self.color == color.yellow:
+                    pygame.draw.circle(
+                        surface,
+                        self.color,
+                        (self.x, self.reaction_time),
+                        self.radius,
+                        self.result)
+
+            if box.press_left:
+                if self.color == color.sky_blue:
+                    pygame.draw.circle(
+                        surface,
+                        self.color,
+                        (self.x, self.reaction_time),
+                        self.radius,
+                        self.result)
+
+            if box.press_right:
+                if self.color == color.alert_red:
+                    pygame.draw.circle(
+                        surface,
+                        self.color,
+                        (self.x, self.reaction_time),
+                        self.radius,
+                        self.result)
 
     class Boxes:
         def __init__(self):
             self.size_x = 10
             self.size_y = 10
             self.selected = True
+            self.press_up = True
+            self.press_down = True
+            self.press_left = True
+            self.press_right = True
+            self.mouse_timer = 0
+            self.selected_up = True
+            self.selected_down = True
+            self.selected_left = True
+            self.selected_right = True
+
 
         def draw_box(self, mouse_cords):
 
@@ -140,54 +184,122 @@ def stats(surface, surface_width, surface_height, margin_color,
 
             x_mouse = mouse_cords[0]
             y_mouse = mouse_cords[-1]
+            self.mouse_timer += 1
 
             if up_box.left <= x_mouse <= (up_box.left + self.size_x):
                 if up_box.top <= y_mouse <= (up_box.top + self.size_y):
+
+                    if self.mouse_timer >= 10:
+                        if pygame.mouse.get_pressed(num_buttons=3) == (1, 0, 0):
+                            self.mouse_timer = 0
+                            if not self.press_up:
+                                self.press_up = True
+                                self.selected_up = True
+                            else:
+                                self.press_up = False
+                                self.selected_up = False
+
                     fill_color_up = color.lighter_grey
                     fill_up = 0
+
             if down_box.left <= x_mouse <= (down_box.left + self.size_x):
                 if down_box.top <= y_mouse <= (down_box.top + self.size_y):
+
+                    if self.mouse_timer >= 10:
+                        if pygame.mouse.get_pressed(num_buttons=3) == (1, 0, 0):
+                            self.mouse_timer = 0
+                            if not self.press_down:
+                                self.press_down = True
+                                self.selected_down = True
+                            else:
+                                self.press_down = False
+                                self.selected_down = False
+
                     fill_color_down = color.lighter_grey
                     fill_down = 0
+
             if left_box.left <= x_mouse <= (left_box.left + self.size_x):
                 if left_box.top <= y_mouse <= (left_box.top + self.size_y):
+
+                    if self.mouse_timer >= 10:
+                        if pygame.mouse.get_pressed(num_buttons=3) == (1, 0, 0):
+                            self.mouse_timer = 0
+                            if not self.press_left:
+                                self.press_left = True
+                                self.selected_left = True
+                            else:
+                                self.press_left = False
+                                self.selected_left = False
+
                     fill_color_left = color.lighter_grey
                     fill_left = 0
+
             if right_box.left <= x_mouse <= (right_box.left + self.size_x):
                 if right_box.top <= y_mouse <= (right_box.top + self.size_y):
+
+                    if self.mouse_timer >= 10:
+                        if pygame.mouse.get_pressed(num_buttons=3) == (1, 0, 0):
+                            self.mouse_timer = 0
+                            if not self.press_right:
+                                self.press_right = True
+                                self.selected_right = True
+                            else:
+                                self.press_right = False
+                                self.selected_right = False
+
                     fill_color_right = color.lighter_grey
                     fill_right = 0
+
+            selected_color = color.forest_green
+            if self.selected_up:
+                fill_color_up = selected_color
+                fill_up = 0
+            if self.selected_down:
+                fill_color_down = selected_color
+                fill_down = 0
+            if self.selected_left:
+                fill_color_left = selected_color
+                fill_left = 0
+            if self.selected_right:
+                fill_color_right = selected_color
+                fill_right = 0
 
             pygame.draw.rect(surface, fill_color_up, up_box, fill_up)
             pygame.draw.rect(surface, fill_color_down, down_box, fill_down)
             pygame.draw.rect(surface, fill_color_left, left_box, fill_left)
             pygame.draw.rect(surface, fill_color_right, right_box, fill_right)
 
-
     def draw_line(directions):
 
         for idx, direction in enumerate(directions):
 
+            selected_state = [box.press_up, box.press_down, box.press_left, box.press_right][idx]
             line_color = [color.white, color.yellow, color.sky_blue, color.alert_red][idx]
 
-            for entry_idx, entry in enumerate(direction):
+            if not (slowest_time - fastest_time):
+                reaction_time_range = 1
+            else:
+                reaction_time_range = (slowest_time - fastest_time)
 
-                if entry_idx < len(direction) - 1:
-                    x_start, y_start = entry[0], entry[-1]
-                    x_end, y_end = direction[entry_idx + 1][0], direction[entry_idx + 1][-1]
+            if selected_state:
+                for entry_idx, entry in enumerate(direction):
 
-                    y_start = point.y_adjust + \
-                              (y_start - fastest_time) * \
-                              ((surface_height - (margin * 3)) / (slowest_time - fastest_time))
-                    y_end = point.y_adjust + \
-                            (y_end - fastest_time) * \
-                            ((surface_height - (margin * 3)) / (slowest_time - fastest_time))
+                    if entry_idx < len(direction) - 1:
+                        x_start, y_start = entry[0], entry[-1]
+                        x_end, y_end = direction[entry_idx + 1][0], direction[entry_idx + 1][-1]
 
-                    pygame.draw.line(surface,
-                                     line_color,
-                                     (x_start * graph.cols, y_start),
-                                     (x_end * graph.cols, y_end),
-                                     1)
+                        y_start = point.y_adjust + \
+                                  (y_start - fastest_time) * \
+                                  ((surface_height - (margin * 3)) / reaction_time_range)
+                        y_end = point.y_adjust + \
+                                (y_end - fastest_time) * \
+                                ((surface_height - (margin * 3)) / reaction_time_range)
+
+                        pygame.draw.line(surface,
+                                         line_color,
+                                         (x_start * graph.cols, y_start),
+                                         (x_end * graph.cols, y_end),
+                                         1)
 
     def draw_margin():
         pygame.draw.rect(surface, color.charcoal, (0, 0, surface_width, surface_height), margin)
@@ -231,7 +343,14 @@ def stats(surface, surface_width, surface_height, margin_color,
 
         for idx, placement in enumerate(rects):
             placement.bottomleft = (surfaces[idx][-1][0], surfaces[idx][-1][-1] + (30 * scaler))
-            surface.blit(surfaces[idx][0], placement)
+            if all_entries[idx][0] == 1 and box.selected_up:
+                surface.blit(surfaces[idx][0], placement)
+            if all_entries[idx][0] == 2 and box.selected_down:
+                surface.blit(surfaces[idx][0], placement)
+            if all_entries[idx][0] == 3 and box.selected_left:
+                surface.blit(surfaces[idx][0], placement)
+            if all_entries[idx][0] == 4 and box.selected_right:
+                surface.blit(surfaces[idx][0], placement)
 
         # for reference
         # level_font_surface = level_font.render(f"LEVEL {level}", True, color.instructions_color)
@@ -298,14 +417,17 @@ def stats(surface, surface_width, surface_height, margin_color,
         surface.fill(color.black)
 
         graph.draw_graph()
+
+        for box in boxes:
+            box.draw_box((mx, my))
+
         draw_margin()
         render_text()
 
         for point in all_points:
             point.draw_point()
 
-        for box in boxes:
-            box.draw_box((mx, my))
+
 
         draw_line(entries_directions)
 
