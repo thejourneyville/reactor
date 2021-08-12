@@ -8,7 +8,7 @@ def level_screen(surface, surface_width, surface_height, margin, margin_color,
                  disc_pulse_value, disc_pulse_direction,
                  scaler, clock, fps):
     level_font_position = 0
-    level_font_speed = 500
+    level_font_speed = 500 * scaler
     level_font_animating = True
     level_font_open_count = 0
     level = 1

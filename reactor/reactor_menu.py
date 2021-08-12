@@ -2,6 +2,7 @@ import pygame
 import reactor_main_game
 import reactor_round as round_screen
 import reactor_colors as color
+import reactor_account_create as create
 
 # initializing pygame
 pygame.init()
@@ -11,7 +12,7 @@ width, height = 1, 1  # screen aspect ratio
 display_info_object = pygame.display.Info()
 screen_width, screen_height = display_info_object.current_w, display_info_object.current_h
 screen_scaler = height / screen_height
-scaler = 1
+scaler = .75
 surface_width, surface_height = int((width / screen_scaler) * scaler), int((height / screen_scaler) * scaler)
 surface = pygame.display.set_mode((surface_width, surface_height))
 
@@ -154,6 +155,11 @@ def start_menu():
 
             elif event.type == pygame.KEYDOWN:
                 if pygame.key.name(event.key) == "s":
+
+                    # create account
+                    user_account = create.account_create(surface, surface_width, surface_height, margin, margin_color,
+                                                         disc_pulse_value, disc_pulse_direction,
+                                                         scaler, clock, fps)
 
                     accuracy, timer = round_screen.level_screen(surface, surface_width, surface_height,
                                                                 margin, margin_color,
