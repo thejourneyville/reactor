@@ -17,11 +17,11 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
     all_entries = (success + fail)
     success_directions = [entry[0] for entry in success]
     fail_directions = [entry[1] for entry in fail]
-    success_times = [entry[2] for entry in success]
-    fail_times = [entry[2] for entry in fail]
+    success_times = [entry[2] if entry[2] > 0 else 1 for entry in success]
+    fail_times = [entry[2] if entry[2] > 0 else 1 for entry in fail]
     all_times = success_times + fail_times
-    slowest_time = max(all_times)
-    fastest_time = min(all_times)
+    slowest_time, fastest_time = max(all_times), min(all_times)
+
     print(f"current surface height minus margins * 2: {surface_height - (margin * 2)}")
 
     successes = [entry for entry in current_react_data['success']]
@@ -317,7 +317,7 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
 
     graph = Graph()
 
-    boxes = [Boxes() for box in range(4)]
+    box = Boxes()
 
     all_points = []
     point_data_view = []
@@ -363,8 +363,8 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
 
         graph.draw_graph()
 
-        for box in boxes:
-            box.draw_box((mx, my))
+        box.draw_box((mx, my))
+
 
         draw_margin()
         render_text()
