@@ -12,10 +12,10 @@ def level_screen(surface, surface_width, surface_height, margin, margin_color,
     level_font_animating = True
     level_font_open_count = 0
     level = 1
-    score_goal = 60
-    time_limit = 150
+    score_goal = 10
+    time_limit = 30
     pygame.display.set_caption(f"LEVEL {level}")
-    door_speed = 23
+    door_speed = 20
     level_screen_loop = True
     accuracy_result, time_remaining = 0, 0
 
@@ -32,7 +32,7 @@ def level_screen(surface, surface_width, surface_height, margin, margin_color,
         level_font_surface = level_font.render(f"LEVEL {level}", True, color.instructions_color)
         instructions_surface = instructions_font.render(
             f"must score {score_goal} points in {time_limit} seconds", True, color.instructions_color)
-        speed_font_surface = speed_font.render(f"reactor speed {door_speed}", True, color.alert_red)
+        speed_font_surface = speed_font.render(f"reactor speed {door_speed * 60} pixels/second", True, color.alert_red)
 
         level_font_rect = level_font_surface.get_rect()
         instructions_rect = instructions_surface.get_rect()
@@ -94,7 +94,7 @@ def level_screen(surface, surface_width, surface_height, margin, margin_color,
                 quit()
 
             elif event.type == pygame.KEYDOWN:
-                if pygame.key.name(event.key) == "s":
+                if event.key == pygame.K_RETURN:
                     game_over, accuracy_result, time_remaining, current_react_data = main.run_reactor(surface,
                                                                                                       surface_width,
                                                                                                       surface_height,
@@ -115,6 +115,18 @@ def level_screen(surface, surface_width, surface_height, margin, margin_color,
 
                     if game_over:
                         return accuracy_result, time_remaining
+                    else:
+                        # deciding to advance/lower/maintain level
+                        shots_made = len(current_react_data['success'])
+                        shots_missed = len(current_react_data['fail'])
+                        total_shots = shots_made + shots_missed
+                        if shots_missed / total_shots <= .1:  # 5% or less of total shots missed grants promotion
+                            level += 1
+                            door_speed += 1
+                        elif shots_missed / total_shots >= .2:  # 20% or more of total shots missed grants demotion
+                            if level > 1:
+                                level -= 1
+                                door_speed -= 1
 
                 elif pygame.key.name(event.key) == "q":
                     return accuracy_result, time_remaining

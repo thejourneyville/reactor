@@ -7,6 +7,9 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
     pygame.display.set_caption(f"PLAYER STATISTICS")
     margin = int(30 * scaler)
 
+    if not current_react_data:
+        return
+
     data = current_react_data
     door_speed = data['door_speed']
     disc_speed = data['disc_speed']
@@ -20,7 +23,10 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
     success_times = [entry[2] if entry[2] > 0 else 1 for entry in success]
     fail_times = [entry[2] if entry[2] > 0 else 1 for entry in fail]
     all_times = success_times + fail_times
-    slowest_time, fastest_time = max(all_times), min(all_times)
+    if all_times:
+        slowest_time, fastest_time = max(all_times), min(all_times)
+    else:
+        fastest_time, slowest_time = 1, 2
 
     print(f"current surface height minus margins * 2: {surface_height - (margin * 2)}")
 
@@ -353,7 +359,7 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
                 quit()
 
             elif event.type == pygame.KEYDOWN:
-                if pygame.key.name(event.key) == "s":
+                if event.key == pygame.K_RETURN:
                     return
 
         mx, my = pygame.mouse.get_pos()

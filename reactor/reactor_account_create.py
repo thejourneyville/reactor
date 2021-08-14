@@ -131,7 +131,7 @@ def account_create(surface, surface_width, surface_height, margin, margin_color,
 
         for idx, pos in enumerate(k_pos):
 
-            if idx < len(k_pos) - 11:
+            if idx < 49:  # 0 - 48 represents all letters and spaces between them
                 if pos[0] <= x < pos[0] + letter[0]:
                     if pos[-1] <= y < pos[-1] + letter[-1]:
                         if letters[idx] != " ":
@@ -173,7 +173,7 @@ def account_create(surface, surface_width, surface_height, margin, margin_color,
 
         return output_letter
 
-    def print_name(timer, command, user_name, key_positions, letter_size):
+    def print_name(timer, command, user_name, key_positions, letter_size, keyboard):
 
         name_complete = False
         letters = "q w e r t y u i o pa s d f g h j k lz x c v b n madv rub end"
@@ -189,32 +189,57 @@ def account_create(surface, surface_width, surface_height, margin, margin_color,
             action = letters[command]
 
         if command is not None:
-            if command < 49:
-                if timer >= 15:
-                    if pygame.mouse.get_pressed(num_buttons=3) == (1, 0, 0):
-                        timer = 0
-                        if timer == 0:
-                            if len(user_name) < 12:
-                                user_name += letters[command]
-            elif command == 49:
-                if timer >= 15:
-                    if pygame.mouse.get_pressed(num_buttons=3) == (1, 0, 0):
-                        timer = 0
-                        if timer == 0:
+            if not keyboard:
+                if command < 49:
+                    if timer >= 10:
+                        if pygame.mouse.get_pressed(num_buttons=3) == (1, 0, 0):
+                            timer = 0
+                            if timer == 0:
+                                if len(user_name) < 12:
+                                    user_name += letters[command]
+
+                elif command == 49:
+                    if timer >= 10:
+                        if pygame.mouse.get_pressed(num_buttons=3) == (1, 0, 0):
+                            timer = 0
+                            if timer == 0:
+                                if len(user_name) < 12:
+                                    user_name += "_"
+                elif command == 53:
+                    if timer >= 10:
+                        if pygame.mouse.get_pressed(num_buttons=3) == (1, 0, 0):
+                            timer = 0
+                            if timer == 0:
+                                user_name = user_name[:-1]
+                elif command == 57:
+                    if timer >= 10:
+                        if pygame.mouse.get_pressed(num_buttons=3) == (1, 0, 0):
+                            timer = 0
+                            if timer == 0:
+                                name_complete = True
+                                return timer, user_name, name_complete
+
+            else:
+                if command < 49:
+                    timer = 0
+                    if timer == 0:
+                        if len(user_name) < 12:
+                            user_name += letters[command]
+                elif command == 49:
+                    timer = 0
+                    if timer == 0:
+                        if len(user_name) < 12:
                             user_name += "_"
-            elif command == 53:
-                if timer >= 15:
-                    if pygame.mouse.get_pressed(num_buttons=3) == (1, 0, 0):
-                        timer = 0
-                        if timer == 0:
-                            user_name = user_name[:-1]
-            elif command == 57:
-                if timer >= 15:
-                    if pygame.mouse.get_pressed(num_buttons=3) == (1, 0, 0):
-                        timer = 0
-                        if timer == 0:
-                            name_complete = True
-                            return timer, user_name, name_complete
+                elif command == 53:
+                    timer = 0
+                    if timer == 0:
+                        user_name = user_name[:-1]
+                elif command == 57:
+                    timer = 0
+                    if timer == 0:
+                        name_complete = True
+                        return timer, user_name, name_complete
+
         timer += 1
 
         board_text = "SF Square Head Bold.ttf"
@@ -246,12 +271,18 @@ def account_create(surface, surface_width, surface_height, margin, margin_color,
     instructions_font_animating = True
     instructions_font_open_count = 0
 
+    keys = [pygame.K_q, " ", pygame.K_w, " ", pygame.K_e, " ", pygame.K_r, " ", pygame.K_t, " ", pygame.K_y, " ",
+            pygame.K_u, " ", pygame.K_i, " ", pygame.K_o, " ", pygame.K_p, pygame.K_a, " ", pygame.K_s, " ", pygame.K_d,
+            " ", pygame.K_f, " ", pygame.K_g, " ", pygame.K_h, " ", pygame.K_j, " ", pygame.K_k, " ", pygame.K_l,
+            pygame.K_z, " ", pygame.K_x, " ", pygame.K_c, " ", pygame.K_v, " ", pygame.K_b, " ", pygame.K_n, " ",
+            pygame.K_m, pygame.K_SPACE, " ", " ", " ", pygame.K_BACKSPACE, " ", " ", " ", pygame.K_RETURN]
+    keyboard_pressed = False
+
     mouse_timer = 0
     account_name = ""
     complete = False
     while not complete:
 
-        clock.tick(fps)
         surface.fill(color.background)
 
         draw_margin()
@@ -266,16 +297,22 @@ def account_create(surface, surface_width, surface_height, margin, margin_color,
         mouse_xy = mouse_coord()
         hovered_letter = highlight_text(mouse_xy, all_pos, let_size)
 
-        mouse_timer, account_name, complete = print_name(mouse_timer, hovered_letter, account_name, all_pos, let_size)
-
-        pygame.display.update()
-
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 quit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     complete = True
+                for idx, pressed in enumerate(keys):
+                    if event.key == keys[idx]:
+                        keyboard_pressed = True
+                        hovered_letter = idx
+
+        mouse_timer, account_name, complete = \
+            print_name(mouse_timer, hovered_letter, account_name, all_pos, let_size, keyboard_pressed)
+        keyboard_pressed = False
+
+        pygame.display.update()
 
     return account_name
 
