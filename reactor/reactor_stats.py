@@ -28,7 +28,7 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
     else:
         fastest_time, slowest_time = 1, 2
 
-    print(f"current surface height minus margins * 2: {surface_height - (margin * 2)}")
+    # print(f"current surface height minus margins * 2: {surface_height - (margin * 2)}")
 
     successes = [entry for entry in current_react_data['success']]
     fails = [entry for entry in current_react_data['fail']]
@@ -44,18 +44,7 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
              sorted([entry for entry in all_shot_entries if entry[0] == 4], key=lambda x: x[-1])]
 
     entries_directions = [up, down, left, right]
-    # for direction in entries_directions:
-    #     for entry in direction:
-    #         print(entry)
 
-    if success_times:
-        fastest_success = min(success_times)
-    else:
-        fastest_success = min(fail_times)
-    if fail_times:
-        slowest_fail = max(fail_times)
-    else:
-        slowest_fail = max(success_times)
     time_stamp_success = [entry[-1] for entry in success]
     time_stamp_fail = [entry[-1] for entry in fail]
     time_stamp_total = (time_stamp_success + time_stamp_fail)
@@ -319,38 +308,123 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
             if all_entries[idx][0] == 4 and box.selected_right:
                 surface.blit(surfaces[idx][0], placement)
 
-        # for reference  # level_font_surface = level_font.render(f"LEVEL {level}", True, color.instructions_color)  # instructions_surface = instructions_font.render(  #     f"must score {score_goal} points in {time_limit} seconds", True, color.instructions_color)  # speed_font_surface = speed_font.render(f"reactor speed {door_speed}", True, color.alert_red)  #  # level_font_rect = level_font_surface.get_rect()  # instructions_rect = instructions_surface.get_rect()  # speed_font_rect = speed_font_surface.get_rect()  #  # level_font_rect.centerx, level_font_rect.centery = level_font_position, surface_height // 2 - (30 * scaler)  # instructions_rect.centerx, instructions_rect.centery = surface_width // 2, surface_height // 2 + (60 * scaler)  # speed_font_rect.center = (surface_width // 2, surface_height // 2 + (20 * scaler))  #  # surface.blit(level_font_surface, level_font_rect)
+        # for reference
+        # level_font_surface = level_font.render(f"LEVEL {level}", True, color.instructions_color)
+        # instructions_surface = instructions_font.render(
+        #     f"must score {score_goal} points in {time_limit} seconds", True, color.instructions_color)
+        # speed_font_surface = speed_font.render(f"reactor speed {door_speed}", True, color.alert_red)
+        #  # level_font_rect = level_font_surface.get_rect()
+        # instructions_rect = instructions_surface.get_rect()
+        # speed_font_rect = speed_font_surface.get_rect()  #
+        # level_font_rect.centerx, level_font_rect.centery = level_font_position, surface_height // 2 - (30 * scaler)
+        # instructions_rect.centerx, instructions_rect.centery = surface_width // 2, surface_height // 2 + (60 * scaler)
+        # speed_font_rect.center = (surface_width // 2, surface_height // 2 + (20 * scaler))
+        #  # surface.blit(level_font_surface, level_font_rect)
+
+    def summary(s_data, f_data):
+        up_times_success    = [entry[2] for entry in s_data if entry[0] == 1]
+        down_times_success  = [entry[2] for entry in s_data if entry[0] == 2]
+        left_times_success  = [entry[2] for entry in s_data if entry[0] == 3]
+        right_times_success = [entry[2] for entry in s_data if entry[0] == 4]
+
+        up_times_fail       = [entry[2] for entry in f_data if entry[0] == 1]
+        down_times_fail     = [entry[2] for entry in f_data if entry[0] == 2]
+        left_times_fail     = [entry[2] for entry in f_data if entry[0] == 3]
+        right_times_fail    = [entry[2] for entry in f_data if entry[0] == 4]
+
+        up_succ_amount      = len(up_times_success)
+        down_succ_amount    = len(down_times_success)
+        left_succ_amount    = len(left_times_success)
+        right_succ_amount   = len(right_times_success)
+
+        up_fail_amount      = len(up_times_fail)
+        down_fail_amount    = len(down_times_fail)
+        left_fail_amount    = len(left_times_fail)
+        right_fail_amount   = len(right_times_fail)
+
+        up_total_amount     = up_succ_amount + up_fail_amount
+        down_total_amount   = down_succ_amount + down_fail_amount
+        left_total_amount   = left_succ_amount + left_fail_amount
+        right_total_amount  = right_succ_amount + right_fail_amount
+
+        # successful shot - reaction time averages
+        up_times_success_average    = sum(up_times_success) / up_succ_amount
+        down_times_success_average  = sum(down_times_success) / down_succ_amount
+        left_times_success_average  = sum(left_times_success) / left_succ_amount
+        right_times_success_average = sum(right_times_success) / right_succ_amount
+
+        # fail shot - reaction time averages
+
+        up_times_fail_average       = sum(up_times_fail) / up_fail_amount
+        down_times_fail_average     = sum(down_times_fail) / down_fail_amount
+        left_times_fail_average     = sum(left_times_fail) / left_fail_amount
+        right_times_fail_average    = sum(right_times_fail) / right_fail_amount
+
+        all_times_success_averages = [up_times_success_average,
+                                      down_times_success_average,
+                                      left_times_success_average,
+                                      right_times_success_average]
+
+        all_times_fail_averages = [up_times_fail_average,
+                                   down_times_fail_average,
+                                   left_times_fail_average,
+                                   right_times_fail_average]
+
+        labels = ['up', 'down', 'left', 'right']
+
+        # fastest success time by overall average
+        fastest_average_time = min(all_times_success_averages)
+
+        # slowest success time by overall average
+        slowest_average_time = max(all_times_success_averages)
+
+        # fastest success direction by overall average
+        fastest_average_direction = labels[all_times_success_averages.index(fastest_average_time)]
+
+        # slowest success direction by overall average
+        slowest_average_direction = labels[all_times_success_averages.index(slowest_average_time)]
+
+        # successful shot - percentage of total of shots
+        up_shots_made_ptg       = (up_succ_amount / up_total_amount) * 100
+        down_shots_made_ptg     = (down_succ_amount / down_total_amount) * 100
+        left_shots_made_ptg     = (left_succ_amount / left_total_amount) * 100
+        right_shots_made_ptg    = (right_succ_amount / right_total_amount) * 100
+
+        # total percentage of successful shots
+        all_shots_made_ptg = (sum([up_succ_amount,
+                                  down_succ_amount,
+                                  left_succ_amount,
+                                  right_succ_amount]) / (len(s_data) + len(f_data))) * 100
+
+        wrong_directions = [(entry[0], entry[1]) for entry in f_data if entry[0] != entry[1]]
+
+        ########
+        print(f"up_times_success_average:       {up_times_success_average}\n"
+              f"down_times_success_average:     {down_times_success_average}\n"
+              f"left_times_success_average:     {left_times_success_average}\n"
+              f"right_times_success_average:    {right_times_success_average}\n"
+              
+              f"fastest_direction:              {fastest_average_direction} {fastest_average_time}\n"
+              f"slowest_direction:              {slowest_average_direction} {slowest_average_time}\n"
+              
+              f"up_shots_made_ptg:              {round(up_shots_made_ptg, 2)}%\n"
+              f"down_shots_made_ptg:            {round(down_shots_made_ptg, 2)}%\n"
+              f"left_shots_made_ptg:            {round(left_shots_made_ptg, 2)}%\n"
+              f"right_shots_made_ptg:           {round(right_shots_made_ptg, 2)}%\n"
+              f"all_shots_made_ptg:             {round(all_shots_made_ptg, 2)}%")
 
     graph = Graph()
-
     box = Boxes()
 
     all_points = []
-    point_data_view = []
-    up_data, down_data, left_data, right_data = [], [], [], []
     for point in range(entries):
 
         if time_stamp_total[point] in time_stamp_success:
-            point_data = (all_entries[point][-1], all_entries[point][2], all_entries[point][0],
-                          False)  # point_data_view.append((all_entries[point][-1], all_entries[point][2], all_entries[point][0], True))
+            point_data = (all_entries[point][-1], all_entries[point][2], all_entries[point][0], False)
         else:
-            point_data = (all_entries[point][-1], all_entries[point][2], all_entries[point][0],
-                          True)  # point_data_view.append((all_entries[point][-1], all_entries[point][2], all_entries[point][0], False))
-
-        # if all_entries[point][0] == "1":
-        #     up_data.append((all_entries[point][-1], all_entries[point][2]))
-        # elif all_entries[point][0] == "2":
-        #     down_data.append((all_entries[point][-1], all_entries[point][2]))
-        # elif all_entries[point][0] == "3":
-        #     left_data.append((all_entries[point][-1], all_entries[point][2]))
-        # else:
-        #     right_data.append((all_entries[point][-1], all_entries[point][2]))
+            point_data = (all_entries[point][-1], all_entries[point][2], all_entries[point][0], True)
 
         all_points.append(Point(point_data))
-
-    # print(f"point data:\n")
-    # for entry in point_data_view:
-    #     print(entry)
 
     while True:
 
@@ -360,6 +434,9 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
 
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
+
+                    summary(successes, fails)
+
                     return
 
         mx, my = pygame.mouse.get_pos()
@@ -379,5 +456,6 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
             point.draw_point()
 
         draw_line(entries_directions)
+        summary(success, fail)
 
         pygame.display.update()

@@ -15,6 +15,8 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color,
     margin_return_nominal_state_duration = 25
     disc_color_rising = True
     disc_color = 200
+    landing = False
+    disc_distance = 500  # starting size used for placing new disc after scoring
     lives = 10
     score = 0
     collisions = 0
@@ -303,17 +305,17 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color,
         def get_openings(self):
             return self.openings
 
-    class Ball:
+    class Disc:
         def __init__(self):
             self.true_disc_radius_size = 100
             self.disc_radius_size = self.true_disc_radius_size * scaler
             self.x = (surface_width // 2) - self.disc_radius_size
             self.y = (surface_height // 2) - self.disc_radius_size
-            self.ball = pygame.Rect((self.x, self.y), (self.disc_radius_size * 2, self.disc_radius_size * 2))
+            self.disc = pygame.Rect((self.x, self.y), (self.disc_radius_size * 2, self.disc_radius_size * 2))
             self.true_disc_speed = 50
             self.disc_speed = int(self.true_disc_speed * scaler)
             self.switch = 0
-            self.rest = 100
+            self.rest = 24
             self.score = 0
             self.pulse_speed = 10
             self.start_mark_close = 0
@@ -365,27 +367,27 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color,
                         self.switch = 4
 
                 if self.switch == 1:
-                    self.ball.y -= self.disc_speed
+                    self.disc.y -= self.disc_speed
                 elif self.switch == 2:
-                    self.ball.y += self.disc_speed
+                    self.disc.y += self.disc_speed
                 elif self.switch == 3:
-                    self.ball.x -= self.disc_speed
+                    self.disc.x -= self.disc_speed
                 elif self.switch == 4:
-                    self.ball.x += self.disc_speed
+                    self.disc.x += self.disc_speed
 
-                if any([self.ball.top > surface_height,
-                        self.ball.bottom < 0,
-                        self.ball.left > surface_width,
-                        self.ball.right < 0]):
+                if any([self.disc.top > surface_height,
+                        self.disc.bottom < 0,
+                        self.disc.left > surface_width,
+                        self.disc.right < 0]):
                     success_shot = True
                     self.score += 1
-                    self.ball.x, self.ball.y = self.x, self.y
+                    # self.disc.x, self.disc.y = self.x, self.y
                     last_direction = self.switch
                     self.switch = 0
-                    self.rest = 10
+                    self.rest = 24
                     self.start_timer = True
 
-            return success_shot, max(self.switch, last_direction), self.ball.center
+            return success_shot, max(self.switch, last_direction), self.disc.center
 
         def collision(self, bx, by, dx, dy):
             distance = (((dx - bx) ** 2) + ((dy - by) ** 2)) ** .5
@@ -416,7 +418,7 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color,
             elif switch_state:
                 return switch_state, current_color + self.pulse_speed
 
-        def draw_ball(self, current_color):
+        def draw_disc(self, current_color):
 
             blue_shift = current_color
             red_shift = 255 + (current_color * -1) + self.pulse_speed
@@ -429,7 +431,7 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color,
             pygame.draw.circle(
                 surface,
                 (red_shift, 0, blue_shift),
-                (self.ball.x + self.disc_radius_size, self.ball.y + self.disc_radius_size),
+                (self.disc.x + self.disc_radius_size, self.disc.y + self.disc_radius_size),
                 self.disc_radius_size,
                 int(35 * scaler))
 
@@ -468,14 +470,26 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color,
                 output_color = (int(r), int(g), int(b))
                 all_colors.append(output_color)
 
+            if not landing:
+                for idx, shadow in enumerate(all_shadows):
+                    shadow.append((self.disc.x, self.disc.y))
+                    pygame.draw.circle(
+                        surface,
+                        all_colors[(len(all_shadows) - 1) - idx],
+                        (shadow[0][0] + self.disc_radius_size, shadow[0][-1] + self.disc_radius_size),
+                        self.disc_radius_size,
+                        int((idx + 1) ** 1.3))
+
+        def disc_landing(self, distance):
+
             for idx, shadow in enumerate(all_shadows):
-                shadow.append((self.ball.x, self.ball.y))
-                pygame.draw.circle(
-                    surface,
-                    all_colors[(len(all_shadows) - 1) - idx],
-                    (shadow[0][0] + self.disc_radius_size, shadow[0][-1] + self.disc_radius_size),
-                    self.disc_radius_size,
-                    int((idx + 1) ** 1.3))
+                shadow.append((self.disc.x, self.disc.y))
+
+            pygame.draw.circle(surface, current_disc_color,
+                (self.disc.x + self.disc_radius_size, self.disc.y + self.disc_radius_size),
+                self.disc_radius_size + distance,
+                int((35 * scaler) + distance // 4))
+
 
     def draw_margin(m_color, rehab):
         # red = (240, 17, 59)
@@ -578,8 +592,8 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color,
     def build_reaction_data(total, success_fail, reaction_time, disc_direction, door):
 
         total.setdefault("door_speed", doors.true_door_speed)
-        total.setdefault("disc_speed", ball.true_disc_speed)
-        total.setdefault("disc_size", ball.true_disc_radius_size)
+        total.setdefault("disc_speed", disc.true_disc_speed)
+        total.setdefault("disc_size", disc.true_disc_radius_size)
         total.setdefault("success", [])
         total.setdefault("fail", [])
         total.setdefault("last_shot_made", success_fail)
@@ -750,7 +764,7 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color,
         return time_limit - elapsed_seconds
 
     doors = Doors()
-    ball = Ball()
+    disc = Disc()
 
     while True:
 
@@ -765,11 +779,17 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color,
         clock.tick(fps)
         surface.fill(color.background)
 
-        ball_scored, ball_direction, ball_coord = ball.launch()
+        disc_scored, disc_direction, disc_coord = disc.launch()
+        # if disc_scored:
+            # disc.disc.x, disc.disc.y = disc.x, disc.y
+            # landing = True
+
+
         time_remaining_decimal = round(timer((pygame.time.get_ticks() - timer_marker) / 1000), 2)  # precise timer
         time_remaining = int(time_remaining_decimal)  # main game timer
         all_particles = anim_explosion(all_particles, disc_explosion_color)
-        disc_color_rising, disc_color = ball.ball_pulse(disc_color_rising, disc_color)
+        disc_color_rising, disc_color = disc.ball_pulse(disc_color_rising, disc_color)
+        disc.shadow(current_disc_color)
         doors.draw_doors()
         draw_margin(margin_color, margin_return_nominal_state)
 
@@ -778,39 +798,50 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color,
         chosen_door_coords = [doors.slide_T(),
                               doors.slide_B(),
                               doors.slide_L(),
-                              doors.slide_R()][ball_direction - 1]
+                              doors.slide_R()][disc_direction - 1]
+
+        if landing:
+            disc.disc_landing(disc_distance)
+            disc_distance -= 48
+            if disc_distance < 0:
+                disc_distance = 576
+                landing = False
 
         if not game_over:
 
-            if ball_scored:
+            if disc_scored:
                 margin_color = color.success_color
                 margin_return_nominal_state = 1
-                score = ball.score
+                score = disc.score
                 react_success = True
                 # print(f"1: {ball.start_mark_close, ball_direction} current/last active door: {doors.last_open}")
                 current_react_data = build_reaction_data(
                     current_react_data,
                     react_success,
-                    ball.start_mark_close,
-                    ball_direction,
+                    disc.start_mark_close,
+                    disc_direction,
                     doors.last_open)
+
+                disc.disc.x, disc.disc.y = disc.x, disc.y
+                landing = True
+
             else:
                 # created to change index when searching chosen_door_coords for either front side or back side
-                if (ball_direction - 1) < 2:
+                if (disc_direction - 1) < 2:
                     x, y = 0, -1
                 else:
                     x, y = -1, 1
 
-                collision_result_front, collide_location = ball.collision(
-                    ball_coord[0],
-                    ball_coord[-1],
+                collision_result_front, collide_location = disc.collision(
+                    disc_coord[0],
+                    disc_coord[-1],
                     chosen_door_coords[x],
                     chosen_door_coords[y])
 
                 if not collision_result_front:
-                    collision_result_back, collide_location = ball.collision(
-                        ball_coord[0],
-                        ball_coord[-1],
+                    collision_result_back, collide_location = disc.collision(
+                        disc_coord[0],
+                        disc_coord[-1],
                         chosen_door_coords[0],
                         chosen_door_coords[1])
 
@@ -821,15 +852,15 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color,
                     current_react_data = build_reaction_data(
                         current_react_data,
                         react_success,
-                        ball.start_mark_close,
-                        ball_direction,
+                        disc.start_mark_close,
+                        disc_direction,
                         doors.last_open)
 
                     lives -= 1
                     collisions += 1
                     margin_color = color.fail_color
                     all_particles = explosion(collide_location, all_particles)
-                    disc_explosion_color = ball.get_ball_color(current_disc_color)
+                    disc_explosion_color = disc.get_ball_color(current_disc_color)
 
                     if lives == 0:
                         margin_return_nominal_state = 0
@@ -838,9 +869,9 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color,
 
                     else:
                         margin_return_nominal_state = 0
-                        ball = Ball()
-                        ball.rest = 10
-                        ball.score = score
+                        disc = Disc()
+                        disc.rest = 10
+                        disc.score = score
 
         if time_remaining_decimal < 0:
             margin_return_nominal_state = 0
@@ -856,10 +887,9 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color,
         accuracy_result = accuracy(score, collisions, doors.get_openings())
 
         if not game_over:
+            if not landing:
+                current_disc_color = disc.draw_disc(disc_color)
 
-            current_disc_color = ball.draw_ball(disc_color)
-            ball.shadow(current_disc_color)
-            doors.draw_doors()
             draw_margin(margin_color, margin_return_nominal_state)
             stats(accuracy_result, lives, time_remaining)
 
