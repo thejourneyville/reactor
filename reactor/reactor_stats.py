@@ -136,8 +136,7 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
 
         def draw_box(self, mouse_cords):
 
-            fill_color_up, fill_color_down, fill_color_left, fill_color_right = \
-                color.lightgrey, color.lightgrey, color.lightgrey, color.lightgrey
+            fill_color_up, fill_color_down, fill_color_left, fill_color_right = color.lightgrey, color.lightgrey, color.lightgrey, color.lightgrey
             fill_up, fill_down, fill_left, fill_right = 1, 1, 1, 1
 
             up_box = pygame.Rect(((margin + 35) * scaler, (margin - 7 * scaler), self.size_x, self.size_y))
@@ -308,66 +307,51 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
             if all_entries[idx][0] == 4 and box.selected_right:
                 surface.blit(surfaces[idx][0], placement)
 
-        # for reference
-        # level_font_surface = level_font.render(f"LEVEL {level}", True, color.instructions_color)
-        # instructions_surface = instructions_font.render(
-        #     f"must score {score_goal} points in {time_limit} seconds", True, color.instructions_color)
-        # speed_font_surface = speed_font.render(f"reactor speed {door_speed}", True, color.alert_red)
-        #  # level_font_rect = level_font_surface.get_rect()
-        # instructions_rect = instructions_surface.get_rect()
-        # speed_font_rect = speed_font_surface.get_rect()  #
-        # level_font_rect.centerx, level_font_rect.centery = level_font_position, surface_height // 2 - (30 * scaler)
-        # instructions_rect.centerx, instructions_rect.centery = surface_width // 2, surface_height // 2 + (60 * scaler)
-        # speed_font_rect.center = (surface_width // 2, surface_height // 2 + (20 * scaler))
-        #  # surface.blit(level_font_surface, level_font_rect)
+        # for reference  # level_font_surface = level_font.render(f"LEVEL {level}", True, color.instructions_color)  # instructions_surface = instructions_font.render(  #     f"must score {score_goal} points in {time_limit} seconds", True, color.instructions_color)  # speed_font_surface = speed_font.render(f"reactor speed {door_speed}", True, color.alert_red)  #  # level_font_rect = level_font_surface.get_rect()  # instructions_rect = instructions_surface.get_rect()  # speed_font_rect = speed_font_surface.get_rect()  #  # level_font_rect.centerx, level_font_rect.centery = level_font_position, surface_height // 2 - (30 * scaler)  # instructions_rect.centerx, instructions_rect.centery = surface_width // 2, surface_height // 2 + (60 * scaler)  # speed_font_rect.center = (surface_width // 2, surface_height // 2 + (20 * scaler))  #  # surface.blit(level_font_surface, level_font_rect)
 
     def summary(s_data, f_data):
-        up_times_success    = [entry[2] for entry in s_data if entry[0] == 1]
-        down_times_success  = [entry[2] for entry in s_data if entry[0] == 2]
-        left_times_success  = [entry[2] for entry in s_data if entry[0] == 3]
+        up_times_success = [entry[2] for entry in s_data if entry[0] == 1]
+        down_times_success = [entry[2] for entry in s_data if entry[0] == 2]
+        left_times_success = [entry[2] for entry in s_data if entry[0] == 3]
         right_times_success = [entry[2] for entry in s_data if entry[0] == 4]
 
-        up_times_fail       = [entry[2] for entry in f_data if entry[0] == 1]
-        down_times_fail     = [entry[2] for entry in f_data if entry[0] == 2]
-        left_times_fail     = [entry[2] for entry in f_data if entry[0] == 3]
-        right_times_fail    = [entry[2] for entry in f_data if entry[0] == 4]
+        up_times_fail = [entry[2] for entry in f_data if entry[0] == 1]
+        down_times_fail = [entry[2] for entry in f_data if entry[0] == 2]
+        left_times_fail = [entry[2] for entry in f_data if entry[0] == 3]
+        right_times_fail = [entry[2] for entry in f_data if entry[0] == 4]
 
-        up_succ_amount      = len(up_times_success)
-        down_succ_amount    = len(down_times_success)
-        left_succ_amount    = len(left_times_success)
-        right_succ_amount   = len(right_times_success)
+        up_succ_amount = len(up_times_success)
+        down_succ_amount = len(down_times_success)
+        left_succ_amount = len(left_times_success)
+        right_succ_amount = len(right_times_success)
 
-        up_fail_amount      = len(up_times_fail)
-        down_fail_amount    = len(down_times_fail)
-        left_fail_amount    = len(left_times_fail)
-        right_fail_amount   = len(right_times_fail)
+        up_fail_amount = len(up_times_fail)
+        down_fail_amount = len(down_times_fail)
+        left_fail_amount = len(left_times_fail)
+        right_fail_amount = len(right_times_fail)
 
-        up_total_amount     = up_succ_amount + up_fail_amount
-        down_total_amount   = down_succ_amount + down_fail_amount
-        left_total_amount   = left_succ_amount + left_fail_amount
-        right_total_amount  = right_succ_amount + right_fail_amount
+        up_total_amount = up_succ_amount + up_fail_amount
+        down_total_amount = down_succ_amount + down_fail_amount
+        left_total_amount = left_succ_amount + left_fail_amount
+        right_total_amount = right_succ_amount + right_fail_amount
 
         # successful shot - reaction time averages
-        up_times_success_average    = sum(up_times_success) / up_succ_amount
-        down_times_success_average  = sum(down_times_success) / down_succ_amount
-        left_times_success_average  = sum(left_times_success) / left_succ_amount
+        up_times_success_average = sum(up_times_success) / up_succ_amount
+        down_times_success_average = sum(down_times_success) / down_succ_amount
+        left_times_success_average = sum(left_times_success) / left_succ_amount
         right_times_success_average = sum(right_times_success) / right_succ_amount
 
         # fail shot - reaction time averages
 
-        up_times_fail_average       = sum(up_times_fail) / up_fail_amount
-        down_times_fail_average     = sum(down_times_fail) / down_fail_amount
-        left_times_fail_average     = sum(left_times_fail) / left_fail_amount
-        right_times_fail_average    = sum(right_times_fail) / right_fail_amount
+        up_times_fail_average = sum(up_times_fail) / up_fail_amount
+        down_times_fail_average = sum(down_times_fail) / down_fail_amount
+        left_times_fail_average = sum(left_times_fail) / left_fail_amount
+        right_times_fail_average = sum(right_times_fail) / right_fail_amount
 
-        all_times_success_averages = [up_times_success_average,
-                                      down_times_success_average,
-                                      left_times_success_average,
+        all_times_success_averages = [up_times_success_average, down_times_success_average, left_times_success_average,
                                       right_times_success_average]
 
-        all_times_fail_averages = [up_times_fail_average,
-                                   down_times_fail_average,
-                                   left_times_fail_average,
+        all_times_fail_averages = [up_times_fail_average, down_times_fail_average, left_times_fail_average,
                                    right_times_fail_average]
 
         labels = ['up', 'down', 'left', 'right']
@@ -385,16 +369,14 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
         slowest_average_direction = labels[all_times_success_averages.index(slowest_average_time)]
 
         # successful shot - percentage of total of shots
-        up_shots_made_ptg       = (up_succ_amount / up_total_amount) * 100
-        down_shots_made_ptg     = (down_succ_amount / down_total_amount) * 100
-        left_shots_made_ptg     = (left_succ_amount / left_total_amount) * 100
-        right_shots_made_ptg    = (right_succ_amount / right_total_amount) * 100
+        up_shots_made_ptg = (up_succ_amount / up_total_amount) * 100
+        down_shots_made_ptg = (down_succ_amount / down_total_amount) * 100
+        left_shots_made_ptg = (left_succ_amount / left_total_amount) * 100
+        right_shots_made_ptg = (right_succ_amount / right_total_amount) * 100
 
         # total percentage of successful shots
-        all_shots_made_ptg = (sum([up_succ_amount,
-                                  down_succ_amount,
-                                  left_succ_amount,
-                                  right_succ_amount]) / (len(s_data) + len(f_data))) * 100
+        all_shots_made_ptg = (sum([up_succ_amount, down_succ_amount, left_succ_amount, right_succ_amount]) / (
+                    len(s_data) + len(f_data))) * 100
 
         wrong_directions = [(entry[0], entry[1]) for entry in f_data if entry[0] != entry[1]]
 
@@ -403,10 +385,10 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
               f"down_times_success_average:     {down_times_success_average}\n"
               f"left_times_success_average:     {left_times_success_average}\n"
               f"right_times_success_average:    {right_times_success_average}\n"
-              
+
               f"fastest_direction:              {fastest_average_direction} {fastest_average_time}\n"
               f"slowest_direction:              {slowest_average_direction} {slowest_average_time}\n"
-              
+
               f"up_shots_made_ptg:              {round(up_shots_made_ptg, 2)}%\n"
               f"down_shots_made_ptg:            {round(down_shots_made_ptg, 2)}%\n"
               f"left_shots_made_ptg:            {round(left_shots_made_ptg, 2)}%\n"
@@ -434,7 +416,6 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
 
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
-
                     summary(successes, fails)
 
                     return
@@ -447,7 +428,6 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
         graph.draw_graph()
 
         box.draw_box((mx, my))
-
 
         draw_margin()
         render_text()

@@ -2,6 +2,7 @@ import pygame
 import reactor_colors as color
 import reactor_main_game as main
 import reactor_stats as stats
+import reactor_stats_new as stats_new
 
 
 def level_screen(surface, surface_width, surface_height, margin, margin_color,
@@ -11,8 +12,8 @@ def level_screen(surface, surface_width, surface_height, margin, margin_color,
     level_font_speed = 500 * scaler
     level_font_animating = True
     level_font_open_count = 0
-    level = 6
-    score_goal = 15
+    level = 1
+    score_goal = 4
     time_limit = 60
     pygame.display.set_caption(f"LEVEL {level}")
     door_speed = 20 + level
@@ -110,7 +111,9 @@ def level_screen(surface, surface_width, surface_height, margin, margin_color,
                     # print(f"time remaining: {time_remaining}")
                     time_elapsed = time_limit - time_remaining
 
-                    stats.stats(surface, surface_width, surface_height, margin_color,
+                    # stats.stats(surface, surface_width, surface_height, margin_color,
+                    #             scaler, clock, fps, level, current_react_data, time_elapsed)
+                    stats_new.stats(surface, surface_width, surface_height, margin_color,
                                 scaler, clock, fps, level, current_react_data, time_elapsed)
 
                     if game_over:
