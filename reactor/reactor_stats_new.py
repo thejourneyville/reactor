@@ -17,10 +17,10 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
     slowest_time    = max([idx[1] for idx in all_data])
     fastest_time    = min([idx[1] for idx in all_data])
 
-    up_data     = [(entry[0], entry[-1]) for entry in all_data if entry[2] == 1]
-    down_data   = [(entry[0], entry[-1]) for entry in all_data if entry[2] == 2]
-    left_data   = [(entry[0], entry[-1]) for entry in all_data if entry[2] == 3]
-    right_data  = [(entry[0], entry[-1]) for entry in all_data if entry[2] == 4]
+    up_data     = [(entry[0], entry[1]) for entry in all_data if entry[2] == 1]
+    down_data   = [(entry[0], entry[1]) for entry in all_data if entry[2] == 2]
+    left_data   = [(entry[0], entry[1]) for entry in all_data if entry[2] == 3]
+    right_data  = [(entry[0], entry[1]) for entry in all_data if entry[2] == 4]
     line_data   = [up_data, down_data, left_data, right_data]
 
     class Graph:
@@ -212,22 +212,22 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
 
     def draw_line(data):
 
-        for color_select, direction in enumerate(data):
-            line_color = [color.white, color.yellow, color.sky_blue, color.alert_red][color_select]
+        for selector, direction in enumerate(data):
+            line_color  = [color.white, color.yellow, color.sky_blue, color.alert_red][selector]
+            activated   = [box.press_up, box.press_down, box.press_left, box.press_right][selector]
 
             for idx in range(len(direction)):
 
-                if idx < len(direction) - 1:
-                    start_x, start_y = direction[idx][0] * graph.cols, \
-                                       Point.y_adjust + (direction[idx][-1] - fastest_time) * \
-                                       ((surface_height - (margin * 3)) / (slowest_time - fastest_time))
+                if idx < len(direction) - 1 and activated:
+                    start_x, start_y    = direction[idx][0] * graph.cols, \
+                                          Point.y_adjust + (direction[idx][-1] - fastest_time) * \
+                                          ((surface_height - (margin * 3)) / (slowest_time - fastest_time))
 
-                    end_x, end_y = direction[idx + 1][0] * graph.cols, \
-                                   Point.y_adjust + (direction[idx + 1][-1] - fastest_time) * \
-                                   ((surface_height - (margin * 3)) / (slowest_time - fastest_time))
-                    print(start_x, start_y, end_x, end_y)
+                    end_x, end_y        = direction[idx + 1][0] * graph.cols, \
+                                          Point.y_adjust + (direction[idx + 1][-1] - fastest_time) * \
+                                          ((surface_height - (margin * 3)) / (slowest_time - fastest_time))
+
                     pygame.draw.line(surface, line_color, (start_x, start_y), (end_x, end_y), 1)
-
 
     def summary(s_data, f_data):
 
