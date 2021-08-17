@@ -12,9 +12,9 @@ def level_screen(surface, surface_width, surface_height, margin, margin_color,
     level_font_speed = 500 * scaler
     level_font_animating = True
     level_font_open_count = 0
-    level = 1
-    score_goal = 4
-    time_limit = 60
+    level = 6
+    score_goal = 15
+    time_limit = 40
     pygame.display.set_caption(f"LEVEL {level}")
     door_speed = 20 + level
     level_screen_loop = True

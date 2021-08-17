@@ -18,7 +18,6 @@ navy = (14, 47, 86)
 alert_red = (255, 48, 79)
 sky_blue = (17, 141, 240)
 
-
 # text colors
 title_color = darkgrey
 start_color = alert_red
@@ -35,3 +34,7 @@ doors_color = charcoal
 background = cream
 
 grid_lines = lighter_grey
+stats = [(249, 253, 80),
+         (133, 239, 71),
+         (0, 189, 86),
+         (32, 125, 255)]

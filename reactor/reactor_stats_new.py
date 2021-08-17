@@ -1,4 +1,5 @@
 import pygame
+import colors
 import reactor_colors as color
 
 
@@ -10,18 +11,18 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
     if not current_react_data:
         return
 
-    print(f"current_react_data: {current_react_data}")
     success_data    = [(entry[-1], entry[2], entry[0], False) for entry in current_react_data['success']]
     fail_data       = [(entry[-1], entry[2], entry[0], True) for entry in current_react_data['fail']]
-    all_data        = success_data + fail_data
-    slowest_time    = max([idx[1] for idx in all_data])
-    fastest_time    = min([idx[1] for idx in all_data])
+    all_data        = sorted((success_data + fail_data), key=lambda x: x[0])  # sorted by time elapsed
 
     up_data     = [(entry[0], entry[1]) for entry in all_data if entry[2] == 1]
     down_data   = [(entry[0], entry[1]) for entry in all_data if entry[2] == 2]
     left_data   = [(entry[0], entry[1]) for entry in all_data if entry[2] == 3]
     right_data  = [(entry[0], entry[1]) for entry in all_data if entry[2] == 4]
     line_data   = [up_data, down_data, left_data, right_data]
+
+    slowest_time = max([idx[1] for idx in all_data])
+    fastest_time = min([idx[1] for idx in all_data])
 
     class Graph:
         def __init__(self):
@@ -72,7 +73,7 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
         def draw_box(self, mouse_cords):
 
             fill_color_up, fill_color_down, fill_color_left, fill_color_right = \
-                color.lightgrey, color.lightgrey, color.lightgrey, color.lightgrey
+                color.cream, color.cream, color.cream, color.cream
             fill_up, fill_down, fill_left, fill_right = 1, 1, 1, 1
 
             up_box = pygame.Rect(((margin + 35) * scaler, (margin - 7 * scaler), self.size_x, self.size_y))
@@ -148,7 +149,7 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
                     fill_color_right = color.lighter_grey
                     fill_right = 0
 
-            selected_color = color.forest_green
+            selected_color = color.cream
             if self.selected_up:
                 fill_color_up = selected_color
                 fill_up = 0
@@ -170,20 +171,17 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
     class Point:
         y_adjust = margin * (1.5 * scaler)
 
-        # 0 timer, 1 reaction time, 2 direction, -1 success/fail
         def __init__(self, point_data):
             self.time_marker = point_data[0]
             self.speed = point_data[1]
             self.direction = point_data[2]
-            self.result = point_data[-1]  # False == Successful shot
+            self.result = point_data[-1]  # False == Successful shot because 0 represents solid fill on circle
             self.x = self.time_marker * graph.cols
-            # self.y_adjust = margin * (1.5 * scaler)
             self.y = Point.y_adjust + (self.speed - fastest_time) * (
                     (surface_height - (margin * 3)) / (slowest_time - fastest_time))
             self.reaction_time = self.y
-            self.color = [color.white, color.yellow, color.sky_blue, color.alert_red][self.direction - 1]
-            self.radius = 5
-            # self.ball = pygame.Rect((int(self.x), int(self.y)), (self.radius, self.radius))
+            self.color = color.stats[self.direction - 1]
+            self.radius = 5 * scaler
 
         def get_point(self):
             return self.x, self.y
@@ -195,25 +193,50 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
                         (surface_height - (margin * 3)) / 1)
 
             if box.press_up:
-                if self.color == color.white:
+                if self.direction - 1 == 0:
                     pygame.draw.circle(surface, self.color, (self.x, self.reaction_time), self.radius, self.result)
 
             if box.press_down:
-                if self.color == color.yellow:
+                if self.direction - 1 == 1:
                     pygame.draw.circle(surface, self.color, (self.x, self.reaction_time), self.radius, self.result)
 
             if box.press_left:
-                if self.color == color.sky_blue:
+                if self.direction - 1 == 2:
                     pygame.draw.circle(surface, self.color, (self.x, self.reaction_time), self.radius, self.result)
 
             if box.press_right:
-                if self.color == color.alert_red:
+                if self.direction - 1 == 3:
                     pygame.draw.circle(surface, self.color, (self.x, self.reaction_time), self.radius, self.result)
+
+        def draw_coords(self):
+
+            font_style_key = "darkforest.ttf"
+            coord_font = pygame.font.Font(f"./{font_style_key}", int(15 * scaler))
+            x_coord, y_coord = self.x, self.y + (30 * scaler)
+            coord_surface = coord_font.render(f"{round(self.speed, 2)}", True, colors.WHITE)
+            coord_rect = coord_surface.get_rect()
+            coord_rect.bottomleft = (x_coord, y_coord)
+
+            if box.press_up:
+                if self.direction == 1:
+                    surface.blit(coord_surface, coord_rect)
+
+            if box.press_down:
+                if self.direction == 2:
+                    surface.blit(coord_surface, coord_rect)
+
+            if box.press_left:
+                if self.direction == 3:
+                    surface.blit(coord_surface, coord_rect)
+
+            if box.press_right:
+                if self.direction == 4:
+                    surface.blit(coord_surface, coord_rect)
 
     def draw_line(data):
 
         for selector, direction in enumerate(data):
-            line_color  = [color.white, color.yellow, color.sky_blue, color.alert_red][selector]
+            line_color  = color.stats[selector]
             activated   = [box.press_up, box.press_down, box.press_left, box.press_right][selector]
 
             for idx in range(len(direction)):
@@ -231,18 +254,18 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
 
     def summary(s_data, f_data):
 
-        print(f"success data: {len(s_data)}\n{s_data}")
-        print(f"fail data: {len(f_data)}\n{f_data}")
+        # print(f"success data: {len(s_data)}\n{s_data}")
+        # print(f"fail data: {len(f_data)}\n{f_data}")
 
-        up_times_success = [entry[2] for entry in s_data if entry[0] == 1]
-        down_times_success = [entry[2] for entry in s_data if entry[0] == 2]
-        left_times_success = [entry[2] for entry in s_data if entry[0] == 3]
-        right_times_success = [entry[2] for entry in s_data if entry[0] == 4]
+        up_times_success = [entry[1] for entry in s_data if entry[2] == 1]
+        down_times_success = [entry[1] for entry in s_data if entry[2] == 2]
+        left_times_success = [entry[1] for entry in s_data if entry[2] == 3]
+        right_times_success = [entry[1] for entry in s_data if entry[2] == 4]
 
-        up_times_fail = [entry[2] for entry in f_data if entry[0] == 1]
-        down_times_fail = [entry[2] for entry in f_data if entry[0] == 2]
-        left_times_fail = [entry[2] for entry in f_data if entry[0] == 3]
-        right_times_fail = [entry[2] for entry in f_data if entry[0] == 4]
+        up_times_fail = [entry[1] for entry in f_data if entry[2] == 1]
+        down_times_fail = [entry[1] for entry in f_data if entry[2] == 2]
+        left_times_fail = [entry[1] for entry in f_data if entry[2] == 3]
+        right_times_fail = [entry[1] for entry in f_data if entry[2] == 4]
 
         up_succ_amount = len(up_times_success)
         down_succ_amount = len(down_times_success)
@@ -266,7 +289,6 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
         right_times_success_average = sum(right_times_success) / right_succ_amount
 
         # fail shot - reaction time averages
-
         up_times_fail_average = sum(up_times_fail) / up_fail_amount
         down_times_fail_average = sum(down_times_fail) / down_fail_amount
         left_times_fail_average = sum(left_times_fail) / left_fail_amount
@@ -302,7 +324,7 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
         all_shots_made_ptg = (sum([up_succ_amount, down_succ_amount, left_succ_amount, right_succ_amount]) / (
                 len(s_data) + len(f_data))) * 100
 
-        wrong_directions = [(entry[0], entry[1]) for entry in f_data if entry[0] != entry[1]]
+        # wrong_directions = [(entry[0], entry[1]) for entry in f_data if entry[0] != entry[1]]
 
         ########
         return (f"up_times_success_average:       {up_times_success_average}\n"
@@ -310,8 +332,8 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
                 f"left_times_success_average:     {left_times_success_average}\n"
                 f"right_times_success_average:    {right_times_success_average}\n"
 
-                f"fastest_direction:              {fastest_average_direction} {fastest_average_time}\n"
-                f"slowest_direction:              {slowest_average_direction} {slowest_average_time}\n"
+                f"fastest_success_direction:      {fastest_average_direction} {fastest_average_time}\n"
+                f"slowest_success_direction:      {slowest_average_direction} {slowest_average_time}\n"
 
                 f"up_shots_made_ptg:              {round(up_shots_made_ptg, 2)}%\n"
                 f"down_shots_made_ptg:            {round(down_shots_made_ptg, 2)}%\n"
@@ -322,11 +344,38 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
     def draw_margin():
         pygame.draw.rect(surface, color.charcoal, (0, 0, surface_width, surface_height), margin)
 
+    def render_key_text():
+
+        font_style_key = "darkforest.ttf"
+
+        key_font = pygame.font.Font(f"./{font_style_key}", int(15 * scaler))
+
+        labels = ["UP", "DOWN", "LEFT", "RIGHT"]
+
+        box_colors = color.stats
+
+        key_positions = [(margin * scaler, (margin + 5 * scaler)),
+                         (margin * scaler, (margin + 25 * scaler)),
+                         (margin * scaler, (margin + 45 * scaler)),
+                         (margin * scaler, (margin + 65 * scaler))]
+
+        key_surfaces = [(key_font.render(f"{labels[assignment]}",
+                        True, box_colors[assignment]),
+                        key_positions[assignment]) for assignment in range(len(key_positions))]
+
+        key_rects = [key_surfaces[surf][0].get_rect() for surf in range(len(key_surfaces))]
+
+        for rect_idx in range(len(key_rects)):
+            key_rects[rect_idx].bottomleft = key_surfaces[rect_idx][-1]
+            surface.blit(key_surfaces[rect_idx][0], key_rects[rect_idx])
+
     graph = Graph()
     box = Boxes()
+    # success_data = [(entry[-1], entry[2], entry[0], False) for entry in current_react_data['success']]
     # 0 timer, 1 reaction time, 2 direction, -1 success/fail
     points = [Point([entry[0], entry[1], entry[2], entry[-1]]) for entry in all_data]
 
+    print(summary(success_data, fail_data))
     while True:
 
         for event in pygame.event.get():
@@ -346,15 +395,12 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
         box.draw_box((mx, my))
 
         draw_margin()
-        # render_text()
-        #
+        render_key_text()
+
         for point in points:
             point.draw_point()
+            point.draw_coords()
 
         draw_line(line_data)
-
-
-
-
 
         pygame.display.update()
