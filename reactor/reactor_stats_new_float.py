@@ -70,16 +70,16 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
             self.selected_left = True
             self.selected_right = True
 
-        def draw_box(self, mouse_cords):
+        def draw_box(self, mouse_cords, diff_x, diff_y):
 
             fill_color_up, fill_color_down, fill_color_left, fill_color_right = \
                 color.cream, color.cream, color.cream, color.cream
             fill_up, fill_down, fill_left, fill_right = 1, 1, 1, 1
 
-            up_box = pygame.Rect(((margin + 35) * scaler, (margin - 7 * scaler), self.size_x, self.size_y))
-            down_box = pygame.Rect(((margin + 35) * scaler, (margin + 13 * scaler), self.size_x, self.size_y))
-            left_box = pygame.Rect(((margin + 35) * scaler, (margin + 33 * scaler), self.size_x, self.size_y))
-            right_box = pygame.Rect(((margin + 35) * scaler, (margin + 53 * scaler), self.size_x, self.size_y))
+            up_box = pygame.Rect(((diff_x + 40 * scaler), (diff_y + 12 * scaler), self.size_x, self.size_y))
+            down_box = pygame.Rect(((diff_x + 40 * scaler), (diff_y + 32 * scaler), self.size_x, self.size_y))
+            left_box = pygame.Rect(((diff_x + 40 * scaler), (diff_y + 52 * scaler), self.size_x, self.size_y))
+            right_box = pygame.Rect(((diff_x + 40 * scaler), (diff_y + 72 * scaler), self.size_x, self.size_y))
 
             x_mouse = mouse_cords[0]
             y_mouse = mouse_cords[-1]
@@ -344,7 +344,7 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
     def draw_margin():
         pygame.draw.rect(surface, color.charcoal, (0, 0, surface_width, surface_height), margin)
 
-    def render_key_text():
+    def render_key_text(diff_x, diff_y):
 
         font_style_key = "darkforest.ttf"
 
@@ -354,10 +354,10 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
 
         box_colors = color.stats
 
-        key_positions = [(margin * scaler, (margin + 5 * scaler)),
-                         (margin * scaler, (margin + 25 * scaler)),
-                         (margin * scaler, (margin + 45 * scaler)),
-                         (margin * scaler, (margin + 65 * scaler))]
+        key_positions = [(diff_x + 5 * scaler, (diff_y + 25 * scaler)),
+                         (diff_x + 5 * scaler, (diff_y + 45 * scaler)),
+                         (diff_x + 5 * scaler, (diff_y + 65 * scaler)),
+                         (diff_x + 5 * scaler, (diff_y + 85 * scaler))]
 
         key_surfaces = [(key_font.render(f"{labels[assignment]}",
                         True, box_colors[assignment]),
@@ -369,6 +369,24 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
             key_rects[rect_idx].bottomleft = key_surfaces[rect_idx][-1]
             surface.blit(key_surfaces[rect_idx][0], key_rects[rect_idx])
 
+    def draw_legend(m_x, m_y):
+
+        background_color = color.black
+        outline_color = color.white
+
+        pygame.draw.rect(surface, background_color, ((m_x, m_y), (x_legend_size, y_legend_size)))
+        pygame.draw.rect(surface, outline_color, ((m_x, m_y), (x_legend_size, y_legend_size)), 1)
+
+    def move_legend(m_x, m_y):
+
+        background_color = color.black
+        outline_color = color.white
+
+        pygame.draw.rect(surface, background_color, ((m_x - x_diff, m_y - y_diff), (x_legend_size, y_legend_size)))
+        pygame.draw.rect(surface, outline_color, ((m_x - x_diff, m_y - y_diff), (x_legend_size, y_legend_size)), 1)
+
+        return m_x - x_diff, m_y - y_diff
+
     graph = Graph()
     box = Boxes()
     # success_data = [(entry[-1], entry[2], entry[0], False) for entry in current_react_data['success']]
@@ -376,6 +394,11 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
     points = [Point([entry[0], entry[1], entry[2], entry[-1]]) for entry in all_data]
 
     # print(summary(success_data, fail_data))
+    legend_x_pos = (margin + 35) * scaler
+    legend_y_pos = (margin - 7 * scaler)
+    x_legend_size = 60 * scaler
+    y_legend_size = 90 * scaler
+    measured = False
     while True:
 
         for event in pygame.event.get():
@@ -392,15 +415,36 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
         mx, my = pygame.mouse.get_pos()
 
         graph.draw_graph()
-        box.draw_box((mx, my))
+
 
         draw_margin()
-        render_key_text()
 
         for point in points:
             point.draw_point()
             point.draw_coords()
 
         draw_line(line_data)
+
+        if all([legend_x_pos - 5 <= mx <= legend_x_pos + x_legend_size + 5,
+                legend_y_pos - 5 <= my <= legend_y_pos + y_legend_size + 5]):
+
+            if pygame.mouse.get_pressed(num_buttons=3) == (1, 0, 0):
+                if not measured:
+                    x_diff = abs(mx - legend_x_pos)
+                    y_diff = abs(my - legend_y_pos)
+                    measured = True
+                legend_x_pos, legend_y_pos = move_legend(mx, my)
+                render_key_text(legend_x_pos, legend_y_pos)
+                box.draw_box((mx, my), legend_x_pos, legend_y_pos)
+
+            else:
+                measured = False
+                draw_legend(legend_x_pos, legend_y_pos)
+                render_key_text(legend_x_pos, legend_y_pos)
+                box.draw_box((mx, my), legend_x_pos, legend_y_pos)
+        else:
+            draw_legend(legend_x_pos, legend_y_pos)
+            render_key_text(legend_x_pos, legend_y_pos)
+            box.draw_box((mx, my), legend_x_pos, legend_y_pos)
 
         pygame.display.update()

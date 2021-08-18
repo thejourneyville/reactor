@@ -39,52 +39,19 @@ def draw_box(x, y):
 
 def text(x, y):
     style = "darkforest.ttf"
-    f"./{style}",
-    if pressed:
-        font_center = pygame.font.Font(f"./{style}", square // 3)
-        position_center = (x + square // 2, y + square // 2)
-        surf = (font_center.render(f"TEXT", True, (255, 255, 255)))
-        rect = surf.get_rect()
-        rect.center = position_center
-        surface.blit(surf, rect)
-    else:
-        font_center = pygame.font.Font(f"./{style}", square // 3)
 
-        position_center = (x + square // 2, y + square // 2)
-        position_up = (x + square // 2, y + square // 2 - 2)
-        position_down = (x + square // 2, y + square // 2 + 2)
-        position_left = (x + square // 2 - 2, y + square // 2)
-        position_right = (x + square // 2 + 2, y + square // 2)
-
-        surf_center = (font_center.render(f"TEXT", True, (255, 255, 255)))
-        surf_up = (font_center.render(f"TEXT", True, (255, 0, 0)))
-        surf_down = (font_center.render(f"TEXT", True, (255, 0, 0)))
-        surf_left = (font_center.render(f"TEXT", True, (255, 0, 0)))
-        surf_right = (font_center.render(f"TEXT", True, (255, 0, 0)))
-
-        rect_center = surf_center.get_rect()
-        rect_up = surf_center.get_rect()
-        rect_down = surf_center.get_rect()
-        rect_left = surf_center.get_rect()
-        rect_right = surf_center.get_rect()
-
-        rect_center.center = position_center
-        rect_up.center = position_up
-        rect_down.center = position_down
-        rect_left.center = position_left
-        rect_right.center = position_right
-
-        surface.blit(surf_up, rect_up)
-        surface.blit(surf_down, rect_down)
-        surface.blit(surf_left, rect_left)
-        surface.blit(surf_right, rect_right)
-        surface.blit(surf_center, rect_center)
+    font_center = pygame.font.Font(f"./{style}", square // 3)
+    position_center = (x + square // 2, y + square // 2)
+    surf = (font_center.render(f"TEXT", True, (255, 255, 255)))
+    rect = surf.get_rect()
+    rect.center = position_center
+    surface.blit(surf, rect)
 
 
 square = int(300 * scaler)
 box_x, box_y = (surface_width // 2) - 50, (surface_height // 2) - 50
 measured = False
-pressed = False
+
 while True:
 
     for event in pygame.event.get():
@@ -99,7 +66,6 @@ while True:
     if box_x - 5 <= mx <= box_x + square + 5 and box_y - 5 <= my <= box_y + square + 5:
 
         if pygame.mouse.get_pressed(num_buttons=3) == (1, 0, 0):
-            pressed = True
             if not measured:
                 diff_x, diff_y = abs(box_x - mx), abs(box_y - my)
                 measured = True
@@ -120,7 +86,6 @@ while True:
                 box_y = 0
 
         else:
-            pressed = False
             measured = False
             draw_box(box_x, box_y)
             text(box_x, box_y)
