@@ -58,96 +58,104 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
 
     class Boxes:
         def __init__(self):
-            self.size_x = 10 * scaler
-            self.size_y = 10 * scaler
-            self.press_up = True
-            self.press_down = True
-            self.press_left = True
-            self.press_right = True
+            self.size = 10 * scaler
+            self.stats_size = 20 * scaler
             self.mouse_timer = 0
             self.selected_up = True
             self.selected_down = True
             self.selected_left = True
             self.selected_right = True
+            self.legend_moving = False
+            self.selected_stats = False
+            self.stats_moving = False
 
-        def draw_box(self, mouse_cords, diff_x, diff_y):
+        def draw_checkbox(self, mouse_cords, diff_x, diff_y, stats_diff_x, stats_diff_y):
 
-            fill_color_up, fill_color_down, fill_color_left, fill_color_right = \
-                color.cream, color.cream, color.cream, color.cream
-            fill_up, fill_down, fill_left, fill_right = 1, 1, 1, 1
+            fill_color_up, fill_color_down, fill_color_left, fill_color_right, fill_color_stats = \
+                color.cream, color.cream, color.cream, color.cream, color.cream
+            fill_up, fill_down, fill_left, fill_right, fill_stats = 1, 1, 1, 1, 1
 
-            up_box = pygame.Rect(((diff_x + 40 * scaler), (diff_y + 12 * scaler), self.size_x, self.size_y))
-            down_box = pygame.Rect(((diff_x + 40 * scaler), (diff_y + 32 * scaler), self.size_x, self.size_y))
-            left_box = pygame.Rect(((diff_x + 40 * scaler), (diff_y + 52 * scaler), self.size_x, self.size_y))
-            right_box = pygame.Rect(((diff_x + 40 * scaler), (diff_y + 72 * scaler), self.size_x, self.size_y))
+            up_box      = pygame.Rect(((diff_x + 40 * scaler), (diff_y + 12 * scaler), self.size, self.size))
+            down_box    = pygame.Rect(((diff_x + 40 * scaler), (diff_y + 32 * scaler), self.size, self.size))
+            left_box    = pygame.Rect(((diff_x + 40 * scaler), (diff_y + 52 * scaler), self.size, self.size))
+            right_box   = pygame.Rect(((diff_x + 40 * scaler), (diff_y + 72 * scaler), self.size, self.size))
+            stats_box   = pygame.Rect(stats_diff_x, stats_diff_y, self.stats_size, self.stats_size)
 
             x_mouse = mouse_cords[0]
             y_mouse = mouse_cords[-1]
             self.mouse_timer += 1
 
-            if up_box.left <= x_mouse <= (up_box.left + self.size_x):
-                if up_box.top <= y_mouse <= (up_box.top + self.size_y):
+            if not self.stats_moving:
+                if up_box.left <= x_mouse <= (up_box.left + self.size):
+                    if up_box.top <= y_mouse <= (up_box.top + self.size):
 
-                    if self.mouse_timer >= 10:
-                        if pygame.mouse.get_pressed(num_buttons=3) == (1, 0, 0):
-                            self.mouse_timer = 0
-                            if not self.press_up:
-                                self.press_up = True
-                                self.selected_up = True
-                            else:
-                                self.press_up = False
-                                self.selected_up = False
+                        if self.mouse_timer >= 20:
+                            if pygame.mouse.get_pressed(num_buttons=3) == (1, 0, 0):
+                                if not self.selected_up:
+                                    self.selected_up = True
+                                else:
+                                    self.selected_up = False
+                                self.mouse_timer = 0
 
-                    fill_color_up = color.lighter_grey
-                    fill_up = 0
+                        fill_color_up = color.lighter_grey
+                        fill_up = 0
 
-            if down_box.left <= x_mouse <= (down_box.left + self.size_x):
-                if down_box.top <= y_mouse <= (down_box.top + self.size_y):
+                if down_box.left <= x_mouse <= (down_box.left + self.size):
+                    if down_box.top <= y_mouse <= (down_box.top + self.size):
 
-                    if self.mouse_timer >= 10:
-                        if pygame.mouse.get_pressed(num_buttons=3) == (1, 0, 0):
-                            self.mouse_timer = 0
-                            if not self.press_down:
-                                self.press_down = True
-                                self.selected_down = True
-                            else:
-                                self.press_down = False
-                                self.selected_down = False
+                        if self.mouse_timer >= 20:
+                            if pygame.mouse.get_pressed(num_buttons=3) == (1, 0, 0):
+                                if not self.selected_down:
+                                    self.selected_down = True
+                                else:
+                                    self.selected_down = False
+                                self.mouse_timer = 0
 
-                    fill_color_down = color.lighter_grey
-                    fill_down = 0
+                        fill_color_down = color.lighter_grey
+                        fill_down = 0
 
-            if left_box.left <= x_mouse <= (left_box.left + self.size_x):
-                if left_box.top <= y_mouse <= (left_box.top + self.size_y):
+                if left_box.left <= x_mouse <= (left_box.left + self.size):
+                    if left_box.top <= y_mouse <= (left_box.top + self.size):
 
-                    if self.mouse_timer >= 10:
-                        if pygame.mouse.get_pressed(num_buttons=3) == (1, 0, 0):
-                            self.mouse_timer = 0
-                            if not self.press_left:
-                                self.press_left = True
-                                self.selected_left = True
-                            else:
-                                self.press_left = False
-                                self.selected_left = False
+                        if self.mouse_timer >= 20:
+                            if pygame.mouse.get_pressed(num_buttons=3) == (1, 0, 0):
+                                if not self.selected_left:
+                                    self.selected_left = True
+                                else:
+                                    self.selected_left = False
+                                self.mouse_timer = 0
 
-                    fill_color_left = color.lighter_grey
-                    fill_left = 0
+                        fill_color_left = color.lighter_grey
+                        fill_left = 0
 
-            if right_box.left <= x_mouse <= (right_box.left + self.size_x):
-                if right_box.top <= y_mouse <= (right_box.top + self.size_y):
+                if right_box.left <= x_mouse <= (right_box.left + self.size):
+                    if right_box.top <= y_mouse <= (right_box.top + self.size):
 
-                    if self.mouse_timer >= 10:
-                        if pygame.mouse.get_pressed(num_buttons=3) == (1, 0, 0):
-                            self.mouse_timer = 0
-                            if not self.press_right:
-                                self.press_right = True
-                                self.selected_right = True
-                            else:
-                                self.press_right = False
-                                self.selected_right = False
+                        if self.mouse_timer >= 20:
+                            if pygame.mouse.get_pressed(num_buttons=3) == (1, 0, 0):
+                                if not self.selected_right:
+                                    self.selected_right = True
+                                else:
+                                    self.selected_right = False
+                                self.mouse_timer = 0
 
-                    fill_color_right = color.lighter_grey
-                    fill_right = 0
+                        fill_color_right = color.lighter_grey
+                        fill_right = 0
+
+            if not self.legend_moving:
+                if stats_box.left <= x_mouse <= (stats_box.left + self.stats_size):
+                    if stats_box.top <= y_mouse <= (stats_box.top + self.stats_size):
+
+                        if self.mouse_timer >= 20:
+                            if pygame.mouse.get_pressed(num_buttons=3) == (1, 0, 0):
+                                if not self.selected_stats:
+                                    self.selected_stats = True
+                                else:
+                                    self.selected_stats = False
+                                self.mouse_timer = 0
+
+                        fill_color_stats = color.lighter_grey
+                        fill_stats = 0
 
             selected_color = color.cream
             if self.selected_up:
@@ -162,11 +170,15 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
             if self.selected_right:
                 fill_color_right = selected_color
                 fill_right = 0
+            if self.selected_stats:
+                fill_color_stats = selected_color
+                fill_stats = 0
 
             pygame.draw.rect(surface, fill_color_up, up_box, fill_up)
             pygame.draw.rect(surface, fill_color_down, down_box, fill_down)
             pygame.draw.rect(surface, fill_color_left, left_box, fill_left)
             pygame.draw.rect(surface, fill_color_right, right_box, fill_right)
+            pygame.draw.rect(surface, fill_color_stats, stats_box, fill_stats)
 
     class Point:
         y_adjust = margin * (1.5 * scaler)
@@ -181,7 +193,7 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
                     (surface_height - (margin * 3)) / (slowest_time - fastest_time))
             self.reaction_time = self.y
             self.color = color.stats[self.direction - 1]
-            self.radius = 5 * scaler
+            self.radius = 10 * scaler
 
         def get_point(self):
             return self.x, self.y
@@ -192,19 +204,19 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
                 self.reaction_time = self.y_adjust + (self.reaction_time - fastest_time) * (
                         (surface_height - (margin * 3)) / 1)
 
-            if box.press_up:
+            if box.selected_up:
                 if self.direction - 1 == 0:
                     pygame.draw.circle(surface, self.color, (self.x, self.reaction_time), self.radius, self.result)
 
-            if box.press_down:
+            if box.selected_down:
                 if self.direction - 1 == 1:
                     pygame.draw.circle(surface, self.color, (self.x, self.reaction_time), self.radius, self.result)
 
-            if box.press_left:
+            if box.selected_left:
                 if self.direction - 1 == 2:
                     pygame.draw.circle(surface, self.color, (self.x, self.reaction_time), self.radius, self.result)
 
-            if box.press_right:
+            if box.selected_right:
                 if self.direction - 1 == 3:
                     pygame.draw.circle(surface, self.color, (self.x, self.reaction_time), self.radius, self.result)
 
@@ -217,19 +229,19 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
             coord_rect = coord_surface.get_rect()
             coord_rect.bottomleft = (x_coord, y_coord)
 
-            if box.press_up:
+            if box.selected_up:
                 if self.direction == 1:
                     surface.blit(coord_surface, coord_rect)
 
-            if box.press_down:
+            if box.selected_down:
                 if self.direction == 2:
                     surface.blit(coord_surface, coord_rect)
 
-            if box.press_left:
+            if box.selected_left:
                 if self.direction == 3:
                     surface.blit(coord_surface, coord_rect)
 
-            if box.press_right:
+            if box.selected_right:
                 if self.direction == 4:
                     surface.blit(coord_surface, coord_rect)
 
@@ -237,7 +249,7 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
 
         for selector, direction in enumerate(data):
             line_color  = color.stats[selector]
-            activated   = [box.press_up, box.press_down, box.press_left, box.press_right][selector]
+            activated   = [box.selected_up, box.selected_down, box.selected_left, box.selected_right][selector]
 
             for idx in range(len(direction)):
 
@@ -344,7 +356,7 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
     def draw_margin():
         pygame.draw.rect(surface, color.charcoal, (0, 0, surface_width, surface_height), margin)
 
-    def render_key_text(diff_x, diff_y):
+    def render_legend_text(diff_x, diff_y):
 
         font_style_key = "darkforest.ttf"
 
@@ -372,7 +384,7 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
     def draw_legend(m_x, m_y):
 
         background_color = color.black
-        outline_color = color.white
+        outline_color = color.lightgrey
 
         pygame.draw.rect(surface, background_color, ((m_x, m_y), (x_legend_size, y_legend_size)))
         pygame.draw.rect(surface, outline_color, ((m_x, m_y), (x_legend_size, y_legend_size)), 1)
@@ -380,10 +392,36 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
     def move_legend(m_x, m_y):
 
         background_color = color.black
-        outline_color = color.white
+        outline_color = color.lightgrey
 
         pygame.draw.rect(surface, background_color, ((m_x - x_diff, m_y - y_diff), (x_legend_size, y_legend_size)))
         pygame.draw.rect(surface, outline_color, ((m_x - x_diff, m_y - y_diff), (x_legend_size, y_legend_size)), 1)
+
+        return m_x - x_diff, m_y - y_diff
+
+    def draw_stats(m_x, m_y):
+
+        background_color = color.black
+        outline_color = color.lightgrey
+
+        if box.selected_stats:
+            pygame.draw.rect(surface, background_color, ((m_x, m_y), (x_stats_size, y_stats_size)))
+            pygame.draw.rect(surface, outline_color, ((m_x, m_y), (x_stats_size, y_stats_size)), 1)
+        else:
+            pygame.draw.rect(surface, background_color, ((m_x, m_y), (x_stats_size, box.stats_size)))
+            pygame.draw.rect(surface, outline_color, ((m_x, m_y), (x_stats_size, box.stats_size)), 1)
+
+    def move_stats(m_x, m_y):
+
+        background_color = color.black
+        outline_color = color.lightgrey
+
+        if box.selected_stats:
+            pygame.draw.rect(surface, background_color, ((m_x - x_diff, m_y - y_diff), (x_stats_size, y_stats_size)))
+            pygame.draw.rect(surface, outline_color, ((m_x - x_diff, m_y - y_diff), (x_stats_size, y_stats_size)), 1)
+        else:
+            pygame.draw.rect(surface, background_color, ((m_x - x_diff, m_y - y_diff), (x_stats_size, box.stats_size)))
+            pygame.draw.rect(surface, outline_color, ((m_x - x_diff, m_y - y_diff), (x_stats_size, box.stats_size)), 1)
 
         return m_x - x_diff, m_y - y_diff
 
@@ -394,11 +432,18 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
     points = [Point([entry[0], entry[1], entry[2], entry[-1]]) for entry in all_data]
 
     # print(summary(success_data, fail_data))
-    legend_x_pos = (margin + 35) * scaler
-    legend_y_pos = (margin - 7 * scaler)
     x_legend_size = 60 * scaler
     y_legend_size = 90 * scaler
-    measured = False
+    legend_x_pos = margin
+    legend_y_pos = margin
+    legend_measured = False
+
+    x_stats_size = 240 * scaler
+    y_stats_size = 360 * scaler
+    stats_x_pos = margin
+    stats_y_pos = (surface_height - (margin + y_stats_size))
+    stats_measured = False
+
     while True:
 
         for event in pygame.event.get():
@@ -415,36 +460,74 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
         mx, my = pygame.mouse.get_pos()
 
         graph.draw_graph()
-
-
         draw_margin()
 
         for point in points:
             point.draw_point()
             point.draw_coords()
-
         draw_line(line_data)
 
-        if all([legend_x_pos - 5 <= mx <= legend_x_pos + x_legend_size + 5,
-                legend_y_pos - 5 <= my <= legend_y_pos + y_legend_size + 5]):
+        if not box.stats_moving:
+            if all([legend_x_pos - 5 <= mx <= legend_x_pos + x_legend_size + 5,
+                    legend_y_pos - 5 <= my <= legend_y_pos + y_legend_size + 5]):
 
-            if pygame.mouse.get_pressed(num_buttons=3) == (1, 0, 0):
-                if not measured:
-                    x_diff = abs(mx - legend_x_pos)
-                    y_diff = abs(my - legend_y_pos)
-                    measured = True
-                legend_x_pos, legend_y_pos = move_legend(mx, my)
-                render_key_text(legend_x_pos, legend_y_pos)
-                box.draw_box((mx, my), legend_x_pos, legend_y_pos)
+                if pygame.mouse.get_pressed(num_buttons=3) == (1, 0, 0):
+                    box.legend_moving = True
+                    if not legend_measured:
+                        x_diff = abs(mx - legend_x_pos)
+                        y_diff = abs(my - legend_y_pos)
+                        legend_measured = True
+                    box.draw_checkbox((mx, my), legend_x_pos, legend_y_pos, stats_x_pos, stats_y_pos)
+                    legend_x_pos, legend_y_pos = move_legend(mx, my)
+                    render_legend_text(legend_x_pos, legend_y_pos)
+
+                else:
+                    box.legend_moving = False
+                    legend_measured = False
+                    box.draw_checkbox((mx, my), legend_x_pos, legend_y_pos, stats_x_pos, stats_y_pos)
+                    draw_legend(legend_x_pos, legend_y_pos)
+                    render_legend_text(legend_x_pos, legend_y_pos)
 
             else:
-                measured = False
+                box.draw_checkbox((mx, my), legend_x_pos, legend_y_pos, stats_x_pos, stats_y_pos)
                 draw_legend(legend_x_pos, legend_y_pos)
-                render_key_text(legend_x_pos, legend_y_pos)
-                box.draw_box((mx, my), legend_x_pos, legend_y_pos)
+                render_legend_text(legend_x_pos, legend_y_pos)
+
         else:
             draw_legend(legend_x_pos, legend_y_pos)
-            render_key_text(legend_x_pos, legend_y_pos)
-            box.draw_box((mx, my), legend_x_pos, legend_y_pos)
+            render_legend_text(legend_x_pos, legend_y_pos)
+            box.draw_checkbox((mx, my), legend_x_pos, legend_y_pos, stats_x_pos, stats_y_pos)
 
-        pygame.display.update()
+        if not box.legend_moving:
+            if any([box.selected_stats and all([stats_x_pos - 5 <= mx <= stats_x_pos + x_stats_size + 5,
+                    stats_y_pos - 5 <= my <= stats_y_pos + y_stats_size + 5]),
+                    not box.selected_stats and all([stats_x_pos - 5 <= mx <= stats_x_pos + x_stats_size + 5,
+                    stats_y_pos - 5 <= my <= stats_y_pos + box.stats_size + 5])]):
+
+                if pygame.mouse.get_pressed(num_buttons=3) == (1, 0, 0):
+                    box.stats_moving = True
+                    if not stats_measured:
+                        x_diff = abs(mx - stats_x_pos)
+                        y_diff = abs(my - stats_y_pos)
+                        stats_measured = True
+                    stats_x_pos, stats_y_pos = move_stats(mx, my)
+                    box.draw_checkbox((mx, my), legend_x_pos, legend_y_pos, stats_x_pos, stats_y_pos)
+                    # render_stats_text(legend_x_pos, legend_y_pos)
+
+                else:
+                    box.stats_moving = False
+                    stats_measured = False
+                    draw_stats(stats_x_pos, stats_y_pos)
+                    box.draw_checkbox((mx, my), legend_x_pos, legend_y_pos, stats_x_pos, stats_y_pos)
+                    # render_stats_text(stats_x_pos, stats_y_pos)
+
+            else:
+                draw_stats(stats_x_pos, stats_y_pos)
+                box.draw_checkbox((mx, my), legend_x_pos, legend_y_pos, stats_x_pos, stats_y_pos)
+                # render_stats_text(legend_x_pos, legend_y_pos)
+        else:
+            draw_stats(stats_x_pos, stats_y_pos)
+            box.draw_checkbox((mx, my), legend_x_pos, legend_y_pos, stats_x_pos, stats_y_pos)
+            # render_stats_text(legend_x_pos, legend_y_pos)
+
+        pygame.display.flip()
