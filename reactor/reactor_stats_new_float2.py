@@ -1,6 +1,7 @@
 import pygame
 import colors
 import reactor_colors as color
+from statistics import mode
 
 
 def stats(surface, surface_width, surface_height, margin_color, scaler, clock, fps, level, current_react_data,
@@ -192,9 +193,6 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
 
             pygame.draw.rect(surface, fill_color_stats, stats_box, fill_stats)
 
-
-
-
     class Point:
         y_adjust = margin * (1.5 * scaler)
 
@@ -281,8 +279,7 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
 
     def summary(s_data, f_data):
 
-        # print(f"success data: {len(s_data)}\n{s_data}")
-        # print(f"fail data: {len(f_data)}\n{f_data}")
+        labels = ['up', 'down', 'left', 'right']
 
         up_times_success = [entry[1] for entry in s_data if entry[2] == 1]
         down_times_success = [entry[1] for entry in s_data if entry[2] == 2]
@@ -294,79 +291,177 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
         left_times_fail = [entry[1] for entry in f_data if entry[2] == 3]
         right_times_fail = [entry[1] for entry in f_data if entry[2] == 4]
 
-        up_succ_amount = len(up_times_success)
-        down_succ_amount = len(down_times_success)
-        left_succ_amount = len(left_times_success)
-        right_succ_amount = len(right_times_success)
+        dir_succ = [up_times_success, down_times_success, left_times_success, right_times_success]
+        dir_fail = [up_times_fail, down_times_fail, left_times_fail, right_times_fail]
 
-        up_fail_amount = len(up_times_fail)
-        down_fail_amount = len(down_times_fail)
-        left_fail_amount = len(left_times_fail)
-        right_fail_amount = len(right_times_fail)
+        up_succ_amount = len(up_times_success)  # 0
+        down_succ_amount = len(down_times_success)  # 0
+        left_succ_amount = len(left_times_success)  # 0
+        right_succ_amount = len(right_times_success)  # 1
 
-        up_total_amount = up_succ_amount + up_fail_amount
-        down_total_amount = down_succ_amount + down_fail_amount
-        left_total_amount = left_succ_amount + left_fail_amount
-        right_total_amount = right_succ_amount + right_fail_amount
+        up_fail_amount = len(up_times_fail)  # 0
+        down_fail_amount = len(down_times_fail)  # 0
+        left_fail_amount = len(left_times_fail)  # 2
+        right_fail_amount = len(right_times_fail)  # 8
+
+        up_total_amount = up_succ_amount + up_fail_amount  # 0
+        down_total_amount = down_succ_amount + down_fail_amount  # 0
+        left_total_amount = left_succ_amount + left_fail_amount  # 2
+        right_total_amount = right_succ_amount + right_fail_amount  # 9
 
         # successful shot - reaction time averages
-        up_times_success_average = sum(up_times_success) / up_succ_amount
-        down_times_success_average = sum(down_times_success) / down_succ_amount
-        left_times_success_average = sum(left_times_success) / left_succ_amount
-        right_times_success_average = sum(right_times_success) / right_succ_amount
+        if up_succ_amount > 0:
+            up_times_success_average = sum(up_times_success) / up_succ_amount  # 0.0e
+        else:
+            up_times_success_average = 0.0
+        if down_succ_amount > 0:
+            down_times_success_average = sum(down_times_success) / down_succ_amount  # 0.0e
+        else:
+            down_times_success_average = 0.0
+        if left_succ_amount > 0:
+            left_times_success_average = sum(left_times_success) / left_succ_amount  # 0.0e
+        else:
+            left_times_success_average = 0.0
+        if right_succ_amount > 0:
+            right_times_success_average = sum(right_times_success) / right_succ_amount  # 47.0
+        else:
+            right_times_success_average = 0.0
 
         # fail shot - reaction time averages
-        up_times_fail_average = sum(up_times_fail) / up_fail_amount
-        down_times_fail_average = sum(down_times_fail) / down_fail_amount
-        left_times_fail_average = sum(left_times_fail) / left_fail_amount
-        right_times_fail_average = sum(right_times_fail) / right_fail_amount
+        if up_fail_amount > 0:
+            up_times_fail_average = sum(up_times_fail) / up_fail_amount  # 0.0e
+        else:
+            up_times_fail_average = 0.0
+        if down_fail_amount > 0:
+            down_times_fail_average = sum(down_times_fail) / down_fail_amount  # 0.0e
+        else:
+            down_times_fail_average = 0.0
+        if left_fail_amount > 0:
+            left_times_fail_average = sum(left_times_fail) / left_fail_amount  # 1321.5
+        else:
+            left_times_fail_average = 0.0
+        if right_fail_amount > 0:
+            right_times_fail_average = sum(right_times_fail) / right_fail_amount  # 468.625
+        else:
+            right_times_fail_average = 0.0
 
         all_times_success_averages = [up_times_success_average, down_times_success_average, left_times_success_average,
-                                      right_times_success_average]
+                                      right_times_success_average]  # [0.0, 0.0, 0.0 47.0]
 
         all_times_fail_averages = [up_times_fail_average, down_times_fail_average, left_times_fail_average,
-                                   right_times_fail_average]
+                                   right_times_fail_average]  # [0.0, 0.0, 1321.5, 468.625]
 
-        labels = ['up', 'down', 'left', 'right']
-
-        # fastest success time by overall average
-        fastest_average_time = min(all_times_success_averages)
-
-        # slowest success time by overall average
-        slowest_average_time = max(all_times_success_averages)
+        # slowest success time by overall average and fastest success time by overall average
+        slowest_average_time = max(all_times_success_averages)  # 47.0
+        fastest = slowest_average_time  # 47.0
+        for speed in all_times_success_averages:
+            if fastest >= speed > 0:
+                fastest = speed
+        fastest_average_time = fastest  # 47.0
 
         # fastest success direction by overall average
-        fastest_average_direction = labels[all_times_success_averages.index(fastest_average_time)]
+        if fastest_average_time == 0.0:
+            fastest_average_direction = None
+        else:
+            fastest_average_direction = labels[all_times_success_averages.index(fastest_average_time)]  # right
 
         # slowest success direction by overall average
-        slowest_average_direction = labels[all_times_success_averages.index(slowest_average_time)]
+        if slowest_average_time == 0.0:
+            slowest_average_direction = None
+        else:
+            slowest_average_direction = labels[all_times_success_averages.index(slowest_average_time)]  # right
 
         # successful shot - percentage of total of shots
-        up_shots_made_ptg = (up_succ_amount / up_total_amount) * 100
-        down_shots_made_ptg = (down_succ_amount / down_total_amount) * 100
-        left_shots_made_ptg = (left_succ_amount / left_total_amount) * 100
-        right_shots_made_ptg = (right_succ_amount / right_total_amount) * 100
+        if up_succ_amount > 0:
+            up_shots_made_ptg = (up_succ_amount / up_total_amount) * 100
+        else:
+            up_shots_made_ptg = 0
+        if down_succ_amount > 0:
+            down_shots_made_ptg = (down_succ_amount / down_total_amount) * 100
+        else:
+            down_shots_made_ptg = 0
+        if left_succ_amount > 0:
+            left_shots_made_ptg = (left_succ_amount / left_total_amount) * 100
+        else:
+            left_shots_made_ptg = 0
+        if right_succ_amount > 0:
+            right_shots_made_ptg = (right_succ_amount / right_total_amount) * 100
+        else:
+            right_shots_made_ptg = 0
 
         # total percentage of successful shots
         all_shots_made_ptg = (sum([up_succ_amount, down_succ_amount, left_succ_amount, right_succ_amount]) / (
                 len(s_data) + len(f_data))) * 100
 
-        # wrong_directions = [(entry[0], entry[1]) for entry in f_data if entry[0] != entry[1]]
+        door_up, door_down, door_left, door_right = [], [], [], []
+        all_wrong_directions = [(entry[0], entry[1]) for entry in current_react_data['fail'] if entry[0] != entry[1]]
+        for item in all_wrong_directions:
+            if item[-1] == 1:
+                door_up.append(item)
+            elif item[-1] == 2:
+                door_down.append(item)
+            elif item[-1] == 3:
+                door_left.append(item)
+            elif item[-1] == 4:
+                door_right.append(item)
+        all_wrong_doors_count = [len(door_up), len(door_down), len(door_left), len(door_right)]
+        worst_wrong_door_count = max(all_wrong_doors_count)
+        worst_door_index = all_wrong_doors_count.index(worst_wrong_door_count)
+        worst_door_label = labels[worst_door_index]
+
+        shot_up, shot_down, shot_left, shot_right = [], [], [], []
+        for item in all_wrong_directions:
+            if item[0] == 1:
+                shot_up.append(item)
+            elif item[0] == 2:
+                shot_down.append(item)
+            elif item[0] == 3:
+                shot_left.append(item)
+            elif item[0] == 4:
+                shot_right.append(item)
+        all_wrong_shots_count = [len(shot_up), len(shot_down), len(shot_left), len(shot_right)]
+        worst_wrong_shots_count = max(all_wrong_shots_count)
+        worst_shot_index = all_wrong_shots_count.index(worst_wrong_shots_count)
+        worst_shot_label = labels[worst_shot_index]
+
+        common_error = mode(all_wrong_directions)
+        common_error = f"shot {labels[common_error[0] - 1]} door opened {labels[common_error[-1] - 1]}"
 
         ########
-        return (f"up_times_success_average:       {up_times_success_average}\n"
+        print(f"up_times_success_average:       {up_times_success_average}\n"
                 f"down_times_success_average:     {down_times_success_average}\n"
                 f"left_times_success_average:     {left_times_success_average}\n"
                 f"right_times_success_average:    {right_times_success_average}\n"
 
-                f"fastest_success_direction:      {fastest_average_direction} {fastest_average_time}\n"
-                f"slowest_success_direction:      {slowest_average_direction} {slowest_average_time}\n"
+                f"fastest_success_direction:      {fastest_average_direction}: {fastest_average_time}\n"
+                f"slowest_success_direction:      {slowest_average_direction}: {slowest_average_time}\n"
 
                 f"up_shots_made_ptg:              {round(up_shots_made_ptg, 2)}%\n"
                 f"down_shots_made_ptg:            {round(down_shots_made_ptg, 2)}%\n"
                 f"left_shots_made_ptg:            {round(left_shots_made_ptg, 2)}%\n"
                 f"right_shots_made_ptg:           {round(right_shots_made_ptg, 2)}%\n"
-                f"all_shots_made_ptg:             {round(all_shots_made_ptg, 2)}%")
+                f"all_shots_made_ptg:             {round(all_shots_made_ptg, 2)}%\n"
+                f"worst wrong direction:          {worst_shot_label}: {worst_wrong_shots_count}\n"
+                f"worst door accuracy:            {worst_door_label}: {worst_wrong_door_count}\n"
+                f"most common wrong scenario:     {common_error}")
+
+        return [f"up_times_success_average:       {up_times_success_average}",
+                f"down_times_success_average:     {down_times_success_average}",
+                f"left_times_success_average:     {left_times_success_average}",
+                f"right_times_success_average:    {right_times_success_average}",
+                f"fastest_success_direction:      {fastest_average_direction}: {fastest_average_time}",
+                f"slowest_success_direction:      {slowest_average_direction}: {slowest_average_time}",
+                f"up_shots_made_ptg:              {round(up_shots_made_ptg, 2)}%",
+                f"down_shots_made_ptg:            {round(down_shots_made_ptg, 2)}%",
+                f"left_shots_made_ptg:            {round(left_shots_made_ptg, 2)}%",
+                f"right_shots_made_ptg:           {round(right_shots_made_ptg, 2)}%",
+                f"all_shots_made_ptg:             {round(all_shots_made_ptg, 2)}%",
+                f"worst wrong direction:          {worst_shot_label}: {worst_wrong_shots_count}",
+                f"worst door accuracy:            {worst_door_label}: {worst_wrong_door_count}",
+                f"most common wrong scenario:     {common_error}"]
+
+    def render_summary(mouse, xdiff, ydiff, results):
+        pass
 
     def draw_margin():
         pygame.draw.rect(surface, color.charcoal, (0, 0, surface_width, surface_height), margin)
@@ -404,15 +499,15 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
         pygame.draw.rect(surface, background_color, ((m_x, m_y), (x_legend_size, y_legend_size)))
         pygame.draw.rect(surface, outline_color, ((m_x, m_y), (x_legend_size, y_legend_size)), 1)
 
-    def move_legend(m_x, m_y):
+    def move_legend(m_x, m_y, xdiff, ydiff):
 
         background_color = color.black
         outline_color = color.lightgrey
 
-        pygame.draw.rect(surface, background_color, ((m_x - x_diff, m_y - y_diff), (x_legend_size, y_legend_size)))
-        pygame.draw.rect(surface, outline_color, ((m_x - x_diff, m_y - y_diff), (x_legend_size, y_legend_size)), 1)
+        pygame.draw.rect(surface, background_color, ((m_x - xdiff, m_y - ydiff), (x_legend_size, y_legend_size)))
+        pygame.draw.rect(surface, outline_color, ((m_x - xdiff, m_y - ydiff), (x_legend_size, y_legend_size)), 1)
 
-        return m_x - x_diff, m_y - y_diff
+        return m_x - xdiff, m_y - ydiff
 
     def draw_stats(m_x, m_y):
 
@@ -426,19 +521,101 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
             pygame.draw.rect(surface, background_color, ((m_x, m_y), (x_stats_size, box.stats_size)))
             pygame.draw.rect(surface, outline_color, ((m_x, m_y), (x_stats_size, box.stats_size)), 1)
 
-    def move_stats(m_x, m_y):
+    def move_stats(m_x, m_y, xdiff, ydiff):
 
         background_color = color.black
         outline_color = color.lightgrey
 
         if box.selected_stats:
-            pygame.draw.rect(surface, background_color, ((m_x - x_diff, m_y - y_diff), (x_stats_size, y_stats_size)))
-            pygame.draw.rect(surface, outline_color, ((m_x - x_diff, m_y - y_diff), (x_stats_size, y_stats_size)), 1)
+            pygame.draw.rect(surface, background_color, ((m_x - xdiff, m_y - ydiff), (x_stats_size, y_stats_size)))
+            pygame.draw.rect(surface, outline_color, ((m_x - xdiff, m_y - ydiff), (x_stats_size, y_stats_size)), 1)
         else:
-            pygame.draw.rect(surface, background_color, ((m_x - x_diff, m_y - y_diff), (x_stats_size, box.stats_size)))
-            pygame.draw.rect(surface, outline_color, ((m_x - x_diff, m_y - y_diff), (x_stats_size, box.stats_size)), 1)
+            pygame.draw.rect(surface, background_color, ((m_x - xdiff, m_y - ydiff), (x_stats_size, box.stats_size)))
+            pygame.draw.rect(surface, outline_color, ((m_x - xdiff, m_y - ydiff), (x_stats_size, box.stats_size)), 1)
 
-        return m_x - x_diff, m_y - y_diff
+        return m_x - xdiff, m_y - ydiff
+
+    def menu_order_0(last, measured, x_pos, y_pos, s_x_pos, s_y_pos, xdiff, ydiff):
+        if not box.stats_moving:
+            if all([x_pos - 5 <= mx <= x_pos + x_legend_size + 5,
+                    y_pos - 5 <= my <= y_pos + y_legend_size + 5]):
+
+                if pygame.mouse.get_pressed(num_buttons=3) == (1, 0, 0):
+                    box.legend_moving = True
+                    last = 0
+
+                    if not measured:
+                        xdiff = abs(mx - x_pos)
+                        ydiff = abs(my - y_pos)
+                        measured = True
+
+                    draw_stats(stats_x_pos, stats_y_pos)
+                    box.draw_stats_checkbox((mx, my), s_x_pos, s_y_pos)
+                    # render_stats_text((mx, my), stats_x_pos, stats_y_pos)
+                    x_pos, y_pos = move_legend(mx, my, xdiff, ydiff)
+                    render_legend_text(x_pos, y_pos)
+                    box.draw_legend_checkbox((mx, my), x_pos, y_pos)
+
+                else:
+                    box.legend_moving = False
+                    measured = False
+                    draw_legend(x_pos, y_pos)
+                    render_legend_text(x_pos, y_pos)
+                    box.draw_legend_checkbox((mx, my), x_pos, y_pos)
+                    draw_stats(s_x_pos, s_y_pos)
+                    box.draw_stats_checkbox((mx, my), s_x_pos, s_y_pos)
+
+            else:
+                draw_legend(x_pos, y_pos)
+                render_legend_text(x_pos, y_pos)
+                box.draw_legend_checkbox((mx, my), x_pos, y_pos)
+                draw_stats(stats_x_pos, s_y_pos)
+                box.draw_stats_checkbox((mx, my), s_x_pos, s_y_pos)
+
+        return last, measured, x_pos, y_pos, xdiff, ydiff
+
+    def menu_order_1(last, measured, x_pos, y_pos, l_x_pos, l_y_pos, xdiff, ydiff):
+        if not box.legend_moving:
+            if any([box.selected_stats and all([x_pos - 5 <= mx <= x_pos + x_stats_size + 5,
+                                                y_pos - 5 <= my <= y_pos + y_stats_size + 5]),
+                    not box.selected_stats and all([x_pos - 5 <= mx <= x_pos + x_stats_size + 5,
+                                                    y_pos - 5 <= my <= y_pos + box.stats_size + 5])]):
+
+                if pygame.mouse.get_pressed(num_buttons=3) == (1, 0, 0):
+                    box.stats_moving = True
+                    last = 1
+
+                    if not measured:  # locks mouse position relative to top-left corner of box until release
+                        xdiff = abs(mx - x_pos)
+                        ydiff = abs(my - y_pos)
+                        measured = True
+
+                    draw_legend(l_x_pos, l_y_pos)
+                    render_legend_text(l_x_pos, l_y_pos)
+                    box.draw_legend_checkbox((mx, my), l_x_pos, l_y_pos)
+                    x_pos, y_pos = move_stats(mx, my, xdiff, ydiff)
+                    box.draw_stats_checkbox((mx, my), x_pos, y_pos)
+                    # render_stats_text(stats_x_pos, stats_y_pos)
+
+                else:
+                    box.stats_moving = False
+                    measured = False
+                    draw_stats(x_pos, y_pos)
+                    box.draw_stats_checkbox((mx, my), x_pos, y_pos)
+                    # render_stats_text(stats_x_pos, stats_y_pos)
+                    draw_legend(l_x_pos, l_y_pos)
+                    render_legend_text(l_x_pos, l_y_pos)
+                    box.draw_legend_checkbox((mx, my), l_x_pos, l_y_pos)
+
+            else:
+                draw_stats(x_pos, y_pos)
+                box.draw_stats_checkbox((mx, my), x_pos, y_pos)
+                # render_stats_text(stats_x_pos, stats_y_pos)
+                draw_legend(l_x_pos, l_y_pos)
+                render_legend_text(l_x_pos, l_y_pos)
+                box.draw_legend_checkbox((mx, my), l_x_pos, l_y_pos)
+
+        return last, measured, x_pos, y_pos, xdiff, ydiff
 
     graph = Graph()
     box = Boxes()
@@ -446,18 +623,20 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
     # 0 timer, 1 reaction time, 2 direction, -1 success/fail
     points = [Point([entry[0], entry[1], entry[2], entry[-1]]) for entry in all_data]
 
-    # print(summary(success_data, fail_data))
+    stat_results = summary(success_data, fail_data)
+
+    # moving menu variables
     x_legend_size = 60 * scaler
     y_legend_size = 90 * scaler
     legend_x_pos = margin
     legend_y_pos = margin
-    legend_measured = False
-
-    x_stats_size = 240 * scaler
+    x_stats_size = 360 * scaler
     y_stats_size = 360 * scaler
     stats_x_pos = margin
     stats_y_pos = (surface_height - (margin + y_stats_size))
-    stats_measured = False
+    mouse_measurement = False
+    last_menu = 0
+    x_diff, y_diff = 0, 0
 
     while True:
 
@@ -482,75 +661,17 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
             point.draw_coords()
         draw_line(line_data)
 
-        if not box.stats_moving:
-            if all([legend_x_pos - 5 <= mx <= legend_x_pos + x_legend_size + 5,
-                    legend_y_pos - 5 <= my <= legend_y_pos + y_legend_size + 5]):
+        if last_menu == 0:
+            last_menu, mouse_measurement, legend_x_pos, legend_y_pos, x_diff, y_diff = \
+                menu_order_0(last_menu, mouse_measurement, legend_x_pos, legend_y_pos, stats_x_pos, stats_y_pos, x_diff, y_diff)
+            last_menu, mouse_measurement, stats_x_pos, stats_y_pos, x_diff, y_diff = \
+                menu_order_1(last_menu, mouse_measurement, stats_x_pos, stats_y_pos, legend_x_pos, legend_y_pos, x_diff, y_diff)
 
-                if pygame.mouse.get_pressed(num_buttons=3) == (1, 0, 0):
-                    box.legend_moving = True
-
-                    if not legend_measured:
-                        x_diff = abs(mx - legend_x_pos)
-                        y_diff = abs(my - legend_y_pos)
-                        legend_measured = True
-
-                    draw_stats(stats_x_pos, stats_y_pos)
-                    box.draw_stats_checkbox((mx, my), stats_x_pos, stats_y_pos)
-                    # render_stats_text(stats_x_pos, stats_y_pos)
-                    legend_x_pos, legend_y_pos = move_legend(mx, my)
-                    render_legend_text(legend_x_pos, legend_y_pos)
-                    box.draw_legend_checkbox((mx, my), legend_x_pos, legend_y_pos)
-
-                else:
-                    box.legend_moving = False
-                    legend_measured = False
-                    draw_legend(legend_x_pos, legend_y_pos)
-                    render_legend_text(legend_x_pos, legend_y_pos)
-                    box.draw_legend_checkbox((mx, my), legend_x_pos, legend_y_pos)
-            else:
-                draw_legend(legend_x_pos, legend_y_pos)
-                render_legend_text(legend_x_pos, legend_y_pos)
-                box.draw_legend_checkbox((mx, my), legend_x_pos, legend_y_pos)
-
-        if not box.legend_moving:
-            if any([box.selected_stats and all([stats_x_pos - 5 <= mx <= stats_x_pos + x_stats_size + 5,
-                                                stats_y_pos - 5 <= my <= stats_y_pos + y_stats_size + 5]),
-                    not box.selected_stats and all([stats_x_pos - 5 <= mx <= stats_x_pos + x_stats_size + 5,
-                                                    stats_y_pos - 5 <= my <= stats_y_pos + box.stats_size + 5])]):
-
-                if pygame.mouse.get_pressed(num_buttons=3) == (1, 0, 0):
-                    box.stats_moving = True
-
-                    if not stats_measured: # locks mouse position relative to top-left corner of box until release
-                        x_diff = abs(mx - stats_x_pos)
-                        y_diff = abs(my - stats_y_pos)
-                        stats_measured = True
-
-                    draw_legend(legend_x_pos, legend_y_pos)
-                    render_legend_text(legend_x_pos, legend_y_pos)
-                    box.draw_legend_checkbox((mx, my), legend_x_pos, legend_y_pos)
-                    stats_x_pos, stats_y_pos = move_stats(mx, my)
-                    box.draw_stats_checkbox((mx, my), stats_x_pos, stats_y_pos)
-                    # render_stats_text(legend_x_pos, legend_y_pos)
-
-                else:
-                    box.stats_moving = False
-                    stats_measured = False
-                    draw_legend(legend_x_pos, legend_y_pos)
-                    render_legend_text(legend_x_pos, legend_y_pos)
-                    box.draw_legend_checkbox((mx, my), legend_x_pos, legend_y_pos)
-                    draw_stats(stats_x_pos, stats_y_pos)
-                    box.draw_stats_checkbox((mx, my), stats_x_pos, stats_y_pos)
-                    # render_stats_text(stats_x_pos, stats_y_pos)
-
-            else:
-                draw_legend(legend_x_pos, legend_y_pos)
-                render_legend_text(legend_x_pos, legend_y_pos)
-                box.draw_legend_checkbox((mx, my), legend_x_pos, legend_y_pos)
-                box.draw_legend_checkbox((mx, my), legend_x_pos, legend_y_pos)
-                draw_stats(stats_x_pos, stats_y_pos)
-                box.draw_stats_checkbox((mx, my), stats_x_pos, stats_y_pos)
-                # render_stats_text(legend_x_pos, legend_y_pos)
+        if last_menu == 1:
+            last_menu, mouse_measurement, stats_x_pos, stats_y_pos, x_diff, y_diff = \
+                menu_order_1(last_menu, mouse_measurement, stats_x_pos, stats_y_pos, legend_x_pos, legend_y_pos, x_diff, y_diff)
+            last_menu, mouse_measurement, legend_x_pos, legend_y_pos, x_diff, y_diff = \
+                menu_order_0(last_menu, mouse_measurement, legend_x_pos, legend_y_pos, stats_x_pos, stats_y_pos, x_diff, y_diff)
 
         pygame.display.flip()
 
