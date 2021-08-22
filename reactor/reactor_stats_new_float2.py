@@ -313,61 +313,66 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
         if up_succ_amount > 0:
             up_times_success_average = sum(up_times_success) / up_succ_amount  # 0.0e
         else:
-            up_times_success_average = 0.0
+            up_times_success_average = "NA"
         if down_succ_amount > 0:
             down_times_success_average = sum(down_times_success) / down_succ_amount  # 0.0e
         else:
-            down_times_success_average = 0.0
+            down_times_success_average = "NA"
         if left_succ_amount > 0:
             left_times_success_average = sum(left_times_success) / left_succ_amount  # 0.0e
         else:
-            left_times_success_average = 0.0
+            left_times_success_average = "NA"
         if right_succ_amount > 0:
             right_times_success_average = sum(right_times_success) / right_succ_amount  # 47.0
         else:
-            right_times_success_average = 0.0
+            right_times_success_average = "NA"
 
         # fail shot - reaction time averages
         if up_fail_amount > 0:
             up_times_fail_average = sum(up_times_fail) / up_fail_amount  # 0.0e
         else:
-            up_times_fail_average = 0.0
+            up_times_fail_average = "NA"
         if down_fail_amount > 0:
             down_times_fail_average = sum(down_times_fail) / down_fail_amount  # 0.0e
         else:
-            down_times_fail_average = 0.0
+            down_times_fail_average = "NA"
         if left_fail_amount > 0:
             left_times_fail_average = sum(left_times_fail) / left_fail_amount  # 1321.5
         else:
-            left_times_fail_average = 0.0
+            left_times_fail_average = "NA"
         if right_fail_amount > 0:
             right_times_fail_average = sum(right_times_fail) / right_fail_amount  # 468.625
         else:
-            right_times_fail_average = 0.0
+            right_times_fail_average = "NA"
 
         all_times_success_averages = [up_times_success_average, down_times_success_average, left_times_success_average,
                                       right_times_success_average]  # [0.0, 0.0, 0.0 47.0]
+        all_times_success_averages = [item for item in all_times_success_averages if item != "NA"]
 
         all_times_fail_averages = [up_times_fail_average, down_times_fail_average, left_times_fail_average,
                                    right_times_fail_average]  # [0.0, 0.0, 1321.5, 468.625]
 
         # slowest success time by overall average and fastest success time by overall average
-        slowest_average_time = max(all_times_success_averages)  # 47.0
-        fastest = slowest_average_time  # 47.0
-        for speed in all_times_success_averages:
-            if fastest >= speed > 0:
-                fastest = speed
-        fastest_average_time = fastest  # 47.0
+        if all_times_success_averages:
+            slowest_average_time = max(all_times_success_averages)  # 47.0
+            fastest = slowest_average_time  # 47.0
+            for speed in all_times_success_averages:
+                if fastest >= speed > 0:
+                    fastest = speed
+            fastest_average_time = fastest  # 47.0
+        else:
+            fastest_average_time = "NA"
+            slowest_average_time = "NA"
 
         # fastest success direction by overall average
-        if fastest_average_time == 0.0:
-            fastest_average_direction = None
+        if fastest_average_time == "NA":
+            fastest_average_direction = "NA"
         else:
             fastest_average_direction = labels[all_times_success_averages.index(fastest_average_time)]  # right
 
         # slowest success direction by overall average
-        if slowest_average_time == 0.0:
-            slowest_average_direction = None
+        if slowest_average_time == "NA":
+            slowest_average_direction = "NA"
         else:
             slowest_average_direction = labels[all_times_success_averages.index(slowest_average_time)]  # right
 
@@ -375,23 +380,26 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
         if up_succ_amount > 0:
             up_shots_made_ptg = (up_succ_amount / up_total_amount) * 100
         else:
-            up_shots_made_ptg = 0
+            up_shots_made_ptg = "NA"
         if down_succ_amount > 0:
             down_shots_made_ptg = (down_succ_amount / down_total_amount) * 100
         else:
-            down_shots_made_ptg = 0
+            down_shots_made_ptg = "NA"
         if left_succ_amount > 0:
             left_shots_made_ptg = (left_succ_amount / left_total_amount) * 100
         else:
-            left_shots_made_ptg = 0
+            left_shots_made_ptg = "NA"
         if right_succ_amount > 0:
             right_shots_made_ptg = (right_succ_amount / right_total_amount) * 100
         else:
-            right_shots_made_ptg = 0
+            right_shots_made_ptg = "NA"
 
         # total percentage of successful shots
-        all_shots_made_ptg = (sum([up_succ_amount, down_succ_amount, left_succ_amount, right_succ_amount]) / (
-                len(s_data) + len(f_data))) * 100
+        if sum([up_succ_amount, down_succ_amount, left_succ_amount, right_succ_amount]):
+            all_shots_made_ptg = (sum([up_succ_amount, down_succ_amount, left_succ_amount, right_succ_amount]) / (
+                    len(s_data) + len(f_data))) * 100
+        else:
+            all_shots_made_ptg = "NA"
 
         door_up, door_down, door_left, door_right = [], [], [], []
         all_wrong_directions = [(entry[0], entry[1]) for entry in current_react_data['fail'] if entry[0] != entry[1]]
@@ -439,11 +447,11 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
                 f"fastest_success_direction:      {fastest_average_direction}: {fastest_average_time}\n"
                 f"slowest_success_direction:      {slowest_average_direction}: {slowest_average_time}\n"
 
-                f"up_shots_made_ptg:              {round(up_shots_made_ptg, 2)}%\n"
-                f"down_shots_made_ptg:            {round(down_shots_made_ptg, 2)}%\n"
-                f"left_shots_made_ptg:            {round(left_shots_made_ptg, 2)}%\n"
-                f"right_shots_made_ptg:           {round(right_shots_made_ptg, 2)}%\n"
-                f"all_shots_made_ptg:             {round(all_shots_made_ptg, 2)}%\n"
+                f"up_shots_made_ptg:              {up_shots_made_ptg}%\n"
+                f"down_shots_made_ptg:            {down_shots_made_ptg}%\n"
+                f"left_shots_made_ptg:            {left_shots_made_ptg}%\n"
+                f"right_shots_made_ptg:           {right_shots_made_ptg}%\n"
+                f"all_shots_made_ptg:             {all_shots_made_ptg}%\n"
                 f"worst wrong direction:          {worst_shot_label}: {worst_wrong_shots_count}\n"
                 f"worst door accuracy:            {worst_door_label}: {worst_wrong_door_count}\n"
                 f"most common wrong scenario:     {common_error}")
@@ -461,15 +469,15 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
                 f"slowest success direction",
                 f":{slowest_average_direction} :{slowest_average_time}",
                 f"up shots made %",
-                f":{round(up_shots_made_ptg, 2)}%",
+                f":{up_shots_made_ptg}%",
                 f"down shots made %",
-                f":{round(down_shots_made_ptg, 2)}%",
+                f":{down_shots_made_ptg}%",
                 f"left shots made %",
-                f":{round(left_shots_made_ptg, 2)}%",
+                f":{left_shots_made_ptg}%",
                 f"right shots made %",
-                f":{round(right_shots_made_ptg, 2)}%",
+                f":{right_shots_made_ptg}%",
                 f"all shots made %",
-                f":{round(all_shots_made_ptg, 2)}%",
+                f":{all_shots_made_ptg}%",
                 f"worst wrong direction",
                 f":{worst_shot_label} :count {worst_wrong_shots_count}",
                 f"worst door accuracy",
@@ -694,10 +702,10 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
     y_legend_size = 90 * scaler
     legend_x_pos = margin
     legend_y_pos = margin
-    x_stats_size = 575 * scaler
+    x_stats_size = 585 * scaler
     y_stats_size = 325 * scaler
-    stats_x_pos = margin
-    stats_y_pos = (surface_height - (margin + y_stats_size))
+    stats_x_pos = surface_width - (margin + 585 * scaler)
+    stats_y_pos = margin
     mouse_measurement = False
     last_menu = 0
     x_diff, y_diff = 0, 0
