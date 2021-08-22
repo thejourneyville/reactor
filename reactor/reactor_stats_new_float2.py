@@ -424,8 +424,11 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
         worst_shot_index = all_wrong_shots_count.index(worst_wrong_shots_count)
         worst_shot_label = labels[worst_shot_index]
 
-        common_error = mode(all_wrong_directions)
-        common_error = f"shot {labels[common_error[0] - 1]} door opened {labels[common_error[-1] - 1]}"
+        if all_wrong_directions:
+            common_error = mode(all_wrong_directions)
+            common_error = f"shot {labels[common_error[0] - 1]} door opened {labels[common_error[-1] - 1]}"
+        else:
+            common_error = None
 
         ########
         print(f"up_times_success_average:       {up_times_success_average}\n"
@@ -445,23 +448,82 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
                 f"worst door accuracy:            {worst_door_label}: {worst_wrong_door_count}\n"
                 f"most common wrong scenario:     {common_error}")
 
-        return [f"up_times_success_average:       {up_times_success_average}",
-                f"down_times_success_average:     {down_times_success_average}",
-                f"left_times_success_average:     {left_times_success_average}",
-                f"right_times_success_average:    {right_times_success_average}",
-                f"fastest_success_direction:      {fastest_average_direction}: {fastest_average_time}",
-                f"slowest_success_direction:      {slowest_average_direction}: {slowest_average_time}",
-                f"up_shots_made_ptg:              {round(up_shots_made_ptg, 2)}%",
-                f"down_shots_made_ptg:            {round(down_shots_made_ptg, 2)}%",
-                f"left_shots_made_ptg:            {round(left_shots_made_ptg, 2)}%",
-                f"right_shots_made_ptg:           {round(right_shots_made_ptg, 2)}%",
-                f"all_shots_made_ptg:             {round(all_shots_made_ptg, 2)}%",
-                f"worst wrong direction:          {worst_shot_label}: {worst_wrong_shots_count}",
-                f"worst door accuracy:            {worst_door_label}: {worst_wrong_door_count}",
-                f"most common wrong scenario:     {common_error}"]
+        return [f"up times success average",
+                f":{up_times_success_average}",
+                f"down times success average",
+                f":{down_times_success_average}",
+                f"left times success average",
+                f":{left_times_success_average}",
+                f"right times success average",
+                f":{right_times_success_average}",
+                f"fastest success direction",
+                f":{fastest_average_direction} :{fastest_average_time}",
+                f"slowest success direction",
+                f":{slowest_average_direction} :{slowest_average_time}",
+                f"up shots made %",
+                f":{round(up_shots_made_ptg, 2)}%",
+                f"down shots made %",
+                f":{round(down_shots_made_ptg, 2)}%",
+                f"left shots made %",
+                f":{round(left_shots_made_ptg, 2)}%",
+                f"right shots made %",
+                f":{round(right_shots_made_ptg, 2)}%",
+                f"all shots made %",
+                f":{round(all_shots_made_ptg, 2)}%",
+                f"worst wrong direction",
+                f":{worst_shot_label} :count {worst_wrong_shots_count}",
+                f"worst door accuracy",
+                f":{worst_door_label} :count {worst_wrong_door_count}",
+                f"most common wrong scenario",
+                f":{common_error}"]
 
-    def render_summary(mouse, xdiff, ydiff, results):
-        pass
+    def render_summary(diff_x, diff_y, results):
+
+        if box.selected_stats:
+            font_style_key = "Instruction.ttf"
+            stats_font = pygame.font.Font(f"./{font_style_key}", int(16 * scaler))
+            stats_color_label = (255, 112, 10)
+            stats_color_data = (255, 137, 69)
+
+            stat_positions = [(diff_x + 5 * scaler, (diff_y + 55 * scaler)),
+                              (diff_x + 300 * scaler, (diff_y + 55 * scaler)),
+                              (diff_x + 5 * scaler, (diff_y + 75 * scaler)),
+                              (diff_x + 300 * scaler, (diff_y + 75 * scaler)),
+                              (diff_x + 5 * scaler, (diff_y + 95 * scaler)),
+                              (diff_x + 300 * scaler, (diff_y + 95 * scaler)),
+                              (diff_x + 5 * scaler, (diff_y + 115 * scaler)),
+                              (diff_x + 300 * scaler, (diff_y + 115 * scaler)),
+                              (diff_x + 5 * scaler, (diff_y + 135 * scaler)),
+                              (diff_x + 300 * scaler, (diff_y + 135 * scaler)),
+                              (diff_x + 5 * scaler, (diff_y + 155 * scaler)),
+                              (diff_x + 300 * scaler, (diff_y + 155 * scaler)),
+                              (diff_x + 5 * scaler, (diff_y + 175 * scaler)),
+                              (diff_x + 300 * scaler, (diff_y + 175 * scaler)),
+                              (diff_x + 5 * scaler, (diff_y + 195 * scaler)),
+                              (diff_x + 300 * scaler, (diff_y + 195 * scaler)),
+                              (diff_x + 5 * scaler, (diff_y + 215 * scaler)),
+                              (diff_x + 300 * scaler, (diff_y + 215 * scaler)),
+                              (diff_x + 5 * scaler, (diff_y + 235 * scaler)),
+                              (diff_x + 300 * scaler, (diff_y + 235 * scaler)),
+                              (diff_x + 5 * scaler, (diff_y + 255 * scaler)),
+                              (diff_x + 300 * scaler, (diff_y + 255 * scaler)),
+                              (diff_x + 5 * scaler, (diff_y + 275 * scaler)),
+                              (diff_x + 300 * scaler, (diff_y + 275 * scaler)),
+                              (diff_x + 5 * scaler, (diff_y + 295 * scaler)),
+                              (diff_x + 300 * scaler, (diff_y + 295 * scaler)),
+                              (diff_x + 5 * scaler, (diff_y + 315 * scaler)),
+                              (diff_x + 300 * scaler, (diff_y + 315 * scaler))]
+
+            stats_surfaces = [(stats_font.render(assignment, True, stats_color_label),
+                               stat_positions[idx]) if idx % 2 == 0 else
+                              (stats_font.render(assignment, True, stats_color_data),
+                               stat_positions[idx])for idx, assignment in enumerate(results)]
+
+            stats_rects = [stats_surfaces[surf][0].get_rect() for surf in range(len(stats_surfaces))]
+
+            for rect_idx in range(len(stats_rects)):
+                stats_rects[rect_idx].bottomleft = stats_surfaces[rect_idx][-1]
+                surface.blit(stats_surfaces[rect_idx][0], stats_rects[rect_idx])
 
     def draw_margin():
         pygame.draw.rect(surface, color.charcoal, (0, 0, surface_width, surface_height), margin)
@@ -551,7 +613,7 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
 
                     draw_stats(stats_x_pos, stats_y_pos)
                     box.draw_stats_checkbox((mx, my), s_x_pos, s_y_pos)
-                    # render_stats_text((mx, my), stats_x_pos, stats_y_pos)
+                    render_summary(s_x_pos, s_y_pos, stat_results)
                     x_pos, y_pos = move_legend(mx, my, xdiff, ydiff)
                     render_legend_text(x_pos, y_pos)
                     box.draw_legend_checkbox((mx, my), x_pos, y_pos)
@@ -564,6 +626,7 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
                     box.draw_legend_checkbox((mx, my), x_pos, y_pos)
                     draw_stats(s_x_pos, s_y_pos)
                     box.draw_stats_checkbox((mx, my), s_x_pos, s_y_pos)
+                    render_summary(s_x_pos, s_y_pos, stat_results)
 
             else:
                 draw_legend(x_pos, y_pos)
@@ -571,6 +634,7 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
                 box.draw_legend_checkbox((mx, my), x_pos, y_pos)
                 draw_stats(stats_x_pos, s_y_pos)
                 box.draw_stats_checkbox((mx, my), s_x_pos, s_y_pos)
+                render_summary(s_x_pos, s_y_pos, stat_results)
 
         return last, measured, x_pos, y_pos, xdiff, ydiff
 
@@ -595,14 +659,14 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
                     box.draw_legend_checkbox((mx, my), l_x_pos, l_y_pos)
                     x_pos, y_pos = move_stats(mx, my, xdiff, ydiff)
                     box.draw_stats_checkbox((mx, my), x_pos, y_pos)
-                    # render_stats_text(stats_x_pos, stats_y_pos)
+                    render_summary(x_pos, y_pos, stat_results)
 
                 else:
                     box.stats_moving = False
                     measured = False
                     draw_stats(x_pos, y_pos)
                     box.draw_stats_checkbox((mx, my), x_pos, y_pos)
-                    # render_stats_text(stats_x_pos, stats_y_pos)
+                    render_summary(x_pos, y_pos, stat_results)
                     draw_legend(l_x_pos, l_y_pos)
                     render_legend_text(l_x_pos, l_y_pos)
                     box.draw_legend_checkbox((mx, my), l_x_pos, l_y_pos)
@@ -610,7 +674,7 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
             else:
                 draw_stats(x_pos, y_pos)
                 box.draw_stats_checkbox((mx, my), x_pos, y_pos)
-                # render_stats_text(stats_x_pos, stats_y_pos)
+                render_summary(x_pos, y_pos, stat_results)
                 draw_legend(l_x_pos, l_y_pos)
                 render_legend_text(l_x_pos, l_y_pos)
                 box.draw_legend_checkbox((mx, my), l_x_pos, l_y_pos)
@@ -630,8 +694,8 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
     y_legend_size = 90 * scaler
     legend_x_pos = margin
     legend_y_pos = margin
-    x_stats_size = 360 * scaler
-    y_stats_size = 360 * scaler
+    x_stats_size = 575 * scaler
+    y_stats_size = 325 * scaler
     stats_x_pos = margin
     stats_y_pos = (surface_height - (margin + y_stats_size))
     mouse_measurement = False
