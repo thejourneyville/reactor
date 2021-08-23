@@ -815,12 +815,13 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color,
                 score = disc.score
                 react_success = True
                 # print(f"1: {ball.start_mark_close, ball_direction} current/last active door: {doors.last_open}")
-                current_react_data = build_reaction_data(
-                    current_react_data,
-                    react_success,
-                    disc.start_mark_close,
-                    disc_direction,
-                    doors.last_open)
+                if disc.start_mark_close > 0:
+                    current_react_data = build_reaction_data(
+                        current_react_data,
+                        react_success,
+                        disc.start_mark_close,
+                        disc_direction,
+                        doors.last_open)
 
                 disc.disc.x, disc.disc.y = disc.x, disc.y
                 landing = True
@@ -849,12 +850,13 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color,
 
                     react_success = False
                     # print(f"0: {ball.start_mark_close, ball_direction} current/last active door: {doors.last_open}")
-                    current_react_data = build_reaction_data(
-                        current_react_data,
-                        react_success,
-                        disc.start_mark_close,
-                        disc_direction,
-                        doors.last_open)
+                    if disc.start_mark_close > 0:
+                        current_react_data = build_reaction_data(
+                            current_react_data,
+                            react_success,
+                            disc.start_mark_close,
+                            disc_direction,
+                            doors.last_open)
 
                     lives -= 1
                     collisions += 1

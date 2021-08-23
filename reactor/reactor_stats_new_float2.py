@@ -2,6 +2,7 @@ import pygame
 import colors
 import reactor_colors as color
 from statistics import mode
+from itertools import chain
 
 
 def stats(surface, surface_width, surface_height, margin_color, scaler, clock, fps, level, current_react_data,
@@ -327,6 +328,19 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
         else:
             right_times_success_average = "NA"
 
+        all_succ_times = []
+        for direction in dir_succ:
+            for entry in direction:
+                if entry:
+                    all_succ_times.append(entry)
+        if all_succ_times:
+            all_times_success_average = sum(all_succ_times) / len(all_succ_times)
+        else:
+            all_times_success_average = "NA"
+
+        print(f"dir_succ: {dir_succ}")
+        print(f"all_time_average: {all_times_success_average}")
+
         # fail shot - reaction time averages
         if up_fail_amount > 0:
             up_times_fail_average = sum(up_times_fail) / up_fail_amount  # 0.0e
@@ -443,6 +457,7 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
                 f"down_times_success_average:     {down_times_success_average}\n"
                 f"left_times_success_average:     {left_times_success_average}\n"
                 f"right_times_success_average:    {right_times_success_average}\n"
+                f"all_times_success_average:      {all_times_success_average}\n"
 
                 f"fastest_success_direction:      {fastest_average_direction}: {fastest_average_time}\n"
                 f"slowest_success_direction:      {slowest_average_direction}: {slowest_average_time}\n"
@@ -464,6 +479,8 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
                 f":{left_times_success_average}",
                 f"right times success average",
                 f":{right_times_success_average}",
+                f"all_times_success_average",
+                f":{all_times_success_average}",
                 f"fastest success direction",
                 f":{fastest_average_direction} :{fastest_average_time}",
                 f"slowest success direction",
@@ -520,7 +537,9 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
                               (diff_x + 5 * scaler, (diff_y + 295 * scaler)),
                               (diff_x + 300 * scaler, (diff_y + 295 * scaler)),
                               (diff_x + 5 * scaler, (diff_y + 315 * scaler)),
-                              (diff_x + 300 * scaler, (diff_y + 315 * scaler))]
+                              (diff_x + 300 * scaler, (diff_y + 315 * scaler)),
+                              (diff_x + 5 * scaler, (diff_y + 335 * scaler)),
+                              (diff_x + 300 * scaler, (diff_y + 335 * scaler))]
 
             stats_surfaces = [(stats_font.render(assignment, True, stats_color_label),
                                stat_positions[idx]) if idx % 2 == 0 else
@@ -703,7 +722,7 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
     legend_x_pos = margin
     legend_y_pos = margin
     x_stats_size = 585 * scaler
-    y_stats_size = 325 * scaler
+    y_stats_size = 345 * scaler
     stats_x_pos = surface_width - (margin + 585 * scaler)
     stats_y_pos = margin
     mouse_measurement = False
