@@ -2,8 +2,6 @@ import pygame
 import reactor_colors as color
 import reactor_main_game as main
 import reactor_stats as stats
-import reactor_stats_new as stats_new
-import reactor_stats_new_float2 as stats_new_float2
 
 
 def level_screen(surface, surface_width, surface_height, margin, margin_color,
@@ -114,7 +112,7 @@ def level_screen(surface, surface_width, surface_height, margin, margin_color,
 
                     # stats.stats(surface, surface_width, surface_height, margin_color,
                     #             scaler, clock, fps, level, current_react_data, time_elapsed)
-                    stats_new_float2.stats(surface, surface_width, surface_height, margin_color,
+                    stats.stats(surface, surface_width, surface_height, margin_color,
                                 scaler, clock, fps, level, current_react_data, time_elapsed)
 
                     if game_over:
