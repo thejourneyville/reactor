@@ -24,6 +24,9 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
 
     slowest_time = max([idx[1] for idx in all_data])
     fastest_time = min([idx[1] for idx in all_data])
+    fast_slow_range = (slowest_time - fastest_time)
+    if not fast_slow_range:
+        fast_slow_range = 1
 
     class Graph:
         def __init__(self):
@@ -203,7 +206,7 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
             self.result = point_data[-1]  # False == Successful shot because 0 represents solid fill on circle
             self.x = self.time_marker * graph.cols
             self.y = Point.y_adjust + (self.speed - fastest_time) * (
-                    (surface_height - (margin * 3)) / (slowest_time - fastest_time))
+                    (surface_height - (margin * 3)) / fast_slow_range)
             self.reaction_time = self.y
             self.color = color.stats[self.direction - 1]
             self.radius = 10 * scaler
@@ -269,11 +272,11 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
                 if idx < len(direction) - 1 and activated:
                     start_x, start_y    = direction[idx][0] * graph.cols, \
                                           Point.y_adjust + (direction[idx][-1] - fastest_time) * \
-                                          ((surface_height - (margin * 3)) / (slowest_time - fastest_time))
+                                          ((surface_height - (margin * 3)) / fast_slow_range)
 
                     end_x, end_y        = direction[idx + 1][0] * graph.cols, \
                                           Point.y_adjust + (direction[idx + 1][-1] - fastest_time) * \
-                                          ((surface_height - (margin * 3)) / (slowest_time - fastest_time))
+                                          ((surface_height - (margin * 3)) / fast_slow_range)
 
                     pygame.draw.line(surface, line_color, (start_x, start_y), (end_x, end_y), 1)
 
@@ -451,8 +454,10 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
             print(common_error)
             common_errors = [f"shot {labels[entry[0] - 1]} opened {labels[entry[-1] - 1]}" for entry in common_error]
             # common_error = f"shot {labels[common_error[0] - 1]} door opened {labels[common_error[-1] - 1]}"
+            common_errors_len = len(common_errors)
         else:
             common_errors = None
+            common_errors_len = 1
 
         # testing output
         # print(f"up_times_success_average:       {up_times_success_average}\n"
@@ -474,35 +479,35 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
         #         f"most common wrong scenario:     {common_errors}")
 
         return (f"up times success average",
-                f":{up_times_success_average}",
+                f"{up_times_success_average}",
                 f"down times success average",
-                f":{down_times_success_average}",
+                f"{down_times_success_average}",
                 f"left times success average",
-                f":{left_times_success_average}",
+                f"{left_times_success_average}",
                 f"right times success average",
-                f":{right_times_success_average}",
+                f"{right_times_success_average}",
                 f"all_times_success_average",
-                f":{all_times_success_average}",
+                f"{all_times_success_average}",
                 f"fastest success direction",
-                f":{fastest_average_direction} :{fastest_average_time}",
+                f"{fastest_average_direction} {fastest_average_time}",
                 f"slowest success direction",
-                f":{slowest_average_direction} :{slowest_average_time}",
+                f"{slowest_average_direction} {slowest_average_time}",
                 f"up shots made %",
-                f":{up_shots_made_ptg}%",
+                f"{up_shots_made_ptg}",
                 f"down shots made %",
-                f":{down_shots_made_ptg}%",
+                f":{down_shots_made_ptg}",
                 f"left shots made %",
-                f":{left_shots_made_ptg}%",
+                f"{left_shots_made_ptg}",
                 f"right shots made %",
-                f":{right_shots_made_ptg}%",
+                f"{right_shots_made_ptg}",
                 f"all shots made %",
-                f":{all_shots_made_ptg}%",
+                f"{all_shots_made_ptg}",
                 f"worst wrong direction",
-                f":{worst_shot_label} :count {worst_wrong_shots_count}",
+                f"{worst_shot_label} count {worst_wrong_shots_count}",
                 f"worst door accuracy",
-                f":{worst_door_label} :count {worst_wrong_door_count}",
+                f"{worst_door_label} count {worst_wrong_door_count}",
                 f"most common wrong scenarios",
-                common_errors), len(common_errors) - 1
+                common_errors), common_errors_len
 
     def render_summary(diff_x, diff_y, results):
 
@@ -546,18 +551,21 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
 
             # this section preps the render to list all 'most common wrong scenarios'
             results_amend = results[:-1]
-            stats_surfaces = [(stats_font.render(assignment, True, stats_color_label),
+            stats_surfaces = [(stats_font.render(f":{assignment}", True, stats_color_label),
                                stat_positions[idx]) if idx % 2 == 0 else
                               (stats_font.render(assignment, True, stats_color_data),
                                stat_positions[idx])for idx, assignment in enumerate(results_amend)]
 
-            common_wrong_direction_entries = len(results[-1])
+            if results[-1]:
+                common_wrong_direction_entries = results[-1]
+            else:
+                common_wrong_direction_entries = [":NA"]
 
             output = [(diff_x + 300 * scaler, (diff_y + (335 + (20 * n)) * scaler))
-                      for n in range(common_wrong_direction_entries)]
+                      for n in range(len(common_wrong_direction_entries))]
 
             wrong_direction_surfaces = [(stats_font.render(entry, True, stats_color_data), output[idx])
-                                        for idx, entry in enumerate(results[-1])]
+                                        for idx, entry in enumerate(common_wrong_direction_entries)]
 
             stats_surfaces += wrong_direction_surfaces
             stats_rects = [stats_surfaces[surf][0].get_rect() for surf in range(len(stats_surfaces))]
@@ -565,7 +573,6 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
             for rect_idx in range(len(stats_rects)):
                 stats_rects[rect_idx].bottomleft = stats_surfaces[rect_idx][-1]
                 surface.blit(stats_surfaces[rect_idx][0], stats_rects[rect_idx])
-
 
     def draw_margin():
         pygame.draw.rect(surface, color.charcoal, (0, 0, surface_width, surface_height), margin)
@@ -755,8 +762,8 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
 
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
-                    summary(success_data, fail_data)
-                    return
+                    # summary(success_data, fail_data)
+                    return stat_results
 
         clock.tick(fps)
         surface.fill(color.black)

@@ -2,18 +2,21 @@ import pygame
 import reactor_colors as color
 import reactor_main_game as main
 import reactor_stats as stats
+import reactor_database as database
 
 
 def level_screen(surface, surface_width, surface_height, margin, margin_color,
                  disc_pulse_value, disc_pulse_direction,
-                 scaler, clock, fps):
+                 scaler, clock, fps,
+                 user_account):
+
     level_font_position = 0
     level_font_speed = 500 * scaler
     level_font_animating = True
     level_font_open_count = 0
     level = 6
     score_goal = 15
-    time_limit = 40
+    time_limit = 10
     pygame.display.set_caption(f"LEVEL {level}")
     door_speed = 20 + level
     level_screen_loop = True
@@ -112,8 +115,16 @@ def level_screen(surface, surface_width, surface_height, margin, margin_color,
 
                     # stats.stats(surface, surface_width, surface_height, margin_color,
                     #             scaler, clock, fps, level, current_react_data, time_elapsed)
-                    stats.stats(surface, surface_width, surface_height, margin_color,
-                                scaler, clock, fps, level, current_react_data, time_elapsed)
+                    stats_results = stats.stats(surface, surface_width, surface_height, margin_color,
+                                                scaler, clock, fps, level, current_react_data, time_elapsed)
+
+                    print(f"account:{user_account}")
+                    print(f"FROM ROUND SCREEN:\n{stats_results}")
+                    sr = stats_results
+
+                    database.database(user_account, str(level), sr[1], sr[3], sr[5], sr[7], sr[9], sr[15], sr[17],
+                                      sr[19], sr[21], sr[23], str(accuracy_result[-1]), sr[25], sr[27],
+                                      str(sr[29]), "entry")
 
                     if game_over:
                         return accuracy_result, time_remaining

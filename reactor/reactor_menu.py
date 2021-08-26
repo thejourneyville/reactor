@@ -166,7 +166,7 @@ def start_menu():
                     accuracy, timer = round_screen.level_screen(surface, surface_width, surface_height,
                                                                 margin, margin_color,
                                                                 disc_pulse_value, disc_pulse_direction,
-                                                                scaler, clock, fps)
+                                                                scaler, clock, fps, user_account)
 
                     # accuracy, timer = reactor_main_game.run_reactor(
                     #     surface, surface_width, surface_height, margin, margin_color, disc_pulse_value, disc_pulse_direction, scaler, clock, fps)
