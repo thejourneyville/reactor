@@ -80,3 +80,4 @@ def database(user_name, level, react_up, react_down, react_left, react_right, re
 #
 # database(user_name, level, react_up, react_down, react_left, react_right, react_all, accuracy_up, accuracy_down,
 #     accuracy_left, accuracy_right, accuracy_all, attempts, worst_wrong_dir, worst_door_acc, worst_wrong_scenario)
+
