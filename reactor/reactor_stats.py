@@ -430,8 +430,11 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
                 door_right.append(item)
         all_wrong_doors_count = [len(door_up), len(door_down), len(door_left), len(door_right)]
         worst_wrong_door_count = max(all_wrong_doors_count)
-        worst_door_index = all_wrong_doors_count.index(worst_wrong_door_count)
-        worst_door_label = labels[worst_door_index]
+        if worst_wrong_door_count == 0:
+            worst_door_label = "NA"
+        else:
+            worst_door_index = all_wrong_doors_count.index(worst_wrong_door_count)
+            worst_door_label = labels[worst_door_index]
 
         shot_up, shot_down, shot_left, shot_right = [], [], [], []
         for item in all_wrong_directions:
@@ -445,8 +448,11 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
                 shot_right.append(item)
         all_wrong_shots_count = [len(shot_up), len(shot_down), len(shot_left), len(shot_right)]
         worst_wrong_shots_count = max(all_wrong_shots_count)
-        worst_shot_index = all_wrong_shots_count.index(worst_wrong_shots_count)
-        worst_shot_label = labels[worst_shot_index]
+        if worst_wrong_shots_count == 0:
+            worst_shot_label = "NA"
+        else:
+            worst_shot_index = all_wrong_shots_count.index(worst_wrong_shots_count)
+            worst_shot_label = labels[worst_shot_index]
 
         if all_wrong_directions:
             common_error = multimode(all_wrong_directions)
@@ -495,7 +501,7 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
                 f"up shots made %",
                 f"{up_shots_made_ptg}",
                 f"down shots made %",
-                f":{down_shots_made_ptg}",
+                f"{down_shots_made_ptg}",
                 f"left shots made %",
                 f"{left_shots_made_ptg}",
                 f"right shots made %",
@@ -559,7 +565,7 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
             if results[-1]:
                 common_wrong_direction_entries = results[-1]
             else:
-                common_wrong_direction_entries = [":NA"]
+                common_wrong_direction_entries = ["NA"]
 
             output = [(diff_x + 300 * scaler, (diff_y + (335 + (20 * n)) * scaler))
                       for n in range(len(common_wrong_direction_entries))]
