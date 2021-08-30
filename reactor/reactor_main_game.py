@@ -482,8 +482,10 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color,
 
         def disc_landing(self, distance):
 
-            for idx, shadow in enumerate(all_shadows):
-                shadow.append((self.disc.x, self.disc.y))
+            # for idx, shadow in enumerate(all_shadows):
+            #     shadow.append((self.disc.x, self.disc.y))
+            for idx in range(len(all_shadows)-1, -1, -1):
+                all_shadows[idx].append((self.disc.x, self.disc.y))
 
             pygame.draw.circle(surface, current_disc_color,
                 (self.disc.x + self.disc_radius_size, self.disc.y + self.disc_radius_size),
@@ -903,6 +905,7 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color,
             current_react_data = reaction_text(current_react_data)
 
         if score == score_goal:
-            return game_over, accuracy_result, time_remaining, current_react_data
+            if all([doors.rest_T, doors.rest_B, doors.rest_L, doors.rest_R]):
+                return game_over, accuracy_result, time_remaining, current_react_data
 
         pygame.display.update()

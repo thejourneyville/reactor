@@ -340,9 +340,6 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
         else:
             all_times_success_average = "NA"
 
-        print(f"dir_succ: {dir_succ}")
-        print(f"all_time_average: {all_times_success_average}")
-
         # fail shot - reaction time averages
         if up_fail_amount > 0:
             up_times_fail_average = sum(up_times_fail) / up_fail_amount  # 0.0e
@@ -456,8 +453,8 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
 
         if all_wrong_directions:
             common_error = multimode(all_wrong_directions)
-            print(all_wrong_directions)
-            print(common_error)
+            # print(all_wrong_directions)
+            # print(common_error)
             common_errors = [f"shot {labels[entry[0] - 1]} opened {labels[entry[-1] - 1]}" for entry in common_error]
             # common_error = f"shot {labels[common_error[0] - 1]} door opened {labels[common_error[-1] - 1]}"
             common_errors_len = len(common_errors)

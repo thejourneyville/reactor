@@ -12,7 +12,7 @@ width, height = 1, 1  # screen aspect ratio
 display_info_object = pygame.display.Info()
 screen_width, screen_height = display_info_object.current_w, display_info_object.current_h
 screen_scaler = height / screen_height
-scaler = .75
+scaler = 1
 surface_width, surface_height = int((width / screen_scaler) * scaler), int((height / screen_scaler) * scaler)
 surface = pygame.display.set_mode((surface_width, surface_height))
 

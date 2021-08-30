@@ -8,14 +8,18 @@ def sessions(surface, scaler, clock, fps, player, level, session_data, assertion
     pygame.display.set_caption("REACTOR SESSIONS")
 
     class DropDown:
-        def __init__(self, menu_name, rows, menu_width, row_height, x_adjust, y_adjust, data):
+        def __init__(self, menu_name, rows, menu_width, row_height, x_adjust, y_adjust, data, float_color):
             self.menu_name = menu_name
             self.rows = rows
             self.data = data
-            self.data_initialize = True
+            self.data_initialized = False
             self.data_font = None
             self.data_surfaces = None
             self.data_rects = None
+            self.title_initialized = False
+            self.name_font = None
+            self.name_surface = None
+            self.name_rect = None
             self.x_adjust = x_adjust * scaler
             self.y_adjust = y_adjust * scaler
             self.menu_width = menu_width * scaler
@@ -24,7 +28,7 @@ def sessions(surface, scaler, clock, fps, player, level, session_data, assertion
             self.background_color = (50, 50, 50)
             self.menu_bar_color = (75, 75, 75)
             self.checkbox_outline_color = (0, 0, 0)
-            self.float_color = (0, 0, 200)
+            self.float_color = float_color
             self.text_color = (200, 200, 200)
             self.text_float_color = (0, 0, 0)
             self.activated_color = (200, 200, 200)
@@ -83,7 +87,8 @@ def sessions(surface, scaler, clock, fps, player, level, session_data, assertion
 
                 for row in range(1, self.rows + 1):
                     if self.x_adjust < mx < self.x_adjust + self.menu_width:
-                        if self.y_adjust + self.row_height * row < my < self.y_adjust + self.row_height * row + self.row_height:
+                        if self.y_adjust + self.row_height * row < my < \
+                                self.y_adjust + self.row_height * row + self.row_height:
 
                             self.floating_over_items = row
                             if self.mouse_timer >= 20:
@@ -118,64 +123,71 @@ def sessions(surface, scaler, clock, fps, player, level, session_data, assertion
 
         def menu_text(self):
 
-            name_font_style = "Instruction.ttf"
+            header_font_style = "darkforest.ttf"
+            data_font_style = "Instruction.ttf"
 
             def menu_title():
-                name_font = pygame.font.Font(f"./{name_font_style}", int(20 * scaler))
-                name_surface = name_font.render(self.menu_name, True, self.text_color)
-                name_rect = name_surface.get_rect()
-                name_rect.center = self.x_adjust + self.menu_width // 2, self.y_adjust + self.row_height // 2
+                text_y_adjust = 2 * scaler
+                if not self.title_initialized:
+                    self.name_font = pygame.font.Font(f"./{header_font_style}", int(20 * scaler))
+                    self.name_surface = self.name_font.render(self.menu_name, True, self.text_color)
+                    self.name_rect = self.name_surface.get_rect()
+                    self.name_rect.center = self.x_adjust + self.menu_width // 2,\
+                                            self.y_adjust + self.row_height // 2 + text_y_adjust
+                    self.title_initialized = True
 
-                surface.blit(name_surface, name_rect)
+                surface.blit(self.name_surface, self.name_rect)
 
             def data():
-                if self.data_initialize:
-                    self.data_font = pygame.font.Font(f"./{name_font_style}", int(20 * scaler))
+                text_y_adjust = -2 * scaler
+                if not self.data_initialized:
+                    self.data_font = pygame.font.Font(f"./{data_font_style}", int(15 * scaler))
                     self.data_surfaces = [self.data_font.render(item, True, self.text_color) for item in self.data]
                     self.data_rects = [data_surface.get_rect() for data_surface in self.data_surfaces]
 
                     for idx, item in enumerate(self.data_rects):
                         item.left, item.centery = self.x_adjust + self.row_height, self.y_adjust + (
-                                self.row_height * (idx + 1) + self.row_height // 2)
-                    self.data_initialize = False
-                else:
-                    for idx, item in enumerate(self.data_rects):
-                        surface.blit(self.data_surfaces[idx], item)
+                                self.row_height * (idx + 1) + self.row_height // 2 + text_y_adjust)
+                    self.data_initialized = True
+
+                for idx, item in enumerate(self.data_rects):
+                    surface.blit(self.data_surfaces[idx], item)
 
             menu_title()
             if self.menu_slide_position == self.menu_height:
                 data()
 
-
-    # title = input("enter title: ")
-    # items = [item for item in input("enter items: ").split()]
-    player = "benny"
-    items = ["this", "is", "a", "test", "to", "see", "what", "happens"]
-
-    # LEGEND: menu name / number of rows / menu width, row height / x_axis start point, y_axis start point, data
-
-    labels = ['name',
-              'level'
-              'up success reaction times average',
-              'down success reaction times average',
-              'left success reaction times average',
-              'right success reaction times average',
-              'total success reaction times average',
-              'fastest direction success average',
-              'slowest direction success average',
-              'up shots percentage',
-              'down shots percentage',
-              'left shots percentage',
-              'right shots percentage',
-              'total shots percentage',
-              'worst wrong launch direction',
-              'worst mistook door',
-              'most common wrong scenarios',
-              'assertion',
-              'time elapsed',
+    categories = [' 1 level',
+                  ' 2 up success reaction times average',
+                  ' 3 down success reaction times average',
+                  ' 4 left success reaction times average',
+                  ' 5 right success reaction times average',
+                  ' 6 total success reaction times average',
+                  ' 7 fastest direction success average',
+                  ' 8 slowest direction success average',
+                  ' 9 up shots percentage',
+                  '10 down shots percentage',
+                  '11 left shots percentage',
+                  '12 right shots percentage',
+                  '13 total shots percentage',
+                  '14 worst wrong launch direction',
+                  '15 worst mistook door',
+                  '16 most common wrong scenarios',
+                  '17 assertion',
+                  '18 time elapsed',
               ]
 
-    menu = DropDown(f"{player}: session data", len(labels), 400, 20, 0, 0, labels)
+    date_ranges = ['1 day',
+                   '2 week',
+                   '3 month',
+                   '4 year',
+                   ]
+
+    # LEGEND:
+    # menu name / number of rows / menu width, row height / x_axis start point, y_axis start point, data, float_color
+    menu1 = DropDown(f"{player}: session data", len(categories), 387, 20, 0, 0, categories, (0, 189, 86))
+    menu2 = DropDown(f"time range", len(date_ranges), 200, 20, 388, 0, date_ranges, (32, 125, 255))
+    menus = (menu1, menu2)
 
     while True:
 
@@ -188,16 +200,16 @@ def sessions(surface, scaler, clock, fps, player, level, session_data, assertion
 
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
-                    break
+                    return
 
         mx, my = pygame.mouse.get_pos()
-        menu.mouse_timer += 1
 
-        menu.activate()
-        menu.draw_menu()
-        menu.highlight()
-        menu.menu_text()
+        for menu in menus:
+            menu.mouse_timer += 1
+            menu.activate()
+            menu.draw_menu()
+            menu.highlight()
+            menu.menu_text()
 
         pygame.display.update()
-
 

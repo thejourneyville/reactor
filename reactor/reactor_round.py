@@ -119,11 +119,7 @@ def level_screen(surface, surface_width, surface_height, margin, margin_color,
                     stats_results = stats.stats(surface, surface_width, surface_height, margin_color,
                                                 scaler, clock, fps, level, current_react_data, time_elapsed)
 
-                    print(f"account:{user_account}")
-                    print(f"FROM ROUND SCREEN:\n{stats_results}")
                     sr = stats_results
-                    for i in sr:
-                        print(i)
                     database.database(user_account, str(level), sr[1], sr[3], sr[5], sr[7], sr[9], sr[15], sr[17],
                                       sr[19], sr[21], sr[23], str(accuracy_result[-1]), sr[25], sr[27],
                                       str(sr[29]), "entry")
