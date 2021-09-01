@@ -1,5 +1,5 @@
 import pygame
-from reactor_database import database
+import reactor_sessions_data as sessions_data
 
 
 def sessions(surface, scaler, clock, fps, player, level, session_data, assertion, time_elapsed):
@@ -29,8 +29,7 @@ def sessions(surface, scaler, clock, fps, player, level, session_data, assertion
             self.menu_bar_color = (75, 75, 75)
             self.checkbox_outline_color = (0, 0, 0)
             self.float_color = float_color
-            self.text_color = (200, 200, 200)
-            self.text_float_color = (0, 0, 0)
+            self.text_color = (255, 255, 255)
             self.activated_color = (200, 200, 200)
             self.mouse_timer = 20
             self.menu_activated = False
@@ -93,7 +92,8 @@ def sessions(surface, scaler, clock, fps, player, level, session_data, assertion
                             self.floating_over_items = row
                             if self.mouse_timer >= 20:
                                 if pygame.mouse.get_pressed(num_buttons=3) == (1, 0, 0):
-                                    print(self.data[self.floating_over_items - 1])
+                                    print(self.floating_over_items)
+                                    print(self.menu_name, int(self.data[self.floating_over_items - 1][:2].strip(" ")) - 1)
                                     self.mouse_timer = 0
                                     self.menu_activated = False
 
@@ -139,10 +139,11 @@ def sessions(surface, scaler, clock, fps, player, level, session_data, assertion
                 surface.blit(self.name_surface, self.name_rect)
 
             def data():
-                text_y_adjust = -2 * scaler
+                text_y_adjust = -1 * scaler
+                colors = [(255, 255, 255), (0, 0, 0)]
                 if not self.data_initialized:
                     self.data_font = pygame.font.Font(f"./{data_font_style}", int(15 * scaler))
-                    self.data_surfaces = [self.data_font.render(item, True, self.text_color) for item in self.data]
+                    self.data_surfaces = [self.data_font.render(category, True, colors[0]) for category in self.data]
                     self.data_rects = [data_surface.get_rect() for data_surface in self.data_surfaces]
 
                     for idx, item in enumerate(self.data_rects):
@@ -172,22 +173,29 @@ def sessions(surface, scaler, clock, fps, player, level, session_data, assertion
                   '13 total shots percentage',
                   '14 worst wrong launch direction',
                   '15 worst mistook door',
-                  '16 most common wrong scenarios',
-                  '17 assertion',
-                  '18 time elapsed',
+                  '16 assertion',
+                  '17 time elapsed',
               ]
 
-    date_ranges = ['1 day',
-                   '2 week',
-                   '3 month',
-                   '4 year',
+    date_ranges = ['1 today',
+                   '2 day average',
+                   '3 week average',
+                   '4 month average',
                    ]
+
+    # for item in session_data:
+    #     print(item)
 
     # LEGEND:
     # menu name / number of rows / menu width, row height / x_axis start point, y_axis start point, data, float_color
-    menu1 = DropDown(f"{player}: session data", len(categories), 387, 20, 0, 0, categories, (0, 189, 86))
-    menu2 = DropDown(f"time range", len(date_ranges), 200, 20, 388, 0, date_ranges, (32, 125, 255))
+    menu1 = DropDown(str("session"), len(categories), 387, 20, 0, 0, categories, (33, 139, 71))
+    menu2 = DropDown(str("range"), len(date_ranges), 170, 20, 388, 0, date_ranges, (32, 125, 255))
     menus = (menu1, menu2)
+
+    sd = session_data
+    # TODO
+    sessions_data.retrieve(player, str(level), sd[1], sd[3], sd[5], sd[7], sd[9], sd[15], sd[17], sd[19], sd[21],
+                           sd[23], sd[25], sd[27], str(sd[29]), str(assertion[-1]), time_elapsed, "retrieve")
 
     while True:
 

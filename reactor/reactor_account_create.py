@@ -314,5 +314,7 @@ def account_create(surface, surface_width, surface_height, margin, margin_color,
 
         pygame.display.update()
 
+    if not account_name:
+        account_name = "default"
     return account_name
 
