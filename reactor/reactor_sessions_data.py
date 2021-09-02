@@ -1,18 +1,22 @@
 import reactor_database as db
+from reactor_database import retrieve_entries
 import datetime
 from datetime import timedelta
 
 
-def retrieve(user_name, level, react_up, react_down, react_left, react_right, react_all, accuracy_up, accuracy_down,
-             accuracy_left, accuracy_right, accuracy_all, worst_wrong_dir, worst_door_acc,
-             worst_wrong_scenario, attempts, time_elapsed, command):
+# def retrieve(user_name, level, react_up, react_down, react_left, react_right, react_all, accuracy_up, accuracy_down,
+#              accuracy_left, accuracy_right, accuracy_all, worst_wrong_dir, worst_door_acc,
+#              worst_wrong_scenario, attempts, time_elapsed, command):
+#
+#     if command == "retrieve":
+#         result = db.database(user_name, level, react_up, react_down, react_left, react_right, react_all, accuracy_up,
+#                              accuracy_down, accuracy_left, accuracy_right, accuracy_all, worst_wrong_dir,
+#                              worst_door_acc, worst_wrong_scenario, attempts, time_elapsed, command)
+#     else:
+#         return "invalid entry"
 
-    if command == "retrieve":
-        result = db.database(user_name, level, react_up, react_down, react_left, react_right, react_all, accuracy_up,
-                             accuracy_down, accuracy_left, accuracy_right, accuracy_all, worst_wrong_dir,
-                             worst_door_acc, worst_wrong_scenario, attempts, time_elapsed, command)
-    else:
-        return "invalid entry"
+def retrieve(user_name):
+    result = retrieve_entries(user_name)
 
     # test - to see what exists on 'result'
     # for idx, item in enumerate(result):
@@ -34,108 +38,100 @@ def retrieve(user_name, level, react_up, react_down, react_left, react_right, re
         p_all = []
         w_launch = []
         w_door = []
-        w_scene = []
         assertion = []
         elapsed = []
 
         directions = ['NA', 'up', 'down', 'left', 'right']
 
-        for entry in data:
+        for main_entry in data:
+            for entry in main_entry:
 
-            check_directions = [entry[3], entry[4], entry[5], entry[6]]
-            reaction_directions = []
-            for item in check_directions:
+                check_directions = [entry[3], entry[4], entry[5], entry[6]]
+                reaction_directions = []
+                for item in check_directions:
+                    try:
+                        reaction_directions.append(float(item))
+                    except ValueError:
+                        continue
+
+                levels.append(int(entry[2]))
+
                 try:
-                    reaction_directions.append(float(item))
+                    r_up.append(float(entry[3]))
                 except ValueError:
-                    continue
+                    r_up.append(0)
+                try:
+                    r_down.append(float(entry[4]))
+                except ValueError:
+                    r_down.append(0)
+                try:
+                    r_left.append(float(entry[5]))
+                except ValueError:
+                    r_left.append(0)
+                try:
+                    r_right.append(float(entry[6]))
+                except ValueError:
+                    r_right.append(0)
+                try:
+                    r_all.append(float(entry[7]))
+                except ValueError:
+                    r_all.append(0)
+                if reaction_directions:
+                    r_fastest.append(min(reaction_directions))
+                    r_slowest.append(max(reaction_directions))
+                else:
+                    r_fastest.append(0)
+                    r_slowest.append(0)
+                try:
+                    p_up.append(float(entry[8]))
+                except ValueError:
+                    p_up.append(0)
+                try:
+                    p_down.append(float(entry[9]))
+                except ValueError:
+                    p_down.append(0)
+                try:
+                    p_left.append(float(entry[10]))
+                except ValueError:
+                    p_left.append(0)
+                try:
+                    p_right.append(float(entry[11]))
+                except ValueError:
+                    p_right.append(0)
+                try:
+                    p_all.append(float(entry[12]))
+                except ValueError:
+                    p_all.append(0)
 
-            levels.append(int(entry[2]))
+                w_launch.append(directions.index(entry[13].split()[0]))
+                w_door.append(directions.index(entry[14].split()[0]))
 
-            try:
-                r_up.append(float(entry[3]))
-            except ValueError:
-                r_up.append(0)
-            try:
-                r_down.append(float(entry[4]))
-            except ValueError:
-                r_down.append(0)
-            try:
-                r_left.append(float(entry[5]))
-            except ValueError:
-                r_left.append(0)
-            try:
-                r_right.append(float(entry[6]))
-            except ValueError:
-                r_right.append(0)
-            try:
-                r_all.append(float(entry[7]))
-            except ValueError:
-                r_all.append(0)
-            if reaction_directions:
-                r_fastest.append(min(reaction_directions))
-                r_slowest.append(max(reaction_directions))
-            else:
-                r_fastest.append(0)
-                r_slowest.append(0)
-            try:
-                p_up.append(float(entry[8]))
-            except ValueError:
-                p_up.append(0)
-            try:
-                p_down.append(float(entry[9]))
-            except ValueError:
-                p_down.append(0)
-            try:
-                p_left.append(float(entry[10]))
-            except ValueError:
-                p_left.append(0)
-            try:
-                p_right.append(float(entry[11]))
-            except ValueError:
-                p_right.append(0)
-            try:
-                p_all.append(float(entry[12]))
-            except ValueError:
-                p_all.append(0)
-            w_launch.append(directions.index(entry[13].split()[0]))
-            w_door.append(directions.index(entry[14].split()[0]))
-            if entry[15] != "None":
-                w_scene.append(entry[15])
-            else:
-                w_scene.append(0)
-            try:
-                assertion.append(float(entry[16].split()[-1]))
-            except ValueError:
-                assertion.append(0)
-            elapsed.append(int(entry[17]))
+                try:
+                    if float(entry[15].split()[-1]) > 100:
+                        assertion.append(100)
+                    else:
+                        assertion.append(float(entry[15].split()[-1]))
+                except ValueError:
+                    assertion.append(0)
+                elapsed.append(int(entry[16]))
 
-        s = [levels,
-             r_up,
-             r_down,
-             r_left,
-             r_right,
-             r_all,
-             r_fastest,
-             r_slowest,
-             p_up,
-             p_down,
-             p_left,
-             p_right,
-             p_all,
-             w_launch,
-             w_door,
-             w_scene,
-             assertion,
-             elapsed]
-
-        print()
-        for item in s:
-            print(item)
-
-
-
-
+        return [levels,
+                r_up,
+                r_down,
+                r_left,
+                r_right,
+                r_all,
+                r_fastest,
+                r_slowest,
+                p_up,
+                p_down,
+                p_left,
+                p_right,
+                p_all,
+                w_launch,
+                w_door,
+                assertion,
+                elapsed]
 
     def current_day(data):
         today_date = datetime.datetime.today().strftime("%d%m%y")
@@ -143,11 +139,11 @@ def retrieve(user_name, level, react_up, react_down, react_left, react_right, re
         day = []
         for entry in data:
             if entry[1][-6:] == today_date:
-                day.append(entry)
+                day.append([entry])
 
         # print(f"today ({len(day)}): {day}")
 
-        data_sorter(day)
+        return data_sorter(day)
 
     def by_day(data):
         today = datetime.date.today()
@@ -164,7 +160,7 @@ def retrieve(user_name, level, react_up, react_down, react_left, react_right, re
                     day += 1
                     all_days.append(inner)
                     inner = []
-                all_days.append(inner)
+        all_days.append(inner)
 
         blank_lists = [[] for _ in range(365 - len(all_days))]
         for blank in blank_lists:
@@ -268,13 +264,17 @@ def retrieve(user_name, level, react_up, react_down, react_left, react_right, re
         for blank in blank_lists:
             all_months.append(blank)
 
-        data_sorter(all_months)
-
         print(f"\n\nby_month({len(all_months)}): {all_months}\n\n")
 
-    current_day(result)
+        data_sorter(all_months)
+
+    # print("today")
+    return current_day(result)
+    # print("dailny")
     # by_day(result)
+    # print("weekly")
     # by_week(result)
+    # print("monthly")
     # by_month(result)
 
 

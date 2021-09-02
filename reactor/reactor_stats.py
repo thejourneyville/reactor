@@ -554,7 +554,7 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
 
             # this section preps the render to list all 'most common wrong scenarios'
             results_amend = results[:-1]
-            stats_surfaces = [(stats_font.render(f":{assignment}", True, stats_color_label),
+            stats_surfaces = [(stats_font.render(assignment, True, stats_color_label),
                                stat_positions[idx]) if idx % 2 == 0 else
                               (stats_font.render(assignment, True, stats_color_data),
                                stat_positions[idx])for idx, assignment in enumerate(results_amend)]

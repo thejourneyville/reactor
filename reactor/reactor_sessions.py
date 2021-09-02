@@ -1,11 +1,46 @@
 import pygame
 import reactor_sessions_data as sessions_data
+import reactor_colors as color
 
 
-def sessions(surface, scaler, clock, fps, player, level, session_data, assertion, time_elapsed):
+def sessions(surface, surface_width, surface_height, scaler, clock, fps, player):
 
     # window caption
     pygame.display.set_caption("REACTOR SESSIONS")
+
+    # NOTE: processing function will take selected data, pass it's size to Graph for number of cols/rows?
+
+    class Graph:
+        def __init__(self):
+            self.width = surface_width
+            self.height = surface_height
+            self.x_adjust = 0
+            self.y_adjust = 0
+            self.row_amount = 20
+            self.rows = self.height / self.row_amount
+            self.cols_amount = len(all_data[0])
+            self.cols = self.width / self.cols_amount
+            self.gridline_width = 1
+            self.gridline_color = color.darkgrey
+
+        def draw_graph(self):
+            for row in range(self.row_amount):
+                # rows
+                pygame.draw.line(
+                    surface,
+                    self.gridline_color,
+                    (0, int(self.y_adjust + (self.rows * row))),
+                    (surface_width, int(self.y_adjust + (self.rows * row))),
+                    self.gridline_width)
+
+            for col in range(int(self.cols_amount)):
+                # cols
+                pygame.draw.line(
+                    surface,
+                    self.gridline_color,
+                    (int(self.y_adjust + (self.cols * col)), 0),
+                    (int(self.y_adjust + (self.cols * col)), surface_height),
+                    self.gridline_width)
 
     class DropDown:
         def __init__(self, menu_name, rows, menu_width, row_height, x_adjust, y_adjust, data, float_color):
@@ -34,6 +69,7 @@ def sessions(surface, scaler, clock, fps, player, level, session_data, assertion
             self.mouse_timer = 20
             self.menu_activated = False
             self.floating_over_items = None
+            self.last_selected = None
             self.menu_slide_position = 0
             self.menu_slide_speed = 50 * scaler
             self.menu_rect = pygame.Rect(self.x_adjust, self.y_adjust, self.menu_width, self.row_height)
@@ -92,8 +128,7 @@ def sessions(surface, scaler, clock, fps, player, level, session_data, assertion
                             self.floating_over_items = row
                             if self.mouse_timer >= 20:
                                 if pygame.mouse.get_pressed(num_buttons=3) == (1, 0, 0):
-                                    print(self.floating_over_items)
-                                    print(self.menu_name, int(self.data[self.floating_over_items - 1][:2].strip(" ")) - 1)
+                                    self.last_selected = self.floating_over_items - 1
                                     self.mouse_timer = 0
                                     self.menu_activated = False
 
@@ -183,19 +218,14 @@ def sessions(surface, scaler, clock, fps, player, level, session_data, assertion
                    '4 month average',
                    ]
 
-    # for item in session_data:
-    #     print(item)
-
     # LEGEND:
     # menu name / number of rows / menu width, row height / x_axis start point, y_axis start point, data, float_color
     menu1 = DropDown(str("session"), len(categories), 387, 20, 0, 0, categories, (33, 139, 71))
     menu2 = DropDown(str("range"), len(date_ranges), 170, 20, 388, 0, date_ranges, (32, 125, 255))
     menus = (menu1, menu2)
 
-    sd = session_data
-    # TODO
-    sessions_data.retrieve(player, str(level), sd[1], sd[3], sd[5], sd[7], sd[9], sd[15], sd[17], sd[19], sd[21],
-                           sd[23], sd[25], sd[27], str(sd[29]), str(assertion[-1]), time_elapsed, "retrieve")
+    all_data = sessions_data.retrieve(player)
+    graph = Graph()
 
     while True:
 
@@ -212,12 +242,18 @@ def sessions(surface, scaler, clock, fps, player, level, session_data, assertion
 
         mx, my = pygame.mouse.get_pos()
 
+        graph.draw_graph()
+
         for menu in menus:
             menu.mouse_timer += 1
             menu.activate()
             menu.draw_menu()
             menu.highlight()
             menu.menu_text()
+
+        if all([menu1.last_selected is not None,
+                menu2.last_selected is not None]):
+            pass
 
         pygame.display.update()
 
