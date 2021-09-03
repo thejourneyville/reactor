@@ -23,6 +23,9 @@ def retrieve(user_name):
     #     print(idx, item)
 
     def data_sorter(data):
+
+        directions = ['NA', 'up', 'down', 'left', 'right']
+
         levels = []
         r_up = []
         r_down = []
@@ -41,109 +44,107 @@ def retrieve(user_name):
         assertion = []
         elapsed = []
 
-        directions = ['NA', 'up', 'down', 'left', 'right']
+        sessions = []
+        for session in data:
 
-        for main_entry in data:
-            for entry in main_entry:
+            check_directions = [session[3], session[4], session[5], session[6]]
+            reaction_directions = []
+            for item in check_directions:
+                try:
+                    reaction_directions.append(float(item))
+                except ValueError:
+                    continue
 
-                check_directions = [entry[3], entry[4], entry[5], entry[6]]
-                reaction_directions = []
-                for item in check_directions:
-                    try:
-                        reaction_directions.append(float(item))
-                    except ValueError:
-                        continue
+            levels.append(int(session[2]))
 
-                levels.append(int(entry[2]))
+            try:
+                r_up.append(float(session[3]))
+            except ValueError:
+                r_up.append(0)
+            try:
+                r_down.append(float(session[4]))
+            except ValueError:
+                r_down.append(0)
+            try:
+                r_left.append(float(session[5]))
+            except ValueError:
+                r_left.append(0)
+            try:
+                r_right.append(float(session[6]))
+            except ValueError:
+                r_right.append(0)
+            try:
+                r_all.append(float(session[7]))
+            except ValueError:
+                r_all.append(0)
+            if reaction_directions:
+                r_fastest.append(min(reaction_directions))
+                r_slowest.append(max(reaction_directions))
+            else:
+                r_fastest.append(0)
+                r_slowest.append(0)
+            try:
+                p_up.append(float(session[8]))
+            except ValueError:
+                p_up.append(0)
+            try:
+                p_down.append(float(session[9]))
+            except ValueError:
+                p_down.append(0)
+            try:
+                p_left.append(float(session[10]))
+            except ValueError:
+                p_left.append(0)
+            try:
+                p_right.append(float(session[11]))
+            except ValueError:
+                p_right.append(0)
+            try:
+                p_all.append(float(session[12]))
+            except ValueError:
+                p_all.append(0)
 
-                try:
-                    r_up.append(float(entry[3]))
-                except ValueError:
-                    r_up.append(0)
-                try:
-                    r_down.append(float(entry[4]))
-                except ValueError:
-                    r_down.append(0)
-                try:
-                    r_left.append(float(entry[5]))
-                except ValueError:
-                    r_left.append(0)
-                try:
-                    r_right.append(float(entry[6]))
-                except ValueError:
-                    r_right.append(0)
-                try:
-                    r_all.append(float(entry[7]))
-                except ValueError:
-                    r_all.append(0)
-                if reaction_directions:
-                    r_fastest.append(min(reaction_directions))
-                    r_slowest.append(max(reaction_directions))
+            w_launch.append(directions.index(session[13].split()[0]))
+            w_door.append(directions.index(session[14].split()[0]))
+
+            try:
+                if float(session[15].split()[-1]) > 100:
+                    assertion.append(100)
                 else:
-                    r_fastest.append(0)
-                    r_slowest.append(0)
-                try:
-                    p_up.append(float(entry[8]))
-                except ValueError:
-                    p_up.append(0)
-                try:
-                    p_down.append(float(entry[9]))
-                except ValueError:
-                    p_down.append(0)
-                try:
-                    p_left.append(float(entry[10]))
-                except ValueError:
-                    p_left.append(0)
-                try:
-                    p_right.append(float(entry[11]))
-                except ValueError:
-                    p_right.append(0)
-                try:
-                    p_all.append(float(entry[12]))
-                except ValueError:
-                    p_all.append(0)
+                    assertion.append(float(session[15].split()[-1]))
+            except ValueError:
+                assertion.append(0)
+            elapsed.append(int(session[16]))
 
-                w_launch.append(directions.index(entry[13].split()[0]))
-                w_door.append(directions.index(entry[14].split()[0]))
+        sessions.append(levels)
+        sessions.append(r_down)
+        sessions.append(r_left)
+        sessions.append(r_right)
+        sessions.append(r_all)
+        sessions.append(r_fastest)
+        sessions.append(r_slowest)
+        sessions.append(p_up)
+        sessions.append(p_down)
+        sessions.append(p_left)
+        sessions.append(p_right)
+        sessions.append(p_all)
+        sessions.append(w_launch)
+        sessions.append(w_door)
+        sessions.append(assertion)
+        sessions.append(elapsed)
+        sessions.append(r_up)
 
-                try:
-                    if float(entry[15].split()[-1]) > 100:
-                        assertion.append(100)
-                    else:
-                        assertion.append(float(entry[15].split()[-1]))
-                except ValueError:
-                    assertion.append(0)
-                elapsed.append(int(entry[16]))
-
-        return [levels,
-                r_up,
-                r_down,
-                r_left,
-                r_right,
-                r_all,
-                r_fastest,
-                r_slowest,
-                p_up,
-                p_down,
-                p_left,
-                p_right,
-                p_all,
-                w_launch,
-                w_door,
-                assertion,
-                elapsed]
+        return sessions
 
     def current_day(data):
         today_date = datetime.datetime.today().strftime("%d%m%y")
 
-        day = []
+        today = []
         for entry in data:
             if entry[1][-6:] == today_date:
-                day.append([entry])
+                today.append(entry)
 
-        # print(f"today ({len(day)}): {day}")
-
-        return data_sorter(day)
+        return data_sorter(today)
 
     def by_day(data):
         today = datetime.date.today()
@@ -166,9 +167,9 @@ def retrieve(user_name):
         for blank in blank_lists:
             all_days.append(blank)
 
-        print(f"\n\nby_day({len(all_days)}): {all_days}\n\n")
+        # print(f"\n\nby_day({len(all_days)}): {all_days}\n\n")
 
-        data_sorter(all_days)
+        return data_sorter(all_days)
 
     def by_week(data):
         today = datetime.date.today()
@@ -269,13 +270,15 @@ def retrieve(user_name):
         data_sorter(all_months)
 
     # print("today")
-    return current_day(result)
+    day = current_day(result)
     # print("dailny")
-    # by_day(result)
+    # daily = by_day(result)
     # print("weekly")
     # by_week(result)
     # print("monthly")
     # by_month(result)
+
+    return day
 
 
 

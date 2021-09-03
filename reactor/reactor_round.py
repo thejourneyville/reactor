@@ -114,14 +114,11 @@ def level_screen(surface, surface_width, surface_height, margin, margin_color,
                     # print(f"time remaining: {time_remaining}")
                     time_elapsed = time_limit - time_remaining
 
-                    # stats.stats(surface, surface_width, surface_height, margin_color,
-                    #             scaler, clock, fps, level, current_react_data, time_elapsed)
                     stats_results = stats.stats(surface, surface_width, surface_height, margin_color,
                                                 scaler, clock, fps, level, current_react_data, time_elapsed)
 
                     sr = stats_results
-                    # print(f"round screen - sr29: {sr[29]}")
-                    # print(time_elapsed)
+
                     database.database(user_account, str(level), sr[1], sr[3], sr[5], sr[7], sr[9], sr[15], sr[17],
                                       sr[19], sr[21], sr[23], sr[25], sr[27],
                                       str(accuracy_result[-1]), str(time_elapsed), "entry")

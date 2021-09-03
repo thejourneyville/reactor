@@ -14,33 +14,39 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
         def __init__(self):
             self.width = surface_width
             self.height = surface_height
-            self.x_adjust = 0
-            self.y_adjust = 0
-            self.row_amount = 20
-            self.rows = self.height / self.row_amount
-            self.cols_amount = len(all_data[0])
-            self.cols = self.width / self.cols_amount
+            self.x_adjust = 50 * scaler
+            self.y_adjust = 50 * scaler
+            self.rows_amount = 10
+            self.row_size = (self.height - self.y_adjust) // self.rows_amount
             self.gridline_width = 1
-            self.gridline_color = color.darkgrey
+            self.gridline_color = color.lighter_grey
 
-        def draw_graph(self):
-            for row in range(self.row_amount):
+        def draw_graph(self, cols):
+            for row in range(self.rows_amount + 1):
                 # rows
                 pygame.draw.line(
                     surface,
                     self.gridline_color,
-                    (0, int(self.y_adjust + (self.rows * row))),
-                    (surface_width, int(self.y_adjust + (self.rows * row))),
+                    (self.x_adjust // 2, (self.y_adjust // 2) + int(self.row_size * row)),
+                    (surface_width - self.x_adjust // 2, (self.y_adjust // 2) + int(self.row_size * row)),
                     self.gridline_width)
 
-            for col in range(int(self.cols_amount)):
+            col_size = (self.width - self.x_adjust) / cols
+            for col in range(cols + 1):
                 # cols
                 pygame.draw.line(
                     surface,
                     self.gridline_color,
-                    (int(self.y_adjust + (self.cols * col)), 0),
-                    (int(self.y_adjust + (self.cols * col)), surface_height),
+                    ((self.x_adjust // 2) + int(col_size * col), self.y_adjust // 2),
+                    ((self.x_adjust // 2) + int(col_size * col), self.height - self.y_adjust // 2),
                     self.gridline_width)
+
+        def draw_point(self, category, y_adjust, cols):
+
+            data = all_data[category]
+            for idx in range(cols + 1):
+                pygame.draw.circle(surface, color.alert_red,
+                    ((self.x_adjust // 2) + self.x, self.reaction_time), self.radius, self.result)
 
     class DropDown:
         def __init__(self, menu_name, rows, menu_width, row_height, x_adjust, y_adjust, data, float_color):
@@ -129,6 +135,7 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
                             if self.mouse_timer >= 20:
                                 if pygame.mouse.get_pressed(num_buttons=3) == (1, 0, 0):
                                     self.last_selected = self.floating_over_items - 1
+                                    print(self.last_selected)
                                     self.mouse_timer = 0
                                     self.menu_activated = False
 
@@ -193,6 +200,19 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
             if self.menu_slide_position == self.menu_height:
                 data()
 
+    def processing(category, time_range):
+
+        if time_range == 0:
+
+            adjuster = surface_height / max(all_data[category])
+            graph_columns = len(all_data[category])
+
+        else:
+            adjuster = surface_height - max(all_data[category])
+            graph_columns = len(all_data[category])
+
+        return adjuster, graph_columns
+
     categories = [' 1 level',
                   ' 2 up success reaction times average',
                   ' 3 down success reaction times average',
@@ -225,6 +245,15 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
     menus = (menu1, menu2)
 
     all_data = sessions_data.retrieve(player)
+
+    # def test1(data1):
+    #
+    #     print("TEST:")
+    #     print(f"name: all_data\nsize: {len(data1[0])}\nlayer0: {data1}")
+    #     input()
+    #
+    # test1(all_data)
+
     graph = Graph()
 
     while True:
@@ -240,9 +269,14 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
                 if event.key == pygame.K_RETURN:
                     return
 
-        mx, my = pygame.mouse.get_pos()
+        if all([menu1.last_selected is not None,
+                menu2.last_selected is not None]):
+            y_adjuster, cols_amount = processing(menu1.last_selected, menu2.last_selected)
 
-        graph.draw_graph()
+            graph.draw_graph(cols_amount)
+            graph.draw_point(menu1.last_selected, y_adjuster, cols_amount)
+
+        mx, my = pygame.mouse.get_pos()
 
         for menu in menus:
             menu.mouse_timer += 1
@@ -250,10 +284,6 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
             menu.draw_menu()
             menu.highlight()
             menu.menu_text()
-
-        if all([menu1.last_selected is not None,
-                menu2.last_selected is not None]):
-            pass
 
         pygame.display.update()
 
