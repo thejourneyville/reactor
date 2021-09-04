@@ -20,6 +20,7 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
             self.row_size = (self.height - self.y_adjust) // self.rows_amount
             self.gridline_width = 1
             self.gridline_color = color.lighter_grey
+            self.radius = 5 * scaler
 
         def draw_graph(self, cols):
             for row in range(self.rows_amount + 1):
@@ -41,12 +42,33 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
                     ((self.x_adjust // 2) + int(col_size * col), self.height - self.y_adjust // 2),
                     self.gridline_width)
 
-        def draw_point(self, category, y_adjust, cols):
+        def draw_point(self, category, y_adjust, cols, render_type):
 
+            col_size = (self.width - self.x_adjust) / cols
             data = all_data[category]
-            for idx in range(cols + 1):
-                pygame.draw.circle(surface, color.alert_red,
-                    ((self.x_adjust // 2) + self.x, self.reaction_time), self.radius, self.result)
+
+            if render_type == 1:
+                for idx in range(cols):
+                    pygame.draw.circle(surface, color.alert_red,
+                                       (((self.x_adjust // 2) + col_size // 2) + int(col_size * idx),
+                                        self.height - (self.y_adjust // 2) - int(data[idx] * y_adjust)), self.radius, 1)
+
+            if render_type == 0:
+
+                data_font_style = "Instruction.ttf"
+                directions = ["", "U", "D", "L", "R"]
+
+                for idx, item in enumerate(data):
+                    item_font = pygame.font.Font(f"./{data_font_style}", int(20 * scaler))
+                    if category == 13 or category == 14:
+                        print(f"item: {item}")
+                        item_surface = item_font.render(directions[item], True, color.white)
+                    else:
+                        item_surface = item_font.render(str(item), True, color.white)
+                    item_rect = item_surface.get_rect()
+                    item_rect.center = (((self.x_adjust // 2) + col_size // 2) + int(col_size * idx), self.height // 2)
+
+                    surface.blit(item_surface, item_rect)
 
     class DropDown:
         def __init__(self, menu_name, rows, menu_width, row_height, x_adjust, y_adjust, data, float_color):
@@ -135,7 +157,8 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
                             if self.mouse_timer >= 20:
                                 if pygame.mouse.get_pressed(num_buttons=3) == (1, 0, 0):
                                     self.last_selected = self.floating_over_items - 1
-                                    print(self.last_selected)
+                                    self.menu_name = categories[self.last_selected]
+                                    print(self.last_selected, categories[self.last_selected], date_ranges[self.last_selected])
                                     self.mouse_timer = 0
                                     self.menu_activated = False
 
@@ -202,40 +225,49 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
 
     def processing(category, time_range):
 
-        if time_range == 0:
+        category1 = [0, 13, 14]
+        category2 = [1, 2, 3, 4, 5, 8, 9, 10, 11, 12, 15, 16]
+        category3 = [6, 7]
+        category_type = 1
 
-            adjuster = surface_height / max(all_data[category])
-            graph_columns = len(all_data[category])
+        if category in category1:
+            category_type = 0
+        elif category in category2:
+            category_type = 1
+        elif category in category3:
+            category_type = 2
 
-        else:
-            adjuster = surface_height - max(all_data[category])
-            graph_columns = len(all_data[category])
+        try:
+            adjuster = (surface_height - graph.y_adjust) / max(all_data[category])
+        except ZeroDivisionError:
+            adjuster = 0
+        graph_columns = len(all_data[category])
 
-        return adjuster, graph_columns
+        return adjuster, graph_columns, category_type
 
-    categories = [' 1 level',
-                  ' 2 up success reaction times average',
-                  ' 3 down success reaction times average',
-                  ' 4 left success reaction times average',
-                  ' 5 right success reaction times average',
-                  ' 6 total success reaction times average',
-                  ' 7 fastest direction success average',
-                  ' 8 slowest direction success average',
-                  ' 9 up shots percentage',
-                  '10 down shots percentage',
-                  '11 left shots percentage',
-                  '12 right shots percentage',
-                  '13 total shots percentage',
-                  '14 worst wrong launch direction',
-                  '15 worst mistook door',
-                  '16 assertion',
-                  '17 time elapsed',
+    categories = [' 0 level',
+                  ' 1 up success reaction times average',
+                  ' 2 down success reaction times average',
+                  ' 3 left success reaction times average',
+                  ' 4 right success reaction times average',
+                  ' 5 total success reaction times average',
+                  ' 6 fastest direction success average',
+                  ' 7 slowest direction success average',
+                  ' 8 up shots percentage',
+                  ' 9 down shots percentage',
+                  '10 left shots percentage',
+                  '11 right shots percentage',
+                  '12 total shots percentage',
+                  '13 worst wrong launch direction',
+                  '14 worst mistook door',
+                  '15 assertion',
+                  '16 time elapsed',
               ]
 
-    date_ranges = ['1 today',
-                   '2 day average',
-                   '3 week average',
-                   '4 month average',
+    date_ranges = ['0 today',
+                   '1 day average',
+                   '2 week average',
+                   '3 month average',
                    ]
 
     # LEGEND:
@@ -246,20 +278,20 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
 
     all_data = sessions_data.retrieve(player)
 
-    # def test1(data1):
-    #
-    #     print("TEST:")
-    #     print(f"name: all_data\nsize: {len(data1[0])}\nlayer0: {data1}")
-    #     input()
-    #
-    # test1(all_data)
+    def test1(data1):
+
+        print("TEST:")
+        print(f"name: all_data\nsize: {len(data1[0])}\nlayer0: {data1}")
+        input()
+
+    test1(all_data)
 
     graph = Graph()
 
     while True:
 
         clock.tick(fps)
-        surface.fill((200, 200, 200))
+        surface.fill(color.black)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -271,10 +303,10 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
 
         if all([menu1.last_selected is not None,
                 menu2.last_selected is not None]):
-            y_adjuster, cols_amount = processing(menu1.last_selected, menu2.last_selected)
+            y_adjuster, cols_amount, category_type = processing(menu1.last_selected, menu2.last_selected)
 
             graph.draw_graph(cols_amount)
-            graph.draw_point(menu1.last_selected, y_adjuster, cols_amount)
+            graph.draw_point(menu1.last_selected, y_adjuster, cols_amount, category_type)
 
         mx, my = pygame.mouse.get_pos()
 

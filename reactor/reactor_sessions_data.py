@@ -47,14 +47,6 @@ def retrieve(user_name):
         sessions = []
         for session in data:
 
-            check_directions = [session[3], session[4], session[5], session[6]]
-            reaction_directions = []
-            for item in check_directions:
-                try:
-                    reaction_directions.append(float(item))
-                except ValueError:
-                    continue
-
             levels.append(int(session[2]))
 
             try:
@@ -77,44 +69,46 @@ def retrieve(user_name):
                 r_all.append(float(session[7]))
             except ValueError:
                 r_all.append(0)
-            if reaction_directions:
-                r_fastest.append(min(reaction_directions))
-                r_slowest.append(max(reaction_directions))
-            else:
+            try:
+                r_fastest.append((session[8].split()[0], float(session[8].split()[-1])))
+            except ValueError:
                 r_fastest.append(0)
+            try:
+                r_slowest.append((session[9].split()[0], float(session[9].split()[-1])))
+            except ValueError:
                 r_slowest.append(0)
             try:
-                p_up.append(float(session[8]))
+                p_up.append(float(session[10]))
             except ValueError:
                 p_up.append(0)
             try:
-                p_down.append(float(session[9]))
+                p_down.append(float(session[11]))
             except ValueError:
                 p_down.append(0)
             try:
-                p_left.append(float(session[10]))
+                p_left.append(float(session[12]))
             except ValueError:
                 p_left.append(0)
             try:
-                p_right.append(float(session[11]))
+                p_right.append(float(session[13]))
             except ValueError:
                 p_right.append(0)
             try:
-                p_all.append(float(session[12]))
+                p_all.append(float(session[14]))
             except ValueError:
                 p_all.append(0)
 
-            w_launch.append(directions.index(session[13].split()[0]))
-            w_door.append(directions.index(session[14].split()[0]))
+            w_launch.append(directions.index(session[15].split()[0]))
+            w_door.append(directions.index(session[16].split()[0]))
 
             try:
-                if float(session[15].split()[-1]) > 100:
+                if float(session[17].split()[-1]) > 100:
                     assertion.append(100)
                 else:
-                    assertion.append(float(session[15].split()[-1]))
+                    assertion.append(float(session[17].split()[-1]))
             except ValueError:
                 assertion.append(0)
-            elapsed.append(int(session[16]))
+            elapsed.append(int(session[18]))
 
         sessions.append(levels)
         sessions.append(r_down)
