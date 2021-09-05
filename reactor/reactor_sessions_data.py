@@ -111,6 +111,7 @@ def retrieve(user_name):
             elapsed.append(int(session[18]))
 
         sessions.append(levels)
+        sessions.append(r_up)
         sessions.append(r_down)
         sessions.append(r_left)
         sessions.append(r_right)
@@ -126,7 +127,6 @@ def retrieve(user_name):
         sessions.append(w_door)
         sessions.append(assertion)
         sessions.append(elapsed)
-        sessions.append(r_up)
 
         return sessions
 

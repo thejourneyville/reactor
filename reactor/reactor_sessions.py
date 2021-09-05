@@ -19,18 +19,19 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
             self.rows_amount = 10
             self.row_size = (self.height - self.y_adjust) // self.rows_amount
             self.gridline_width = 1
-            self.gridline_color = color.lighter_grey
+            self.gridline_color = color.darkgrey
             self.radius = 5 * scaler
 
         def draw_graph(self, cols):
-            for row in range(self.rows_amount + 1):
-                # rows
-                pygame.draw.line(
-                    surface,
-                    self.gridline_color,
-                    (self.x_adjust // 2, (self.y_adjust // 2) + int(self.row_size * row)),
-                    (surface_width - self.x_adjust // 2, (self.y_adjust // 2) + int(self.row_size * row)),
-                    self.gridline_width)
+            if menu1.last_selected not in [0, 13, 14]:
+                for row in range(self.rows_amount + 1):
+                    # rows
+                    pygame.draw.line(
+                        surface,
+                        self.gridline_color,
+                        (self.x_adjust // 2, (self.y_adjust // 2) + int(self.row_size * row)),
+                        (surface_width - self.x_adjust // 2, (self.y_adjust // 2) + int(self.row_size * row)),
+                        self.gridline_width)
 
             col_size = (self.width - self.x_adjust) / cols
             for col in range(cols + 1):
@@ -47,28 +48,60 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
             col_size = (self.width - self.x_adjust) / cols
             data = all_data[category]
 
+            # self.y = Point.y_adjust + (self.speed - fastest_time) * ((surface_height - (margin * 3)) / fast_slow_range)
+
             if render_type == 1:
+
+                data_font_style = "Instruction.ttf"
+
                 for idx in range(cols):
-                    pygame.draw.circle(surface, color.alert_red,
-                                       (((self.x_adjust // 2) + col_size // 2) + int(col_size * idx),
-                                        self.height - (self.y_adjust // 2) - int(data[idx] * y_adjust)), self.radius, 1)
+                    if data[idx]:
+                        pygame.draw.circle(surface, color.alert_red,
+                                           (((self.x_adjust // 2) + col_size // 2) + int(col_size * idx),
+                                            self.height - (self.y_adjust // 2) - int(data[idx] * y_adjust)),
+                                           self.radius, 0)
+
+                        item_font = pygame.font.Font(f"./{data_font_style}", int(10 * scaler))
+                        item_value_surface = item_font.render(str(round(data[idx], 2)), True, color.white)
+                        item_value_rect = item_value_surface.get_rect()
+                        item_value_rect.center = (((self.x_adjust // 2) + col_size // 2) + int(col_size * idx),
+                                                  self.height - (self.y_adjust // 2) - int(
+                                                      data[idx] * y_adjust) + 15)
+                        surface.blit(item_value_surface, item_value_rect)
+
+
 
             if render_type == 0:
-
+                # 0 6 7 13 14
                 data_font_style = "Instruction.ttf"
                 directions = ["", "U", "D", "L", "R"]
 
                 for idx, item in enumerate(data):
-                    item_font = pygame.font.Font(f"./{data_font_style}", int(20 * scaler))
-                    if category == 13 or category == 14:
-                        print(f"item: {item}")
+                    item_font = pygame.font.Font(f"./{data_font_style}", int(10 * scaler))
+
+                    if category == 6 or category == 7:  # fastest directions
+                        item_direction_surface = item_font.render(item[0][0], True, color.white)
+                        item_value_surface = item_font.render(str(item[-1]), True, color.white)
+                        item_direction_rect = item_direction_surface.get_rect()
+                        item_value_rect = item_value_surface.get_rect()
+                        item_direction_rect.center = (
+                        ((self.x_adjust // 2) + col_size // 2) + int(col_size * idx),
+                        self.height - (self.y_adjust // 2) - int(data[idx][-1] * y_adjust))
+                        item_value_rect.center = (((self.x_adjust // 2) + col_size // 2) + int(col_size * idx),
+                                                      self.height - (self.y_adjust // 2) - int(
+                                                          data[idx][-1] * y_adjust) + 15)
+                        surface.blit(item_direction_surface, item_direction_rect)
+                        surface.blit(item_value_surface, item_value_rect)
+
+                    if category == 13 or category == 14:  # worst
                         item_surface = item_font.render(directions[item], True, color.white)
                     else:
                         item_surface = item_font.render(str(item), True, color.white)
-                    item_rect = item_surface.get_rect()
-                    item_rect.center = (((self.x_adjust // 2) + col_size // 2) + int(col_size * idx), self.height // 2)
+                    if category not in [6, 7]:
+                        item_rect = item_surface.get_rect()
+                        item_rect.center = (((self.x_adjust // 2) + col_size // 2) + int(col_size * idx), self.height // 2)
 
-                    surface.blit(item_surface, item_rect)
+                        surface.blit(item_surface, item_rect)
 
     class DropDown:
         def __init__(self, menu_name, rows, menu_width, row_height, x_adjust, y_adjust, data, float_color):
@@ -97,7 +130,7 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
             self.mouse_timer = 20
             self.menu_activated = False
             self.floating_over_items = None
-            self.last_selected = None
+            self.last_selected = 0
             self.menu_slide_position = 0
             self.menu_slide_speed = 50 * scaler
             self.menu_rect = pygame.Rect(self.x_adjust, self.y_adjust, self.menu_width, self.row_height)
@@ -157,8 +190,8 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
                             if self.mouse_timer >= 20:
                                 if pygame.mouse.get_pressed(num_buttons=3) == (1, 0, 0):
                                     self.last_selected = self.floating_over_items - 1
-                                    self.menu_name = categories[self.last_selected]
-                                    print(self.last_selected, categories[self.last_selected], date_ranges[self.last_selected])
+                                    self.title_initialized = False
+                                    print(self.last_selected, categories[self.floating_over_items - 1])
                                     self.mouse_timer = 0
                                     self.menu_activated = False
 
@@ -195,7 +228,10 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
                 text_y_adjust = 2 * scaler
                 if not self.title_initialized:
                     self.name_font = pygame.font.Font(f"./{header_font_style}", int(20 * scaler))
-                    self.name_surface = self.name_font.render(self.menu_name, True, self.text_color)
+                    if menu == menu1:
+                        self.name_surface = self.name_font.render(categories[self.last_selected], True, self.text_color)
+                    else:
+                        self.name_surface = self.name_font.render("time ranges", True, self.text_color)
                     self.name_rect = self.name_surface.get_rect()
                     self.name_rect.center = self.x_adjust + self.menu_width // 2,\
                                             self.y_adjust + self.row_height // 2 + text_y_adjust
@@ -225,25 +261,31 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
 
     def processing(category, time_range):
 
-        category1 = [0, 13, 14]
-        category2 = [1, 2, 3, 4, 5, 8, 9, 10, 11, 12, 15, 16]
-        category3 = [6, 7]
-        category_type = 1
+        category1 = [0, 6, 7, 13, 14] # string related
+        category2 = [1, 2, 3, 4, 5, 8, 9, 10, 11, 12, 15, 16]  # integer related
+        category_group = None
 
         if category in category1:
-            category_type = 0
+            category_group = 0
         elif category in category2:
-            category_type = 1
-        elif category in category3:
-            category_type = 2
+            category_group = 1
 
-        try:
-            adjuster = (surface_height - graph.y_adjust) / max(all_data[category])
-        except ZeroDivisionError:
+        if category not in [6, 7, 13, 14]:
+            try:
+                adjuster = (surface_height - graph.y_adjust) / max(all_data[category])
+            except ZeroDivisionError:
+                adjuster = 0
+
+        elif category in [6, 7]:
+            speeds = max([int(i[-1]) for i in all_data[category]])
+            adjuster = (surface_height - graph.y_adjust) / speeds
+
+        else:
             adjuster = 0
+
         graph_columns = len(all_data[category])
 
-        return adjuster, graph_columns, category_type
+        return adjuster, graph_columns, category_group
 
     categories = [' 0 level',
                   ' 1 up success reaction times average',
