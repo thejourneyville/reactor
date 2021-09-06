@@ -51,28 +51,61 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
             # self.y = Point.y_adjust + (self.speed - fastest_time) * ((surface_height - (margin * 3)) / fast_slow_range)
 
             if render_type == 1:
+                #  1 2 3 4 5 8 9 10 11 12 15 16
+                fastest = min([item for item in data if item != 0])
+                slowest = max([item for item in data if item != 0])
 
                 data_font_style = "Instruction.ttf"
 
                 for idx in range(cols):
                     if data[idx]:
-                        pygame.draw.circle(surface, color.alert_red,
-                                           (((self.x_adjust // 2) + col_size // 2) + int(col_size * idx),
-                                            self.height - (self.y_adjust // 2) - int(data[idx] * y_adjust)),
-                                           self.radius, 0)
+                        if category not in [8, 9, 10, 11, 12, 15, 16]:
 
-                        item_font = pygame.font.Font(f"./{data_font_style}", int(10 * scaler))
-                        item_value_surface = item_font.render(str(round(data[idx], 2)), True, color.white)
-                        item_value_rect = item_value_surface.get_rect()
-                        item_value_rect.center = (((self.x_adjust // 2) + col_size // 2) + int(col_size * idx),
-                                                  self.height - (self.y_adjust // 2) - int(
-                                                      data[idx] * y_adjust) + 15)
-                        surface.blit(item_value_surface, item_value_rect)
+                            speed = int(data[idx])
+                            try:
+                                y_axis = self.y_adjust + (speed - fastest) * (
+                                            (surface_height - self.y_adjust * 2) / (slowest - fastest))
+                            except ZeroDivisionError:
+                                y_axis = 0
 
+                            pygame.draw.circle(surface, ((255 - int(y_axis * .1)), 0, 0),
+                                               (((self.x_adjust // 2) + col_size // 2) + int(col_size * idx),
+                                                y_axis),
+                                               self.radius, 0)
+
+                            item_font = pygame.font.Font(f"./{data_font_style}", int(10 * scaler))
+                            item_value_surface = item_font.render(str(round(data[idx], 2)), True, color.white)
+                            item_value_rect = item_value_surface.get_rect()
+                            item_value_rect.center = (((self.x_adjust // 2) + col_size // 2) + int(col_size * idx),
+                                                      y_axis + 15)
+                            surface.blit(item_value_surface, item_value_rect)
+                        else:
+
+                            speed = int(data[idx])
+                            try:
+                                y_axis = surface_height - (self.y_adjust + (speed - fastest) * (
+                                            (surface_height - self.y_adjust * 2) / (slowest - fastest)))
+                            except ZeroDivisionError:
+                                y_axis = 0
+
+                            pygame.draw.circle(surface, color.alert_red,
+                                (((self.x_adjust // 2) + col_size // 2) + int(col_size * idx), y_axis), 0)
+
+                            item_font = pygame.font.Font(f"./{data_font_style}", int(10 * scaler))
+                            item_value_surface = item_font.render(str(round(data[idx], 2)), True, color.white)
+                            item_value_rect = item_value_surface.get_rect()
+                            item_value_rect.center = (((self.x_adjust // 2) + col_size // 2) + int(col_size * idx),
+                                                      y_axis + 15)
+                            surface.blit(item_value_surface, item_value_rect)
 
 
             if render_type == 0:
                 # 0 6 7 13 14
+
+                fastest = min([item for item in
+                               [item if not isinstance(item, tuple) else item[-1] for item in data] if item != 0])
+                slowest = max([item for item in
+                               [item if not isinstance(item, tuple) else item[-1] for item in data] if item != 0])
                 data_font_style = "Instruction.ttf"
                 directions = ["", "U", "D", "L", "R"]
 
@@ -80,16 +113,24 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
                     item_font = pygame.font.Font(f"./{data_font_style}", int(10 * scaler))
 
                     if category == 6 or category == 7:  # fastest directions
-                        item_direction_surface = item_font.render(item[0][0], True, color.white)
-                        item_value_surface = item_font.render(str(item[-1]), True, color.white)
+
+                        speed = int(item[-1])
+                        color_code = ["u", "d", "l", "r"]
+
+                        try:
+                            y_axis = self.y_adjust + (speed - fastest) * (
+                                            (surface_height - self.y_adjust * 2) / (slowest - fastest))
+                        except ZeroDivisionError:
+                            y_axis = 0
+
+                        item_direction_surface = item_font.render(item[0][0], True, color.stats[color_code.index(item[0][0])])
+                        item_value_surface = item_font.render(str(round(item[-1], 2)), True, color.white)
                         item_direction_rect = item_direction_surface.get_rect()
                         item_value_rect = item_value_surface.get_rect()
-                        item_direction_rect.center = (
-                        ((self.x_adjust // 2) + col_size // 2) + int(col_size * idx),
-                        self.height - (self.y_adjust // 2) - int(data[idx][-1] * y_adjust))
+                        item_direction_rect.center = (((self.x_adjust // 2) + col_size // 2) + int(col_size * idx),
+                                                      y_axis)
                         item_value_rect.center = (((self.x_adjust // 2) + col_size // 2) + int(col_size * idx),
-                                                      self.height - (self.y_adjust // 2) - int(
-                                                          data[idx][-1] * y_adjust) + 15)
+                                                  y_axis + 15)
                         surface.blit(item_direction_surface, item_direction_rect)
                         surface.blit(item_value_surface, item_value_rect)
 
