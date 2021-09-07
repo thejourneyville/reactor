@@ -20,7 +20,7 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
             self.row_size = (self.height - self.y_adjust) // self.rows_amount
             self.gridline_width = 1
             self.gridline_color = color.darkgrey
-            self.radius = 5 * scaler
+            self.radius = 8 * scaler
 
         def draw_graph(self, cols):
             if menu1.last_selected not in [0, 13, 14]:
@@ -48,12 +48,27 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
             col_size = (self.width - self.x_adjust) / cols
             data = all_data[category]
 
+            def color_grad(y_color_value):
+
+                g = 255 - int(y_color_value * .2)
+
+                if int(y_color_value * .2) <= 255:
+                    r = int(y_color_value * .2)
+                else:
+                    r = int(y_color_value * .1)
+
+                b = 0
+                return r, g, b
+
             # self.y = Point.y_adjust + (self.speed - fastest_time) * ((surface_height - (margin * 3)) / fast_slow_range)
 
             if render_type == 1:
                 #  1 2 3 4 5 8 9 10 11 12 15 16
-                fastest = min([item for item in data if item != 0])
-                slowest = max([item for item in data if item != 0])
+                try:
+                    fastest = min([item for item in data if item != 0])
+                    slowest = max([item for item in data if item != 0])
+                except ValueError:
+                    fastest, slowest = self.y_adjust, self.y_adjust
 
                 data_font_style = "Instruction.ttf"
 
@@ -66,12 +81,12 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
                                 y_axis = self.y_adjust + (speed - fastest) * (
                                             (surface_height - self.y_adjust * 2) / (slowest - fastest))
                             except ZeroDivisionError:
-                                y_axis = 0
+                                y_axis = self.y_adjust
 
-                            pygame.draw.circle(surface, ((255 - int(y_axis * .1)), 0, 0),
-                                               (((self.x_adjust // 2) + col_size // 2) + int(col_size * idx),
-                                                y_axis),
-                                               self.radius, 0)
+                            # rate = lambda T: 200*exp(-T) if T>200 else 400*exp(-T)
+
+                            pygame.draw.circle(surface, color_grad(y_axis),
+                                (self.x_adjust // 2 + (col_size // 2) + int(col_size * idx), y_axis), self.radius, 0)
 
                             item_font = pygame.font.Font(f"./{data_font_style}", int(10 * scaler))
                             item_value_surface = item_font.render(str(round(data[idx], 2)), True, color.white)
@@ -86,10 +101,10 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
                                 y_axis = surface_height - (self.y_adjust + (speed - fastest) * (
                                             (surface_height - self.y_adjust * 2) / (slowest - fastest)))
                             except ZeroDivisionError:
-                                y_axis = 0
+                                y_axis = self.y_adjust
 
-                            pygame.draw.circle(surface, color.alert_red,
-                                (((self.x_adjust // 2) + col_size // 2) + int(col_size * idx), y_axis), 0)
+                            pygame.draw.circle(surface, color_grad(y_axis),
+                                (((self.x_adjust // 2) + col_size // 2) + int(col_size * idx), y_axis), self.radius, 0)
 
                             item_font = pygame.font.Font(f"./{data_font_style}", int(10 * scaler))
                             item_value_surface = item_font.render(str(round(data[idx], 2)), True, color.white)
@@ -102,10 +117,16 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
             if render_type == 0:
                 # 0 6 7 13 14
 
-                fastest = min([item for item in
-                               [item if not isinstance(item, tuple) else item[-1] for item in data] if item != 0])
-                slowest = max([item for item in
-                               [item if not isinstance(item, tuple) else item[-1] for item in data] if item != 0])
+                try:
+                    fastest = min([item for item in
+                                   [item if not isinstance(item, tuple) else item[-1] for item in data] if item != 0])
+                    slowest = max([item for item in
+                                   [item if not isinstance(item, tuple) else item[-1] for item in data] if item != 0])
+                except ValueError:
+                    fastest, slowest = self.y_adjust, self.y_adjust
+
+                print(f"fastest: {fastest}\nslowest: {slowest}\n")
+
                 data_font_style = "Instruction.ttf"
                 directions = ["", "U", "D", "L", "R"]
 
@@ -121,7 +142,7 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
                             y_axis = self.y_adjust + (speed - fastest) * (
                                             (surface_height - self.y_adjust * 2) / (slowest - fastest))
                         except ZeroDivisionError:
-                            y_axis = 0
+                            y_axis = self.y_adjust
 
                         item_direction_surface = item_font.render(item[0][0], True, color.stats[color_code.index(item[0][0])])
                         item_value_surface = item_font.render(str(round(item[-1], 2)), True, color.white)

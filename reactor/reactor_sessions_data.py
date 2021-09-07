@@ -2,6 +2,7 @@ import reactor_database as db
 from reactor_database import retrieve_entries
 import datetime
 from datetime import timedelta
+from statistics import mode
 
 
 # def retrieve(user_name, level, react_up, react_down, react_left, react_right, react_all, accuracy_up, accuracy_down,
@@ -130,6 +131,33 @@ def retrieve(user_name):
 
         return sessions
 
+    def averager(category, data):
+
+        if category not in [6, 7, 13, 14]:
+            size = len(data)
+            total = sum(data)
+            return round(total / size, 2)
+
+        elif category in [6, 7]:
+
+            directions = {'up': 0, 'down': 0, 'left': 0, 'right': 0}
+            for item in data:
+                directions[item[0]] += 1
+
+            greatest = max({k for k, v in directions.items()})
+
+            counts = []
+            for item in data:
+                if item[0] == greatest:
+                    counts.append(item[-1])
+
+            size = len(counts)
+            total = sum(counts)
+            return greatest, round(total / size, 2)
+
+        else:
+            return mode(data)
+
     def current_day(data):
         today_date = datetime.datetime.today().strftime("%d%m%y")
 
@@ -144,6 +172,8 @@ def retrieve(user_name):
         today = datetime.date.today()
         days_date = [(today - timedelta(days=n)).strftime("%d%m%y") for n in range(365)]
 
+        # print(f"data: {data}")
+
         day = 0
         all_days, inner = [], []
         for entry in data:
@@ -157,13 +187,32 @@ def retrieve(user_name):
                     inner = []
         all_days.append(inner)
 
-        blank_lists = [[] for _ in range(365 - len(all_days))]
-        for blank in blank_lists:
-            all_days.append(blank)
+        # print(f"all_days: {all_days}")
+        # for day in all_days:
+        #     print(f"day {day}")
+
+        # blank_lists = [[] for _ in range(365 - len(all_days))]
+        # for blank in blank_lists:
+        #     all_days.append(blank)
 
         # print(f"\n\nby_day({len(all_days)}): {all_days}\n\n")
+        # categories = [' 0 level', ' 1 up success reaction times average', ' 2 down success reaction times average',
+        #               ' 3 left success reaction times average', ' 4 right success reaction times average',
+        #               ' 5 total success reaction times average', ' 6 fastest direction success average',
+        #               ' 7 slowest direction success average', ' 8 up shots percentage', ' 9 down shots percentage',
+        #               '10 left shots percentage', '11 right shots percentage', '12 total shots percentage',
+        #               '13 worst wrong launch direction', '14 worst mistook door', '15 assertion', '16 time elapsed', ]
 
-        return data_sorter(all_days)
+        all_categories, inner = [], []
+        category = 0
+        for idx_category in range(17):
+            for a_day in all_days:
+                day_categories = data_sorter(a_day)
+                inner.append(averager(idx_category, day_categories[idx_category]))
+            all_categories.append(inner)
+            inner = []
+
+        return all_categories
 
     def by_week(data):
         today = datetime.date.today()
@@ -264,15 +313,15 @@ def retrieve(user_name):
         data_sorter(all_months)
 
     # print("today")
-    day = current_day(result)
+    # day = current_day(result)
     # print("dailny")
-    # daily = by_day(result)
+    daily = by_day(result)
     # print("weekly")
     # by_week(result)
     # print("monthly")
     # by_month(result)
 
-    return day
+    return daily
 
 
 
