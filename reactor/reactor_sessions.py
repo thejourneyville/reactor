@@ -51,13 +51,18 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
             def color_grad(y_color_value):
 
                 g = 255 - int(y_color_value * .2)
+                if g <= 0:
+                    g = 1
 
                 if int(y_color_value * .2) <= 255:
                     r = int(y_color_value * .2)
                 else:
                     r = int(y_color_value * .1)
+                    if r > 255:
+                        r = 255
 
                 b = 0
+                print(r, g, b)
                 return r, g, b
 
             # self.y = Point.y_adjust + (self.speed - fastest_time) * ((surface_height - (margin * 3)) / fast_slow_range)
@@ -100,6 +105,9 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
                                             (surface_height - self.y_adjust * 2) / (slowest - fastest)))
                             except ZeroDivisionError:
                                 y_axis = self.y_adjust
+
+                            if y_axis <= 25:
+                                y_axis = 50
 
                             pygame.draw.circle(surface, color_grad(y_axis),
                                 (((self.x_adjust // 2) + col_size // 2) + int(col_size * idx), y_axis), self.radius, 0)
