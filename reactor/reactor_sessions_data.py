@@ -17,7 +17,7 @@ from statistics import mode
 #         return "invalid entry"
 
 def retrieve(user_name):
-    result = retrieve_entries(user_name)
+    result = list(reversed(retrieve_entries(user_name)))
 
     # test - to see what exists on 'result'
     # for idx, item in enumerate(result):
@@ -73,11 +73,11 @@ def retrieve(user_name):
             try:
                 r_fastest.append((session[8].split()[0], float(session[8].split()[-1])))
             except ValueError:
-                r_fastest.append(0)
+                r_fastest.append(("NA", 0))
             try:
                 r_slowest.append((session[9].split()[0], float(session[9].split()[-1])))
             except ValueError:
-                r_slowest.append(0)
+                r_slowest.append(("NA", 0))
             try:
                 p_up.append(float(session[10]))
             except ValueError:
@@ -134,15 +134,24 @@ def retrieve(user_name):
     def averager(category, data):
 
         if category not in [6, 7, 13, 14]:
-            size = len(data)
+            size = len([item for item in data if item != 0])
             total = sum(data)
-            return round(total / size, 2)
+            # print(f"data: {data}\ncategory: {category}\nsize: {size}\ntotal: {total}")
+            try:
+                return round(total / size, 2)
+            except ZeroDivisionError:
+                return 0
 
         elif category in [6, 7]:
 
+            # print(f"data: {data}\ncategory: {category}\nsize: {len(data)}\n")
+
             directions = {'up': 0, 'down': 0, 'left': 0, 'right': 0}
             for item in data:
-                directions[item[0]] += 1
+                if item[0] == "NA":
+                    continue
+                else:
+                    directions[item[0]] += 1
 
             greatest = max({k for k, v in directions.items()})
 
@@ -153,7 +162,10 @@ def retrieve(user_name):
 
             size = len(counts)
             total = sum(counts)
-            return greatest, round(total / size, 2)
+            try:
+                return greatest, round(total / size, 2)
+            except ZeroDivisionError:
+                return greatest, 0
 
         else:
             return mode(data)
@@ -174,20 +186,20 @@ def retrieve(user_name):
 
         # print(f"data: {data}")
 
-        day = 0
+        day_idx = 0
         all_days, inner = [], []
         for entry in data:
-            while day <= 364:
-                if entry[1][-6:] == days_date[day]:
+            while day_idx <= 364:
+                if entry[1][-6:] == days_date[day_idx]:
                     inner.append(entry)
                     break
                 else:
-                    day += 1
+                    day_idx += 1
                     all_days.append(inner)
                     inner = []
         all_days.append(inner)
 
-        # print(f"all_days: {all_days}")
+        # print(f"all_days: {all_days}\n")
         # for day in all_days:
         #     print(f"day {day}")
 
@@ -204,7 +216,6 @@ def retrieve(user_name):
         #               '13 worst wrong launch direction', '14 worst mistook door', '15 assertion', '16 time elapsed', ]
 
         all_categories, inner = [], []
-        category = 0
         for idx_category in range(17):
             for a_day in all_days:
                 day_categories = data_sorter(a_day)
@@ -246,13 +257,22 @@ def retrieve(user_name):
         all_weeks.append(inner)
 
         # adds remaining blank lists to fill 52 weeks of 'all_weeks'
-        blank_lists = [[] for _ in range(52 - len(all_weeks))]
-        for blank in blank_lists:
-            all_weeks.append(blank)
+        # blank_lists = [[] for _ in range(52 - len(all_weeks))]
+        # for blank in blank_lists:
+        #     all_weeks.append(blank)
 
-        print(f"\n\nby_week({len(all_weeks)}): {all_weeks}\n\n")
+        # print(f"\n\nby_week({len(all_weeks)}): {all_weeks}\n\n")
 
-        data_sorter(all_weeks)
+        all_categories, inner = [], []
+        for idx_category in range(17):
+            for a_week in all_weeks:
+                week_categories = data_sorter(a_week)
+                inner.append(averager(idx_category, week_categories[idx_category]))
+            all_categories.append(inner)
+            inner = []
+
+        # print(f"\n\nall_categories: {all_categories}")
+        return all_categories
 
     # NOTE need to figure out how to store monthly data starting from this month and that there's no overlap
     def by_month(data):
@@ -303,25 +323,33 @@ def retrieve(user_name):
                     all_months.append(inner)
                     inner = []
         all_months.append(inner)
+        #
+        # blank_lists = [[] for _ in range(12 - len(all_months))]
+        # for blank in blank_lists:
+        #     all_months.append(blank)
 
-        blank_lists = [[] for _ in range(12 - len(all_months))]
-        for blank in blank_lists:
-            all_months.append(blank)
+        # print(f"\n\nby_month({len(all_months)}): {all_months}\n\n")
 
-        print(f"\n\nby_month({len(all_months)}): {all_months}\n\n")
+        all_categories, inner = [], []
+        for idx_category in range(17):
+            for a_month in all_months:
+                month_categories = data_sorter(a_month)
+                inner.append(averager(idx_category, month_categories[idx_category]))
+            all_categories.append(inner)
+            inner = []
 
-        data_sorter(all_months)
+        return all_categories
 
     # print("today")
-    # day = current_day(result)
+    day = current_day(result)
     # print("dailny")
     daily = by_day(result)
     # print("weekly")
-    # by_week(result)
+    weekly = by_week(result)
     # print("monthly")
-    # by_month(result)
+    monthly = by_month(result)
 
-    return daily
+    return day, daily, weekly, monthly
 
 
 

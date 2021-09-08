@@ -15,7 +15,7 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
             self.width = surface_width
             self.height = surface_height
             self.x_adjust = 50 * scaler
-            self.y_adjust = 50 * scaler
+            self.y_adjust = 100 * scaler
             self.rows_amount = 10
             self.row_size = (self.height - self.y_adjust) // self.rows_amount
             self.gridline_width = 1
@@ -46,7 +46,7 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
         def draw_point(self, category, y_adjust, cols, render_type):
 
             col_size = (self.width - self.x_adjust) / cols
-            data = all_data[category]
+            data = all_data[menu2.last_selected][category]
 
             def color_grad(y_color_value):
 
@@ -65,30 +65,28 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
             if render_type == 1:
                 #  1 2 3 4 5 8 9 10 11 12 15 16
                 try:
-                    fastest = min([item for item in data if item != 0])
-                    slowest = max([item for item in data if item != 0])
+                    fastest = min([item for item in data if item != 0])  # 176.3
+                    slowest = max([item for item in data if item != 0])  # 210.15
                 except ValueError:
-                    fastest, slowest = self.y_adjust, self.y_adjust
+                    fastest, slowest = self.y_adjust, self.y_adjust  # 50, 50
 
                 data_font_style = "Instruction.ttf"
 
                 for idx in range(cols):
                     if data[idx]:
                         if category not in [8, 9, 10, 11, 12, 15, 16]:
+                            speed = int(data[idx])  # 176.3
 
-                            speed = int(data[idx])
                             try:
                                 y_axis = self.y_adjust + (speed - fastest) * (
                                             (surface_height - self.y_adjust * 2) / (slowest - fastest))
                             except ZeroDivisionError:
                                 y_axis = self.y_adjust
 
-                            # rate = lambda T: 200*exp(-T) if T>200 else 400*exp(-T)
-
                             pygame.draw.circle(surface, color_grad(y_axis),
                                 (self.x_adjust // 2 + (col_size // 2) + int(col_size * idx), y_axis), self.radius, 0)
 
-                            item_font = pygame.font.Font(f"./{data_font_style}", int(10 * scaler))
+                            item_font = pygame.font.Font(f"./{data_font_style}", int(15 * scaler))
                             item_value_surface = item_font.render(str(round(data[idx], 2)), True, color.white)
                             item_value_rect = item_value_surface.get_rect()
                             item_value_rect.center = (((self.x_adjust // 2) + col_size // 2) + int(col_size * idx),
@@ -106,13 +104,12 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
                             pygame.draw.circle(surface, color_grad(y_axis),
                                 (((self.x_adjust // 2) + col_size // 2) + int(col_size * idx), y_axis), self.radius, 0)
 
-                            item_font = pygame.font.Font(f"./{data_font_style}", int(10 * scaler))
+                            item_font = pygame.font.Font(f"./{data_font_style}", int(15 * scaler))
                             item_value_surface = item_font.render(str(round(data[idx], 2)), True, color.white)
                             item_value_rect = item_value_surface.get_rect()
                             item_value_rect.center = (((self.x_adjust // 2) + col_size // 2) + int(col_size * idx),
                                                       y_axis + 15)
                             surface.blit(item_value_surface, item_value_rect)
-
 
             if render_type == 0:
                 # 0 6 7 13 14
@@ -124,8 +121,6 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
                                    [item if not isinstance(item, tuple) else item[-1] for item in data] if item != 0])
                 except ValueError:
                     fastest, slowest = self.y_adjust, self.y_adjust
-
-                print(f"fastest: {fastest}\nslowest: {slowest}\n")
 
                 data_font_style = "Instruction.ttf"
                 directions = ["", "U", "D", "L", "R"]
@@ -253,7 +248,7 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
                                 if pygame.mouse.get_pressed(num_buttons=3) == (1, 0, 0):
                                     self.last_selected = self.floating_over_items - 1
                                     self.title_initialized = False
-                                    print(self.last_selected, categories[self.floating_over_items - 1])
+                                    # print(self.last_selected, categories[self.floating_over_items - 1])
                                     self.mouse_timer = 0
                                     self.menu_activated = False
 
@@ -293,7 +288,7 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
                     if menu == menu1:
                         self.name_surface = self.name_font.render(categories[self.last_selected], True, self.text_color)
                     else:
-                        self.name_surface = self.name_font.render("time ranges", True, self.text_color)
+                        self.name_surface = self.name_font.render(date_ranges[self.last_selected], True, self.text_color)
                     self.name_rect = self.name_surface.get_rect()
                     self.name_rect.center = self.x_adjust + self.menu_width // 2,\
                                             self.y_adjust + self.row_height // 2 + text_y_adjust
@@ -334,50 +329,51 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
 
         if category not in [6, 7, 13, 14]:
             try:
-                adjuster = (surface_height - graph.y_adjust) / max(all_data[category])
+                adjuster = (surface_height - graph.y_adjust) / max(all_data[time_range][category])
             except ZeroDivisionError:
                 adjuster = 0
 
         elif category in [6, 7]:
-            speeds = max([int(i[-1]) for i in all_data[category]])
+            speeds = max([int(i[-1]) for i in all_data[time_range][category]])
             adjuster = (surface_height - graph.y_adjust) / speeds
 
         else:
             adjuster = 0
 
-        graph_columns = len(all_data[category])
+        graph_columns = len(all_data[time_range][category])
 
         return adjuster, graph_columns, category_group
 
-    categories = [' 0 level',
-                  ' 1 up success reaction times average',
-                  ' 2 down success reaction times average',
-                  ' 3 left success reaction times average',
-                  ' 4 right success reaction times average',
-                  ' 5 total success reaction times average',
-                  ' 6 fastest direction success average',
-                  ' 7 slowest direction success average',
-                  ' 8 up shots percentage',
-                  ' 9 down shots percentage',
-                  '10 left shots percentage',
-                  '11 right shots percentage',
-                  '12 total shots percentage',
-                  '13 worst wrong launch direction',
-                  '14 worst mistook door',
-                  '15 assertion',
-                  '16 time elapsed',
+    categories = ['level',
+                  'up success reaction times average',
+                  'down success reaction times average',
+                  'left success reaction times average',
+                  'right success reaction times average',
+                  'total success reaction times average',
+                  'fastest direction success average',
+                  'slowest direction success average',
+                  'up shots percentage',
+                  'down shots percentage',
+                  'left shots percentage',
+                  'right shots percentage',
+                  'total shots percentage',
+                  'worst wrong launch direction',
+                  'worst mistook door',
+                  'assertion',
+                  'time elapsed',
               ]
 
-    date_ranges = ['0 today',
-                   '1 day average',
-                   '2 week average',
-                   '3 month average',
+    date_ranges = ['today',
+                   'day average',
+                   'week average',
+                   'month average',
                    ]
 
     # LEGEND:
     # menu name / number of rows / menu width, row height / x_axis start point, y_axis start point, data, float_color
     menu1 = DropDown(str("session"), len(categories), 387, 20, 0, 0, categories, (33, 139, 71))
     menu2 = DropDown(str("range"), len(date_ranges), 170, 20, 388, 0, date_ranges, (32, 125, 255))
+
     menus = (menu1, menu2)
 
     all_data = sessions_data.retrieve(player)
@@ -388,7 +384,7 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
         print(f"name: all_data\nsize: {len(data1[0])}\nlayer0: {data1}")
         input()
 
-    test1(all_data)
+    # test1(all_data)
 
     graph = Graph()
 
