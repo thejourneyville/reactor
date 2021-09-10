@@ -63,7 +63,7 @@ def start_menu():
         stats_font = pygame.font.Font(f"./{font_style_text}", int(40 * scaler))
 
         title_surface = title.render("REACT0R", False, color.title_color)
-        start_surface = start_font.render("[n]ew player [c]ontinue", True, color.start_color)
+        start_surface = start_font.render("press [enter]", True, color.start_color)
         instructions_surface = instructions_font.render(
             "using arrow keys, launch the disc through the open doors", True, color.instructions_color)
         shot_accuracy_surface = stats_font.render(f"shots made/total: {shot_accuracy} pct.", True, color.stats_color)
@@ -154,7 +154,7 @@ def start_menu():
                 quit()
 
             elif event.type == pygame.KEYDOWN:
-                if pygame.key.name(event.key) == "n":
+                if event.key == pygame.K_RETURN:
 
                     # create account
                     user_account = create.account_create(surface, surface_width, surface_height, margin, margin_color,
