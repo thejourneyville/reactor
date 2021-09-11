@@ -366,8 +366,8 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
                   'left shots percentage',
                   'right shots percentage',
                   'total shots percentage',
-                  'worst wrong launch direction',
-                  'worst mistook door',
+                  'common wrong launch direction',
+                  'common mistook door',
                   'assertion',
                   'time elapsed',
               ]

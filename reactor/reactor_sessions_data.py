@@ -168,6 +168,7 @@ def retrieve(user_name):
                 return greatest, 0
 
         else:
+            print(f"category {category}: {data}")
             return mode(data)
 
     def current_day(data):
@@ -195,8 +196,9 @@ def retrieve(user_name):
                     break
                 else:
                     day_idx += 1
-                    all_days.append(inner)
-                    inner = []
+                    if inner:
+                        all_days.append(inner)
+                        inner = []
         all_days.append(inner)
 
         # print(f"all_days: {all_days}\n")
@@ -253,7 +255,7 @@ def retrieve(user_name):
                     week += 1
                     if inner:
                         all_weeks.append(inner)
-                    inner = []
+                        inner = []
         all_weeks.append(inner)
 
         # adds remaining blank lists to fill 52 weeks of 'all_weeks'
@@ -320,8 +322,9 @@ def retrieve(user_name):
                     break
                 else:
                     month_idx = (month_idx - 1) % 12
-                    all_months.append(inner)
-                    inner = []
+                    if inner:
+                        all_months.append(inner)
+                        inner = []
         all_months.append(inner)
         #
         # blank_lists = [[] for _ in range(12 - len(all_months))]
