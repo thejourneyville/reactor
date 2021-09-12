@@ -3,6 +3,7 @@ import reactor_main_game
 import reactor_round as round_screen
 import reactor_colors as color
 import reactor_account_create as create
+import reactor_sessions as sessions
 
 # initializing pygame
 pygame.init()
@@ -160,8 +161,8 @@ def start_menu():
                     user_account = create.account_create(surface, surface_width, surface_height, margin, margin_color,
                                                          disc_pulse_value, disc_pulse_direction,
                                                          scaler, clock, fps)
-                    if user_account:
-                        print(user_account)
+                    # if user_account:
+                    #     print(user_account)
 
                     accuracy, timer = round_screen.level_screen(surface, surface_width, surface_height,
                                                                 margin, margin_color,
@@ -181,6 +182,9 @@ def start_menu():
                     title_open_count = 0
                     accuracy, timer = 0, 0
                     title_animating = True
+
+                elif pygame.key.name(event.key) == "j":  # 'j'ump to data
+                    sessions.sessions(surface, surface_width, surface_height, scaler, clock, fps, 'default')
 
         clock.tick(fps)
         surface.fill(color.background)

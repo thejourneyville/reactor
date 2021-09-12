@@ -15,7 +15,15 @@ def level_screen(surface, surface_width, surface_height, margin, margin_color,
     level_font_speed = 500 * scaler
     level_font_animating = True
     level_font_open_count = 0
-    level = 3
+    print(f"user: {user_account}")
+
+    return_user = int(database.user_exists(user_account)[0])
+    if return_user:
+        level = 3
+    else:
+        level = 3
+
+    print(f"level: {level}")
     score_goal = 15
     time_limit = 45
     pygame.display.set_caption(f"LEVEL {level}")
@@ -117,14 +125,15 @@ def level_screen(surface, surface_width, surface_height, margin, margin_color,
                     stats_results = stats.stats(surface, surface_width, surface_height, margin_color,
                                                 scaler, clock, fps, level, current_react_data, time_elapsed)
 
+
                     sr = stats_results
-                    print(sr[11], sr[13])
 
-                    database.database(user_account, str(level), sr[1], sr[3], sr[5], sr[7], sr[9], sr[11], sr[13],
-                                      sr[15], sr[17], sr[19], sr[21], sr[23], sr[25], sr[27],
-                                      str(accuracy_result[-1]), str(time_elapsed), "entry")
+                    if sr is not None:
+                        database.database(user_account, str(level), sr[1], sr[3], sr[5], sr[7], sr[9], sr[11], sr[13],
+                                          sr[15], sr[17], sr[19], sr[21], sr[23], sr[25], sr[27],
+                                          str(accuracy_result[-1]), str(time_elapsed), "entry")
 
-                    sessions.sessions(surface, surface_width, surface_height, scaler, clock, fps, user_account)
+                        sessions.sessions(surface, surface_width, surface_height, scaler, clock, fps, user_account)
 
 
 

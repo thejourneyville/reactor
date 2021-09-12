@@ -131,7 +131,7 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
                     fastest, slowest = self.y_adjust, self.y_adjust
 
                 data_font_style = "Instruction.ttf"
-                directions = ["", "U", "D", "L", "R"]
+                directions = ["NA", "U", "D", "L", "R"]
 
                 for idx, item in enumerate(data):
                     item_font = pygame.font.Font(f"./{data_font_style}", int(10 * scaler))
@@ -139,7 +139,7 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
                     if category == 6 or category == 7:  # fastest directions
 
                         speed = int(item[-1])
-                        color_code = ["u", "d", "l", "r"]
+                        color_code = ["NA", "up", "down", "left", "right"]
 
                         try:
                             y_axis = self.y_adjust + (speed - fastest) * (
@@ -147,7 +147,9 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
                         except ZeroDivisionError:
                             y_axis = self.y_adjust
 
-                        item_direction_surface = item_font.render(item[0][0], True, color.stats[color_code.index(item[0][0])])
+                        print(f"sessions: category 6 or 7: item: {item}")
+
+                        item_direction_surface = item_font.render(item[0][0], True, color.stats[color_code.index(item[0])])
                         item_value_surface = item_font.render(str(round(item[-1], 2)), True, color.white)
                         item_direction_rect = item_direction_surface.get_rect()
                         item_value_rect = item_value_surface.get_rect()
@@ -159,7 +161,6 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
                         surface.blit(item_value_surface, item_value_rect)
 
                     if category == 13 or category == 14:  # worst
-                        print(f"item: {item}")
                         item_surface = item_font.render(directions[item], True, color.white)
                     else:
                         item_surface = item_font.render(str(item), True, color.white)
@@ -366,8 +367,8 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
                   'left shots percentage',
                   'right shots percentage',
                   'total shots percentage',
-                  'worst wrong launch direction',
-                  'worst mistook door',
+                  'common wrong launch direction',
+                  'common mistook door',
                   'assertion',
                   'time elapsed',
               ]

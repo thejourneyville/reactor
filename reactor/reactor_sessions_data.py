@@ -168,7 +168,6 @@ def retrieve(user_name):
                 return greatest, 0
 
         else:
-            print(f"category {category}: {data}")
             return mode(data)
 
     def current_day(data):
