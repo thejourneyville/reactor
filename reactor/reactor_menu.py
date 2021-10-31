@@ -55,13 +55,13 @@ def start_menu():
             shot_accuracy = 0
             total_openings = 0
 
-        font_style_title = "SF Square Head Bold.ttf"
-        font_style_text = "darkforest.ttf"
+        font_style_title = "/Users/thejourneyville/Documents/vscode/python/reactor/reactor/SF Square Head Bold.ttf"
+        font_style_text = "/Users/thejourneyville/Documents/vscode/python/reactor/reactor/darkforest.ttf"
 
-        title = pygame.font.Font(f"./{font_style_title}", int(150 * scaler))
-        start_font = pygame.font.Font(f"./{font_style_text}", int(60 * scaler))
-        instructions_font = pygame.font.Font(f"./{font_style_text}", int(30 * scaler))
-        stats_font = pygame.font.Font(f"./{font_style_text}", int(40 * scaler))
+        title = pygame.font.Font(f"{font_style_title}", int(150 * scaler))
+        start_font = pygame.font.Font(f"{font_style_text}", int(60 * scaler))
+        instructions_font = pygame.font.Font(f"{font_style_text}", int(30 * scaler))
+        stats_font = pygame.font.Font(f"{font_style_text}", int(40 * scaler))
 
         title_surface = title.render("REACT0R", False, color.title_color)
         start_surface = start_font.render("press [enter]", True, color.start_color)

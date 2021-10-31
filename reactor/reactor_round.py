@@ -33,13 +33,13 @@ def level_screen(surface, surface_width, surface_height, margin, margin_color,
 
     def render_text():
 
-        font_style_title = "SF Square Head Bold.ttf"
-        font_style_text = "darkforest.ttf"
-        font_style_speed = "darkforest.ttf"
+        font_style_title = "/Users/thejourneyville/Documents/vscode/python/reactor/reactor/SF Square Head Bold.ttf"
+        font_style_text = "/Users/thejourneyville/Documents/vscode/python/reactor/reactor/darkforest.ttf"
+        font_style_speed = "/Users/thejourneyville/Documents/vscode/python/reactor/reactor/darkforest.ttf"
 
-        level_font = pygame.font.Font(f"./{font_style_title}", int(75 * scaler))
-        instructions_font = pygame.font.Font(f"./{font_style_text}", int(30 * scaler))
-        speed_font = pygame.font.Font(f"./{font_style_speed}", int(30 * scaler))
+        level_font = pygame.font.Font(f"{font_style_title}", int(75 * scaler))
+        instructions_font = pygame.font.Font(f"{font_style_text}", int(30 * scaler))
+        speed_font = pygame.font.Font(f"{font_style_speed}", int(30 * scaler))
 
         level_font_surface = level_font.render(f"LEVEL {level}", True, color.instructions_color)
         instructions_surface = instructions_font.render(

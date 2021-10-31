@@ -75,7 +75,7 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
                 except ValueError:
                     fastest, slowest = self.y_adjust, self.y_adjust  # 50, 50
 
-                data_font_style = "Instruction.ttf"
+                data_font_style = "/Users/thejourneyville/Documents/vscode/python/reactor/reactor/Instruction.ttf"
 
                 for idx in range(cols):
                     if data[idx]:
@@ -91,7 +91,7 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
                             pygame.draw.circle(surface, color_grad(y_axis),
                                 (self.x_adjust // 2 + (col_size // 2) + int(col_size * idx), y_axis), self.radius, 0)
 
-                            item_font = pygame.font.Font(f"./{data_font_style}", int(15 * scaler))
+                            item_font = pygame.font.Font(f"{data_font_style}", int(15 * scaler))
                             item_value_surface = item_font.render(str(round(data[idx], 2)), True, color.white)
                             item_value_rect = item_value_surface.get_rect()
                             item_value_rect.center = (((self.x_adjust // 2) + col_size // 2) + int(col_size * idx),
@@ -130,11 +130,11 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
                 except ValueError:
                     fastest, slowest = self.y_adjust, self.y_adjust
 
-                data_font_style = "Instruction.ttf"
+                data_font_style = "/Users/thejourneyville/Documents/vscode/python/reactor/reactor/Instruction.ttf"
                 directions = ["NA", "U", "D", "L", "R"]
 
                 for idx, item in enumerate(data):
-                    item_font = pygame.font.Font(f"./{data_font_style}", int(10 * scaler))
+                    item_font = pygame.font.Font(f"{data_font_style}", int(10 * scaler))
 
                     if category == 6 or category == 7:  # fastest directions
 
@@ -288,13 +288,13 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
 
         def menu_text(self):
 
-            header_font_style = "darkforest.ttf"
-            data_font_style = "Instruction.ttf"
+            header_font_style = "/Users/thejourneyville/Documents/vscode/python/reactor/reactor/darkforest.ttf"
+            data_font_style = "/Users/thejourneyville/Documents/vscode/python/reactor/reactor/Instruction.ttf"
 
             def menu_title():
                 text_y_adjust = 2 * scaler
                 if not self.title_initialized:
-                    self.name_font = pygame.font.Font(f"./{header_font_style}", int(20 * scaler))
+                    self.name_font = pygame.font.Font(f"{header_font_style}", int(20 * scaler))
                     if menu == menu1:
                         self.name_surface = self.name_font.render(categories[self.last_selected], True, self.text_color)
                     else:
@@ -310,7 +310,7 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
                 text_y_adjust = -1 * scaler
                 colors = [(255, 255, 255), (0, 0, 0)]
                 if not self.data_initialized:
-                    self.data_font = pygame.font.Font(f"./{data_font_style}", int(15 * scaler))
+                    self.data_font = pygame.font.Font(f"{data_font_style}", int(15 * scaler))
                     self.data_surfaces = [self.data_font.render(category, True, colors[0]) for category in self.data]
                     self.data_rects = [data_surface.get_rect() for data_surface in self.data_surfaces]
 

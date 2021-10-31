@@ -33,14 +33,14 @@ def database(user_name, level, react_up, react_down, react_left, react_right, re
         return datetime.datetime.today().strftime("%d%m%y")
 
     def create_tables():
-        with sqlite3.connect("reactor_data.db") as connection:
+        with sqlite3.connect("/Users/thejourneyville/Documents/vscode/python/reactor/reactor/reactor_data.db") as connection:
             connection.execute(CREATE_TABLE)
 
     def create_entry(name, lev, r_up, r_down, r_left, r_right, r_all, fastest_s, slowest_s, acc_up,
                      acc_down, acc_left, acc_right, acc_all, wrst_wrong_dir,
                      wrst_door_acc, assertion, tme_elapsed):
 
-        with sqlite3.connect("reactor_data.db") as connection:
+        with sqlite3.connect("/Users/thejourneyville/Documents/vscode/python/reactor/reactor/reactor_data.db") as connection:
             connection.execute(CREATE_ENTRY, (
                 name, timestamp(), lev, r_up, r_down, r_left, r_right, r_all, fastest_s, slowest_s, acc_up,
                 acc_down, acc_left, acc_right, acc_all, wrst_wrong_dir, wrst_door_acc,
@@ -57,7 +57,7 @@ def retrieve_entries(name):
 
     RETRIEVE_ENTRIES = "SELECT * FROM entries WHERE user_name = (?) ORDER BY rowid ASC"
 
-    with sqlite3.connect("reactor_data.db") as connection:
+    with sqlite3.connect("/Users/thejourneyville/Documents/vscode/python/reactor/reactor/reactor_data.db") as connection:
         cursor = connection.cursor()
         cursor.execute(RETRIEVE_ENTRIES, (name,))
         return cursor.fetchall()
@@ -67,7 +67,7 @@ def retrieve_level(name):
 
     RETRIEVE_ENTRY = "SELECT level FROM entries WHERE user_name = (?) ORDER BY rowid DESC LIMIT 1;"
 
-    with sqlite3.connect("reactor_data.db") as connection:
+    with sqlite3.connect("/Users/thejourneyville/Documents/vscode/python/reactor/reactor/reactor_data.db") as connection:
         cursor = connection.cursor()
         cursor.execute(RETRIEVE_ENTRY, (name,))
         return cursor.fetchone()
@@ -77,7 +77,7 @@ def user_exists(name):
 
     CHECK_USER = "SELECT EXISTS (SELECT 1 FROM entries WHERE user_name = (?));"
 
-    with sqlite3.connect("reactor_data.db") as connection:
+    with sqlite3.connect("/Users/thejourneyville/Documents/vscode/python/reactor/reactor/reactor_data.db") as connection:
         cursor = connection.cursor()
         cursor.execute(CHECK_USER, (name,))
         return cursor.fetchone()

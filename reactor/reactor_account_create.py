@@ -57,10 +57,10 @@ def account_create(surface, surface_width, surface_height, margin, margin_color,
     def text_board():
 
         row_space = 50 * scaler
-        board_text = "darkforest.ttf"
+        board_text = "/Users/thejourneyville/Documents/vscode/python/reactor/reactor/darkforest.ttf"
 
-        instructions = pygame.font.Font(f"./{board_text}", int(30 * scaler))
-        alphabet = pygame.font.Font(f"./{board_text}", int(50 * scaler))
+        instructions = pygame.font.Font(f"{board_text}", int(30 * scaler))
+        alphabet = pygame.font.Font(f"{board_text}", int(50 * scaler))
 
         instructions_text = "please enter your account name"
         keyboard_1 = "q w e r t y u i o p"
@@ -242,8 +242,8 @@ def account_create(surface, surface_width, surface_height, margin, margin_color,
 
         timer += 1
 
-        board_text = "SF Square Head Bold.ttf"
-        name_text = pygame.font.Font(f"./{board_text}", int(70 * scaler))
+        board_text = "/Users/thejourneyville/Documents/vscode/python/reactor/reactor/SF Square Head Bold.ttf"
+        name_text = pygame.font.Font(f"{board_text}", int(70 * scaler))
 
         row_x_start = (surface_width // 2)
         name_surface = name_text.render(user_name, True, color.sky_blue)
