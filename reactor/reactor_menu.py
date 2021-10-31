@@ -27,8 +27,8 @@ margin = int(60 * scaler)
 margin_color = color.margin_color
 
 # music
-# pygame.mixer.music.load("tron_sample.mp3")
-# pygame.mixer.music.play(-1)
+pygame.mixer.music.load("/Users/thejourneyville/Documents/vscode/python/reactor/reactor/Reactor_mx_vocal.mp3")
+pygame.mixer.music.play(-1)
 
 def start_menu():
 

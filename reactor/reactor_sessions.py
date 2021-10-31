@@ -112,7 +112,7 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
                             pygame.draw.circle(surface, color_grad(y_axis),
                                 (((self.x_adjust // 2) + col_size // 2) + int(col_size * idx), y_axis), self.radius, 0)
 
-                            item_font = pygame.font.Font(f"./{data_font_style}", int(15 * scaler))
+                            item_font = pygame.font.Font(f"{data_font_style}", int(15 * scaler))
                             item_value_surface = item_font.render(str(round(data[idx], 2)), True, color.white)
                             item_value_rect = item_value_surface.get_rect()
                             item_value_rect.center = (((self.x_adjust // 2) + col_size // 2) + int(col_size * idx),

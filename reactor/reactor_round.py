@@ -107,6 +107,10 @@ def level_screen(surface, surface_width, surface_height, margin, margin_color,
 
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
+
+                    pygame.mixer.music.load("/Users/thejourneyville/Documents/vscode/python/reactor/reactor/Reactor_mx.mp3")
+                    pygame.mixer.music.play(-1)
+
                     game_over, accuracy_result, time_remaining, current_react_data = main.run_reactor(surface,
                                                                                                       surface_width,
                                                                                                       surface_height,
@@ -120,6 +124,10 @@ def level_screen(surface, surface_width, surface_height, margin, margin_color,
                     # print(f"accuracy_result: {accuracy_result}")
                     # print(f"current_react_data: {current_react_data}")
                     # print(f"time remaining: {time_remaining}")
+
+                    pygame.mixer.music.load("/Users/thejourneyville/Documents/vscode/python/reactor/reactor/Reactor_mx_vocal.mp3")
+                    pygame.mixer.music.play(-1)
+
                     time_elapsed = time_limit - time_remaining
 
                     stats_results = stats.stats(surface, surface_width, surface_height, margin_color,
