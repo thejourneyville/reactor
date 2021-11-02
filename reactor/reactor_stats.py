@@ -237,7 +237,7 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
 
         def draw_coords(self):
 
-            font_style_key = "/Users/thejourneyville/Documents/vscode/python/reactor/reactor/darkforest.ttf"
+            font_style_key = "darkforest.ttf"
             coord_font = pygame.font.Font(f"{font_style_key}", int(15 * scaler))
             x_coord, y_coord = self.x, self.y + (30 * scaler)
             coord_surface = coord_font.render(f"{round(self.speed, 2)}", True, (255, 255, 255))
@@ -514,7 +514,7 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
     def render_summary(diff_x, diff_y, results):
 
         if box.selected_stats:
-            font_style_key = "/Users/thejourneyville/Documents/vscode/python/reactor/reactor/Instruction.ttf"
+            font_style_key = "Instruction.ttf"
             stats_font = pygame.font.Font(f"{font_style_key}", int(16 * scaler))
             stats_font_small = pygame.font.Font(f"{font_style_key}", int(8 * scaler))
             stats_color_label = (255, 112, 10)
@@ -581,7 +581,7 @@ def stats(surface, surface_width, surface_height, margin_color, scaler, clock, f
 
     def render_legend_text(diff_x, diff_y):
 
-        font_style_key = "/Users/thejourneyville/Documents/vscode/python/reactor/reactor/darkforest.ttf"
+        font_style_key = "darkforest.ttf"
 
         key_font = pygame.font.Font(f"{font_style_key}", int(15 * scaler))
 

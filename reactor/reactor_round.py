@@ -15,15 +15,16 @@ def level_screen(surface, surface_width, surface_height, margin, margin_color,
     level_font_speed = 500 * scaler
     level_font_animating = True
     level_font_open_count = 0
-    print(f"user: {user_account}")
+    # print(f"user: {user_account}")
 
+    database.create_tables()
     return_user = int(database.user_exists(user_account)[0])
     if return_user:
         level = 3
     else:
         level = 3
 
-    print(f"level: {level}")
+    # print(f"level: {level}")
     score_goal = 15
     time_limit = 45
     pygame.display.set_caption(f"LEVEL {level}")
@@ -33,9 +34,9 @@ def level_screen(surface, surface_width, surface_height, margin, margin_color,
 
     def render_text():
 
-        font_style_title = "/Users/thejourneyville/Documents/vscode/python/reactor/reactor/SF Square Head Bold.ttf"
-        font_style_text = "/Users/thejourneyville/Documents/vscode/python/reactor/reactor/darkforest.ttf"
-        font_style_speed = "/Users/thejourneyville/Documents/vscode/python/reactor/reactor/darkforest.ttf"
+        font_style_title = "SF Square Head Bold.ttf"
+        font_style_text = "darkforest.ttf"
+        font_style_speed = "darkforest.ttf"
 
         level_font = pygame.font.Font(f"{font_style_title}", int(75 * scaler))
         instructions_font = pygame.font.Font(f"{font_style_text}", int(30 * scaler))
@@ -108,7 +109,7 @@ def level_screen(surface, surface_width, surface_height, margin, margin_color,
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
 
-                    pygame.mixer.music.load("/Users/thejourneyville/Documents/vscode/python/reactor/reactor/Reactor_mx.mp3")
+                    pygame.mixer.music.load("Reactor_mx.mp3")
                     pygame.mixer.music.play(-1)
 
                     game_over, accuracy_result, time_remaining, current_react_data = main.run_reactor(surface,
@@ -125,7 +126,7 @@ def level_screen(surface, surface_width, surface_height, margin, margin_color,
                     # print(f"current_react_data: {current_react_data}")
                     # print(f"time remaining: {time_remaining}")
 
-                    pygame.mixer.music.load("/Users/thejourneyville/Documents/vscode/python/reactor/reactor/Reactor_mx_vocal.mp3")
+                    pygame.mixer.music.load("Reactor_mx_vocal.mp3")
                     pygame.mixer.music.play(-1)
 
                     time_elapsed = time_limit - time_remaining

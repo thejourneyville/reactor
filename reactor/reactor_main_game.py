@@ -536,8 +536,8 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color,
 
     # text rendered using blit
     def stats(total_points, lives_left, time_left):
-        font_style = "/Users/thejourneyville/Documents/vscode/python/reactor/reactor/darkforest.ttf"
-        lives_style = "/Users/thejourneyville/Documents/vscode/python/reactor/reactor/SF Square Head Bold.ttf"
+        font_style = "darkforest.ttf"
+        lives_style = "SF Square Head Bold.ttf"
         font = pygame.font.Font(f"{font_style}", int(20 * scaler))
         lives_font = pygame.font.Font(f"{lives_style}", int(75 * scaler))
 
@@ -674,7 +674,7 @@ def run_reactor(surface, surface_width, surface_height, margin, margin_color,
 
         current_color = (int(current_color[0]), int(current_color[1]), int(current_color[2]))
 
-        font_style = "/Users/thejourneyville/Documents/vscode/python/reactor/reactor/darkforest.ttf"
+        font_style = "darkforest.ttf"
         if success_data:
             success_font_size = 60 - (success_data[-1][2] // 10)
             if success_font_size < 20:

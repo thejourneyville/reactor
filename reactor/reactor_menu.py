@@ -27,7 +27,7 @@ margin = int(60 * scaler)
 margin_color = color.margin_color
 
 # music
-pygame.mixer.music.load("/Users/thejourneyville/Documents/vscode/python/reactor/reactor/Reactor_mx_vocal.mp3")
+pygame.mixer.music.load("Reactor_mx_vocal.mp3")
 pygame.mixer.music.play(-1)
 
 def start_menu():
@@ -55,8 +55,8 @@ def start_menu():
             shot_accuracy = 0
             total_openings = 0
 
-        font_style_title = "/Users/thejourneyville/Documents/vscode/python/reactor/reactor/SF Square Head Bold.ttf"
-        font_style_text = "/Users/thejourneyville/Documents/vscode/python/reactor/reactor/darkforest.ttf"
+        font_style_title = "SF Square Head Bold.ttf"
+        font_style_text = "darkforest.ttf"
 
         title = pygame.font.Font(f"{font_style_title}", int(150 * scaler))
         start_font = pygame.font.Font(f"{font_style_text}", int(60 * scaler))

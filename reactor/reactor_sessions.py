@@ -75,7 +75,7 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
                 except ValueError:
                     fastest, slowest = self.y_adjust, self.y_adjust  # 50, 50
 
-                data_font_style = "/Users/thejourneyville/Documents/vscode/python/reactor/reactor/Instruction.ttf"
+                data_font_style = "Instruction.ttf"
 
                 for idx in range(cols):
                     if data[idx]:
@@ -130,7 +130,7 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
                 except ValueError:
                     fastest, slowest = self.y_adjust, self.y_adjust
 
-                data_font_style = "/Users/thejourneyville/Documents/vscode/python/reactor/reactor/Instruction.ttf"
+                data_font_style = "Instruction.ttf"
                 directions = ["NA", "U", "D", "L", "R"]
 
                 for idx, item in enumerate(data):
@@ -288,8 +288,8 @@ def sessions(surface, surface_width, surface_height, scaler, clock, fps, player)
 
         def menu_text(self):
 
-            header_font_style = "/Users/thejourneyville/Documents/vscode/python/reactor/reactor/darkforest.ttf"
-            data_font_style = "/Users/thejourneyville/Documents/vscode/python/reactor/reactor/Instruction.ttf"
+            header_font_style = "darkforest.ttf"
+            data_font_style = "Instruction.ttf"
 
             def menu_title():
                 text_y_adjust = 2 * scaler

@@ -9,7 +9,7 @@ def account_create(surface, surface_width, surface_height, margin, margin_color,
     blinker_on = True
     blinker_count = 0
     blinker_speed = 3
-    user_account = "benny"
+    # user_account = "benny"
 
     def draw_background_disc(dissolve, disc_pulse_up):
 
@@ -57,7 +57,7 @@ def account_create(surface, surface_width, surface_height, margin, margin_color,
     def text_board():
 
         row_space = 50 * scaler
-        board_text = "/Users/thejourneyville/Documents/vscode/python/reactor/reactor/darkforest.ttf"
+        board_text = "darkforest.ttf"
 
         instructions = pygame.font.Font(f"{board_text}", int(30 * scaler))
         alphabet = pygame.font.Font(f"{board_text}", int(50 * scaler))
@@ -242,7 +242,7 @@ def account_create(surface, surface_width, surface_height, margin, margin_color,
 
         timer += 1
 
-        board_text = "/Users/thejourneyville/Documents/vscode/python/reactor/reactor/SF Square Head Bold.ttf"
+        board_text = "SF Square Head Bold.ttf"
         name_text = pygame.font.Font(f"{board_text}", int(70 * scaler))
 
         row_x_start = (surface_width // 2)
