@@ -19,8 +19,9 @@ def level_screen(surface, surface_width, surface_height, margin, margin_color,
 
     database.create_tables()
     return_user = int(database.user_exists(user_account)[0])
+ 
     if return_user:
-        level = 3
+        level = int(database.retrieve_level(user_account)[0])
     else:
         level = 3
 
